@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "fscript",
+  "version": "${version}",
+
+  "name": "FScript Lib",
+  "description": "Allows easily making minecraft objects scriptable",
+  "authors": [
+    "SFort"
+  ],
+  "contact": {
+    "sources": "https://github.com/SFort/MC-lib-fscript"
+  },
+
+  "license": "MIT",
+
+  "environment": "*",
+  "depends": {
+    "minecraft": "*"
+  }
+}
