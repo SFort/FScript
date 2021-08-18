@@ -68,6 +68,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 	}
 	public Predicate<T> getLP(String in){
 		return switch (in) {
+			case "full_air" -> entity -> entity.getAir() == entity.getMaxAir();
 			case "sprinting" -> Entity::isSprinting;
 			case "in_lava" -> Entity::isInLava;
 			case "on_fire" -> Entity::isOnFire;
@@ -166,6 +167,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		help.put( "has_player_rider", "Require being a vehicle to a player");
 		help.put( "sneaking", "Require sneaking");
 		help.put( "swimming", "Require swimming");
+		help.put("full_air", "Require having full air");
 	}
 	@Override
 	public Map<String, String> getHelp(){
