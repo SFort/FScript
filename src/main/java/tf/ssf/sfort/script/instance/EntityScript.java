@@ -19,9 +19,17 @@ import java.util.stream.Stream;
 public class EntityScript<T extends Entity> implements PredicateProvider<T>, Help {
 	public Predicate<T> getLP(String in, String val){
 		return switch (in){
-			case "height" -> {
-				float arg = Float.parseFloat(val);
-				yield entity -> entity.getPos().y>=arg;
+			case "X" -> {
+				double arg = Double.parseDouble(val);
+				yield entity -> entity.getX()>=arg;
+			}
+			case "Y" -> {
+				double arg = Double.parseDouble(val);
+				yield entity -> entity.getY()>=arg;
+			}
+			case "Z" -> {
+				double arg = Double.parseDouble(val);
+				yield entity -> entity.getZ()>=arg;
 			}
 			case "age" -> {
 				int arg = Integer.parseInt(val);
@@ -34,6 +42,26 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			case "biome" -> {
 				Identifier arg = new Identifier(val);
 				yield entity -> entity.world.getBiomeKey(entity.getBlockPos()).map(x->x.getValue().equals(arg)).orElse(false);
+			}
+			case "air" -> {
+				int arg = Integer.parseInt(val);
+				yield entity -> entity.getAir()>arg;
+			}
+			case "max_air" -> {
+				int arg = Integer.parseInt(val);
+				yield entity -> entity.getMaxAir()>arg;
+			}
+			case "frozen_ticks" -> {
+				int arg = Integer.parseInt(val);
+				yield entity -> entity.getFrozenTicks()>arg;
+			}
+			case "height" -> {
+				float arg = Float.parseFloat(val);
+				yield entity -> entity.getHeight()>arg;
+			}
+			case "width" -> {
+				float arg = Float.parseFloat(val);
+				yield entity -> entity.getWidth()>arg;
 			}
 			default -> null;
 		};
@@ -49,6 +77,18 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			case "glowing" -> Entity::isGlowing;
 			case "explosion_immune" -> Entity::isImmuneToExplosion;
 			case "invisible" -> Entity::isInvisible;
+			case "on_ground" -> Entity::isOnGround;
+			case "is_silent" -> Entity::isSilent;
+			case "has_no_gravity" -> Entity::hasNoGravity;
+			case "is_inside_wall" -> Entity::isInsideWall;
+			case "is_touching_water" -> Entity::isTouchingWater;
+			case "is_touching_water_or_raid" -> Entity::isTouchingWaterOrRain;
+			case "is_submerged_in_water" -> Entity::isSubmergedInWater;
+			case "has_vehicle" -> Entity::hasVehicle;
+			case "has_passengers" ->Entity::hasPassengers;
+			case "has_player_rider" ->Entity::hasPlayerRider;
+			case "sneaking" -> Entity::isSneaky;
+			case "swimming" -> Entity::isSwimming;
 			default -> null;
 		};
 	}
@@ -94,8 +134,15 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 	}
 	public static final Map<String, String> help = new HashMap<>();
 	static {
-		help.put("age:int","Minimum ticks the player must have existed");
-		help.put("height:float","Minimum required player y height");
+		help.put("air:int", "Minimum required air");
+		help.put("max_air:int", "Minimum required max air");
+		help.put("frozen_ticks:int", "Minimum ticks the entity must have been freezing for");
+		help.put("height:int", "Minimum required height");
+		help.put("width:int", "Minimum required width");
+		help.put("age:int","Minimum ticks the entity must have existed");
+		help.put("X:double","Minimum required entity x");
+		help.put("Y:double","Minimum required entity y height");
+		help.put("Z:double","Minimum required entity z");
 		help.put("local_difficulty:float","Minimum required regional/local difficulty");
 		help.put("biome:","Required biome");
 		help.put("sprinting","Require Sprinting");
@@ -107,6 +154,18 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		help.put("glowing","Require to be glowing");
 		help.put("explosion_immune","Require being immune to explosions");
 		help.put("invisible","Require being invisible");
+		help.put("on_ground", "Require being on ground");
+		help.put( "is_silent", "Require being silent");
+		help.put( "has_no_gravity", "Require having no gravity");
+		help.put( "is_inside_wall", "Requite being inside a solid block");
+		help.put( "is_touching_water", "Require touching water");
+		help.put( "is_touching_water_or_raid", "Require touching water or rain");
+		help.put( "is_submerged_in_water", "Require being submerged in water");
+		help.put( "has_vehicle", "Require having a vehicle");
+		help.put( "has_passengers", "Require being a vehicle");
+		help.put( "has_player_rider", "Require being a vehicle to a player");
+		help.put( "sneaking", "Require sneaking");
+		help.put( "swimming", "Require swimming");
 	}
 	@Override
 	public Map<String, String> getHelp(){

@@ -51,6 +51,14 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
                 float arg = Float.parseFloat(val);
                 yield entity -> entity.getHealth()>=arg;
             }
+            case "max_health" -> {
+                float arg = Float.parseFloat(val);
+                yield entity -> entity.getMaxHealth()>=arg;
+            }
+            case "armor" -> {
+                float arg = Integer.parseInt(val);
+                yield entity -> entity.getArmor()>=arg;
+            }
             case "effect" -> {
                 StatusEffect arg = SimpleRegistry.STATUS_EFFECT.get(new Identifier(val));
                 yield entity -> entity.hasStatusEffect(arg);
@@ -63,6 +71,30 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
                 int arg = Integer.parseInt(val);
                 yield entity -> entity.age - entity.getLastAttackedTime() > arg;
             }
+            case "stuck_arrow_count" -> {
+                int arg = Integer.parseInt(val);
+                yield entity -> entity.getStuckArrowCount() > arg;
+            }
+            case "stinger_count" -> {
+                int arg = Integer.parseInt(val);
+                yield entity -> entity.getStingerCount() > arg;
+            }
+            case "sideways_speed" -> {
+                float arg = Float.parseFloat(val);
+                yield entity -> entity.sidewaysSpeed>=arg;
+            }
+            case "upward_speed" -> {
+                float arg = Float.parseFloat(val);
+                yield entity -> entity.upwardSpeed>=arg;
+            }
+            case "forward_speed" -> {
+                float arg = Float.parseFloat(val);
+                yield entity -> entity.forwardSpeed>=arg;
+            }
+            case "movement_speed" -> {
+                float arg = Float.parseFloat(val);
+                yield entity -> entity.getMovementSpeed()>=arg;
+            }
             default -> null;
         };
     }
@@ -70,6 +102,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         return switch (in) {
             case "full_hp" -> entity -> entity.getHealth() == entity.getMaxHealth();
             case "blocking" -> LivingEntity::isBlocking;
+            case "climbing" -> LivingEntity::isClimbing;
             case "using" -> LivingEntity::isUsingItem;
             case "fall_flying" -> LivingEntity::isFallFlying;
             default -> null;
@@ -81,7 +114,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
             Predicate<T> out = getLP(in, val);
             if (out != null) return out;
         }
-        if (dejavu.add(ENTITY.getClass())){
+        if (dejavu.add(EntityScript.class)){
             Predicate<T> out = ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
         }
@@ -93,7 +126,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
             Predicate<T> out = getLP(in);
             if (out != null) return out;
         }
-        if (dejavu.add(ENTITY.getClass())){
+        if (dejavu.add(EntityScript.class)){
             Predicate<T> out = ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
         }
@@ -109,14 +142,22 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         help.put("boots:ItemID","Require item as boots");
         help.put("effect:EffectID","Require potion effect");
         help.put("health:float","Minimum required heath");
+        help.put("max_health:float","Minimum required max heath");
+        help.put("movement_speed:float","Require going at this speed");
+        help.put("sideways_speed:float","Require going sideways at this speed");
+        help.put("upward_speed:float","Require going up at this speed");
+        help.put("forward_speed:float","Require going forward at this speed");
         help.put("attack:int","Minimum ticked passed since player attacked");
         help.put("attacked:int","Minimum ticks passed since player was attacked");
+        help.put("stuck_arrow_count:int", "Minimum amount of arrows stuck in entity");
+        help.put("stinger_count:int", "Minimum amount of stingers");
+        help.put("armor:int","Minimum required armor");
         help.put("full_hp","Require full health");
         help.put("sprinting","Require Sprinting");
         help.put("blocking","Require Blocking");
+        help.put("climbing","Require Climbing");
         help.put("using","Require using items");
         help.put("fall_flying","Require flying with elytra");
-
     }
     @Override
     public Map<String, String> getHelp(){
@@ -125,7 +166,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     @Override
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
-        if (dejavu.add(WorldScript.class)) out = Stream.concat(out, Default.ENTITY.getAllHelp(dejavu).entrySet().stream());
+        if (dejavu.add(EntityScript.class)) out = Stream.concat(out, Default.ENTITY.getAllHelp(dejavu).entrySet().stream());
         out = Stream.concat(out, getAllHelp().entrySet().stream());
 
         return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

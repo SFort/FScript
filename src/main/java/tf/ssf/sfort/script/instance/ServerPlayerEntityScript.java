@@ -6,6 +6,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
@@ -52,9 +53,13 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
             Predicate<T> out = getLP(in, val);
             if (out != null) return out;
         }
-        if (dejavu.add(PLAYER_ENTITY.getClass())){
+        if (dejavu.add(PlayerEntityScript.class)){
             Predicate<T> out = PLAYER_ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
+        }
+        if (dejavu.add(GameModeScript.class)){
+            Predicate<GameMode> out = Default.GAME_MODE.getPredicate(in, val, dejavu);
+            if (out !=null) return player -> out.test(player.interactionManager.getGameMode());
         }
         return null;
     }
@@ -66,9 +71,13 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
             Predicate<T> out = getLP(in);
             if (out != null) return out;
         }
-        if (dejavu.add(PLAYER_ENTITY.getClass())){
+        if (dejavu.add(PlayerEntityScript.class)){
             Predicate<T> out = PLAYER_ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
+        }
+        if (dejavu.add(GameModeScript.class)){
+            Predicate<GameMode> out = Default.GAME_MODE.getPredicate(in, dejavu);
+            if (out !=null) return player -> out.test(player.interactionManager.getGameMode());
         }
         return null;
     }
@@ -85,6 +94,7 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
         if (dejavu.add(PlayerEntityScript.class)) out = Stream.concat(out, Default.PLAYER_ENTITY.getAllHelp(dejavu).entrySet().stream());
+        if (dejavu.add(GameModeScript.class)) out = Stream.concat(out, Default.GAME_MODE.getAllHelp(dejavu).entrySet().stream());
         out = Stream.concat(out, getAllHelp().entrySet().stream());
 
         return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
