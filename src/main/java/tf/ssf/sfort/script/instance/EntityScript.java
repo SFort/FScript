@@ -1,7 +1,10 @@
 package tf.ssf.sfort.script.instance;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
@@ -63,6 +66,10 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 				float arg = Float.parseFloat(val);
 				yield entity -> entity.getWidth()>arg;
 			}
+			case "in_block" -> {
+				Block arg = Registry.BLOCK.get(new Identifier(val));;
+				yield entity -> entity.world.getBlockState(entity.getBlockPos()).isOf(arg);
+			}
 			default -> null;
 		};
 	}
@@ -83,7 +90,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			case "has_no_gravity" -> Entity::hasNoGravity;
 			case "is_inside_wall" -> Entity::isInsideWall;
 			case "is_touching_water" -> Entity::isTouchingWater;
-			case "is_touching_water_or_raid" -> Entity::isTouchingWaterOrRain;
+			case "is_touching_water_or_rain" -> Entity::isTouchingWaterOrRain;
 			case "is_submerged_in_water" -> Entity::isSubmergedInWater;
 			case "has_vehicle" -> Entity::hasVehicle;
 			case "has_passengers" ->Entity::hasPassengers;
@@ -145,6 +152,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		help.put("Y:double","Minimum required entity y height");
 		help.put("Z:double","Minimum required entity z");
 		help.put("local_difficulty:float","Minimum required regional/local difficulty");
+		help.put("in_block:BlockID", "Require being in specified block");
 		help.put("biome:","Required biome");
 		help.put("sprinting","Require Sprinting");
 		help.put("in_lava","Require being in lava");
@@ -160,7 +168,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		help.put( "has_no_gravity", "Require having no gravity");
 		help.put( "is_inside_wall", "Requite being inside a solid block");
 		help.put( "is_touching_water", "Require touching water");
-		help.put( "is_touching_water_or_raid", "Require touching water or rain");
+		help.put( "is_touching_water_or_rain", "Require touching water or rain");
 		help.put( "is_submerged_in_water", "Require being submerged in water");
 		help.put( "has_vehicle", "Require having a vehicle");
 		help.put( "has_passengers", "Require being a vehicle");
