@@ -4,10 +4,13 @@ import net.minecraft.world.biome.Biome;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
 public class BiomeScript implements PredicateProvider<Biome>, Help {
+	public static final Map<String, String> help = new HashMap<>();
 	@Override
 	public Predicate<Biome> getPredicate(String in, String val, Set<Class<?>> dejavu){
 		return getLP(in,val);
@@ -36,14 +39,15 @@ public class BiomeScript implements PredicateProvider<Biome>, Help {
             default -> null;
 		};
 	}
-	public String getHelp(){
-		return
-				String.format("\t%-20s%-70s%s%n","tempeture","- Player must be in biome warmer then this","float")+
-                String.format("\t%-20s%-70s%s%n","precipitation","- Player must be in biome with this precipitation: rain | snow | none","BiomePrecipitationID")+
-                String.format("\t%-20s%-70s%s%n","catagory","- Player must be in biome with this catagory","BiomeCatagoryID")
-        ;
+	static {
+		help.put("tempeture:float","Player must be in biome warmer then this");
+		help.put("precipitation:BiomePrecipitationID","Player must be in biome with this precipitation: rain | snow | none");
+		help.put("catagory:BiomeCatagoryID","Player must be in biome with this catagory");
 	}
-	public String getAllHelp(Set<Class<?>> dejavu){
+	public Map<String, String> getHelp(){
+		return help;
+	}
+	public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
 		return getHelp();
 	}
 }

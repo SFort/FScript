@@ -4,6 +4,8 @@ import net.minecraft.world.dimension.DimensionType;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -29,16 +31,18 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
     public Predicate<DimensionType> getLP(String in, String val){
         return null;
     }
-    public String getHelp(){
-        return
-                String.format("\t%-20s%s%n","dim_natural","- Require natural dimension")+
-                String.format("\t%-20s%s%n","dim_ultrawarn","- Require ultra warm dimension")+
-                String.format("\t%-20s%s%n","dim_piglin_safe","- Require piglin safe dimension")+
-                String.format("\t%-20s%s%n","dim_does_bed_work","- Require dimension where beds don't blow")+
-                String.format("\t%-20s%s%n","dim_does_anchor_work","- Require dimension where respawn anchors work")
-        ;
+    public static final Map<String, String> help = new HashMap<>();
+    static {
+        help.put("dim_natural","Require natural dimension");
+        help.put("dim_ultrawarn","Require ultra warm dimension");
+        help.put("dim_piglin_safe","Require piglin safe dimension");
+        help.put("dim_does_bed_work","Require dimension where beds don't blow");
+        help.put("dim_does_anchor_work","Require dimension where respawn anchors work");
     }
-    public String getAllHelp(Set<Class<?>> dejavu){
+    public Map<String, String> getHelp(){
+        return help;
+    }
+    public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         return getHelp();
     }
 }

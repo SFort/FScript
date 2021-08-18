@@ -7,8 +7,12 @@ import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WorldScript implements PredicateProvider<World>, Help {
     public Predicate<World> getLP(String in){
@@ -52,17 +56,23 @@ public class WorldScript implements PredicateProvider<World>, Help {
         }
         return null;
     }
-    @Override
-    public String getHelp(){
-        return
-                String.format("\t%-20s%-70s%s%n","dimension","- Require being in dimension overworld|the_nether|the_end","DimensionID")+
-                String.format("\t%-20s%s%n","is_thundering","- Require thunder")+
-                String.format("\t%-20s%s%n","is_raining","- Require rain")+
-                String.format("\t%-20s%s%n","is_day","- Require daytime")
-        ;
+    public static final Map<String, String> help = new HashMap<>();
+    static {
+        help.put("dimension:DimensionID","Require being in dimension overworld|the_nether|the_end");
+        help.put("is_thundering","Require thunder");
+        help.put("is_raining","Require rain");
+        help.put("is_day","Require daytime");
     }
     @Override
-    public String getAllHelp(Set<Class<?>> dejavu){
-        return (dejavu.add(Default.DIMENSION_TYPE.getClass())?Default.DIMENSION_TYPE.getAllHelp(dejavu):"")+getHelp();
+    public Map<String, String> getHelp(){
+        return help;
+    }
+    @Override
+    public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
+        Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
+        if (dejavu.add(DimensionTypeScript.class)) out = Stream.concat(out, Default.DIMENSION_TYPE.getAllHelp(dejavu).entrySet().stream());
+        out = Stream.concat(out, getAllHelp().entrySet().stream());
+
+        return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

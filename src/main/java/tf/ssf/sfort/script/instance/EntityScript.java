@@ -9,8 +9,12 @@ import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.Help;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EntityScript<T extends Entity> implements PredicateProvider<T>, Help {
 	public Predicate<T> getLP(String in, String val){
@@ -88,29 +92,34 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		}
 		return null;
 	}
-	@Override
-	public String getHelp(){
-		return
-			String.format("\t%-20s%-70s%s%n","age","- Minimum ticks the player must have existed","int")+
-			String.format("\t%-20s%-70s%s%n","height","- Minimum required player y height","float")+
-			String.format("\t%-20s%-70s%s%n","local_difficulty","- Minimum required regional/local difficulty","float")+
-			String.format("\t%-20s%-70s%s%n","biome","- Required biome","BiomeID")+
-			String.format("\t%-20s%s%n","sprinting","- Require Sprinting")+
-			String.format("\t%-20s%s%n","in_lava","- Require being in lava")+
-			String.format("\t%-20s%s%n","on_fire","- Require being on fire")+
-			String.format("\t%-20s%s%n","wet","- Require being wet")+
-			String.format("\t%-20s%s%n","fire_immune","- Require being immune to fire")+
-            String.format("\t%-20s%s%n","freezing","- Require to be freezing")+
-            String.format("\t%-20s%s%n","glowing","- Require to be glowing")+
-            String.format("\t%-20s%s%n","explosion_immune","- Require being immune to explosions")+
-            String.format("\t%-20s%s%n","invisible","- Require being invisible")
-		;
+	public static final Map<String, String> help = new HashMap<>();
+	static {
+		help.put("age:int","Minimum ticks the player must have existed");
+		help.put("height:float","Minimum required player y height");
+		help.put("local_difficulty:float","Minimum required regional/local difficulty");
+		help.put("biome:","Required biome");
+		help.put("sprinting","Require Sprinting");
+		help.put("in_lava","Require being in lava");
+		help.put("on_fire","Require being on fire");
+		help.put("wet","Require being wet");
+		help.put("fire_immune","Require being immune to fire");
+		help.put("freezing","Require to be freezing");
+		help.put("glowing","Require to be glowing");
+		help.put("explosion_immune","Require being immune to explosions");
+		help.put("invisible","Require being invisible");
 	}
 	@Override
-	public String getAllHelp(Set<Class<?>> dejavu){
-		return (dejavu.add(WorldScript.class)?Default.WORLD.getAllHelp(dejavu):"")+
-				(dejavu.add(BiomeScript.class)?Default.BIOME.getAllHelp(dejavu):"")+
-				(dejavu.add(ChunkScript.class)?Default.CHUNK.getAllHelp(dejavu):"")+
-				getHelp();
+	public Map<String, String> getHelp(){
+		return help;
+	}
+	@Override
+	public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
+		Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
+		if (dejavu.add(WorldScript.class)) out = Stream.concat(out, Default.WORLD.getAllHelp(dejavu).entrySet().stream());
+		if (dejavu.add(BiomeScript.class)) out = Stream.concat(out, Default.BIOME.getAllHelp(dejavu).entrySet().stream());
+		if (dejavu.add(ChunkScript.class)) out = Stream.concat(out, Default.CHUNK.getAllHelp(dejavu).entrySet().stream());
+		out = Stream.concat(out, getAllHelp().entrySet().stream());
+
+		return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 }

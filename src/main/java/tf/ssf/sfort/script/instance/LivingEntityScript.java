@@ -8,11 +8,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
+import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LivingEntityScript<T extends LivingEntity> implements PredicateProvider<T>, Help {
     private final EntityScript<T> ENTITY = new EntityScript<>();
@@ -66,6 +71,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
             case "full_hp" -> entity -> entity.getHealth() == entity.getMaxHealth();
             case "blocking" -> LivingEntity::isBlocking;
             case "using" -> LivingEntity::isUsingItem;
+            case "fall_flying" -> LivingEntity::isFallFlying;
             default -> null;
         };
     }
@@ -93,28 +99,36 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         }
         return null;
     }
-    @Override
-    public String getHelp(){
-        return
-                String.format("\t%-20s%-70s%s%n","hand","- Require item in main hand","ItemID")+
-                String.format("\t%-20s%-70s%s%n","offhand","- Require item in off hand","ItemID")+
-                String.format("\t%-20s%-70s%s%n","helm","- Require item as helmet","ItemID")+
-                String.format("\t%-20s%-70s%s%n","chest","- Require item as chestplate","ItemID")+
-                String.format("\t%-20s%-70s%s%n","legs","- Require item as leggings","ItemID")+
-                String.format("\t%-20s%-70s%s%n","boots","- Require item as boots","ItemID")+
-                String.format("\t%-20s%-70s%s%n","effect","- Require potion effect","EffectID")+
-                String.format("\t%-20s%-70s%s%n","health","- Minimum required heath","float")+
-                String.format("\t%-20s%-70s%s%n","attack","- Minimum ticked passed since player attacked","float")+
-                String.format("\t%-20s%-70s%s%n","attacked","- Minimum ticks passed since player was attacked","float")+
-                String.format("\t%-20s%s%n","full_hp","- Require full health")+
-                String.format("\t%-20s%s%n","sprinting","- Require Sprinting")+
-                String.format("\t%-20s%s%n","blocking","- Require Blocking")+
-                String.format("\t%-20s%s%n","using","- Require using items")
-                ;
+    public static final Map<String, String> help = new HashMap<>();
+    static {
+        help.put("hand:ItemID","Require item in main hand");
+        help.put("offhand:ItemID","Require item in off hand");
+        help.put("helm:ItemID","Require item as helmet");
+        help.put("chest:ItemID","Require item as chestplate");
+        help.put("legs:ItemID","Require item as leggings");
+        help.put("boots:ItemID","Require item as boots");
+        help.put("effect:EffectID","Require potion effect");
+        help.put("health:float","Minimum required heath");
+        help.put("attack:int","Minimum ticked passed since player attacked");
+        help.put("attacked:int","Minimum ticks passed since player was attacked");
+        help.put("full_hp","Require full health");
+        help.put("sprinting","Require Sprinting");
+        help.put("blocking","Require Blocking");
+        help.put("using","Require using items");
+        help.put("fall_flying","Require flying with elytra");
+
     }
     @Override
-    public String getAllHelp(Set<Class<?>> dejavu){
-        return (dejavu.add(ENTITY.getClass())?ENTITY.getAllHelp(dejavu):"")+getHelp();
+    public Map<String, String> getHelp(){
+        return help;
+    }
+    @Override
+    public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
+        Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
+        if (dejavu.add(WorldScript.class)) out = Stream.concat(out, Default.ENTITY.getAllHelp(dejavu).entrySet().stream());
+        out = Stream.concat(out, getAllHelp().entrySet().stream());
+
+        return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
     private static Item getItem(String id){
         return Registry.ITEM.get(new Identifier(id));

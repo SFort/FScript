@@ -4,6 +4,8 @@ import net.minecraft.world.chunk.Chunk;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.Help;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -28,12 +30,14 @@ public class ChunkScript implements PredicateProvider<Chunk>, Help {
             default -> null;
 		};
 	}
-	public String getHelp(){
-		return
-				String.format("\t%-20s%-70s%s%n","inhabited","- Minimum time players have loaded the chunk in ticks","long")
-        ;
+	public static final Map<String, String> help = new HashMap<>();
+	static {
+		help.put("inhabited:long","Minimum time players have loaded the chunk in ticks");
 	}
-	public String getAllHelp(Set<Class<?>> dejavu){
+	public Map<String, String> getHelp(){
+		return help;
+	}
+	public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
 		return getHelp();
 	}
 }

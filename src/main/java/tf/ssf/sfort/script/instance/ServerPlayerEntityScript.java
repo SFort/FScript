@@ -7,11 +7,16 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements PredicateProvider<T>, Help {
     private final PlayerEntityScript<T> PLAYER_ENTITY = new PlayerEntityScript<>();
@@ -67,15 +72,21 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
         }
         return null;
     }
-    @Override
-    public String getHelp(){
-        return
-                String.format("\t%-20s%-70s%s%n","advancement","- Require advancement unlocked","AdvancementID")+
-                String.format("\t%-20s%-70s%s%n","respawn_distance","- Require player to be nearby their respawn (usually a bed)","double")
-        ;
+    public static final Map<String, String> help = new HashMap<>();
+    static {
+        help.put("advancement:AdvancementID","Require advancement unlocked");
+        help.put("respawn_distance:double","Require player to be nearby their respawn (usually a bed)");
     }
     @Override
-    public String getAllHelp(Set<Class<?>> dejavu){
-        return (dejavu.add(PLAYER_ENTITY.getClass())?PLAYER_ENTITY.getAllHelp(dejavu):"")+getHelp();
+    public Map<String, String> getHelp(){
+        return help;
+    }
+    @Override
+    public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
+        Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
+        if (dejavu.add(PlayerEntityScript.class)) out = Stream.concat(out, Default.PLAYER_ENTITY.getAllHelp(dejavu).entrySet().stream());
+        out = Stream.concat(out, getAllHelp().entrySet().stream());
+
+        return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
