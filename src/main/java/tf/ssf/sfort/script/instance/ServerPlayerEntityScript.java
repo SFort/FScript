@@ -95,7 +95,7 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
         Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
         if (dejavu.add(PlayerEntityScript.class)) out = Stream.concat(out, Default.PLAYER_ENTITY.getAllHelp(dejavu).entrySet().stream());
         if (dejavu.add(GameModeScript.class)) out = Stream.concat(out, Default.GAME_MODE.getAllHelp(dejavu).entrySet().stream());
-        out = Stream.concat(out, getAllHelp().entrySet().stream());
+        out = Stream.concat(out, getHelp().entrySet().stream());
 
         return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

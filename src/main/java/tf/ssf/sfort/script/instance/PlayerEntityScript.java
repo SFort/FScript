@@ -67,7 +67,7 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
         if (dejavu.add(LivingEntityScript.class)) out = Stream.concat(out, Default.LIVING_ENTITY.getAllHelp(dejavu).entrySet().stream());
-        out = Stream.concat(out, getAllHelp().entrySet().stream());
+        out = Stream.concat(out, getHelp().entrySet().stream());
 
         return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

@@ -187,7 +187,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		if (dejavu.add(WorldScript.class)) out = Stream.concat(out, Default.WORLD.getAllHelp(dejavu).entrySet().stream());
 		if (dejavu.add(BiomeScript.class)) out = Stream.concat(out, Default.BIOME.getAllHelp(dejavu).entrySet().stream());
 		if (dejavu.add(ChunkScript.class)) out = Stream.concat(out, Default.CHUNK.getAllHelp(dejavu).entrySet().stream());
-		out = Stream.concat(out, getAllHelp().entrySet().stream());
+		out = Stream.concat(out, getHelp().entrySet().stream());
 
 		return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}

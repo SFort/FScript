@@ -60,7 +60,7 @@ public class FishingBobberEntityScript<T extends FishingBobberEntity> implements
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
         if (dejavu.add(EntityScript.class)) out = Stream.concat(out, Default.ENTITY.getAllHelp(dejavu).entrySet().stream());
-        out = Stream.concat(out, getAllHelp().entrySet().stream());
+        out = Stream.concat(out, getHelp().entrySet().stream());
 
         return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

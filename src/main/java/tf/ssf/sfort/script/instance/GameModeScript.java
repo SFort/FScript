@@ -42,6 +42,6 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
     }
     @Override
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
-        return getAllHelp();
+        return getHelp();
     }
 }

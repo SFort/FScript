@@ -71,7 +71,7 @@ public class WorldScript implements PredicateProvider<World>, Help {
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
         if (dejavu.add(DimensionTypeScript.class)) out = Stream.concat(out, Default.DIMENSION_TYPE.getAllHelp(dejavu).entrySet().stream());
-        out = Stream.concat(out, getAllHelp().entrySet().stream());
+        out = Stream.concat(out, getHelp().entrySet().stream());
 
         return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
