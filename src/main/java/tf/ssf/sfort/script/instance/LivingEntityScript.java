@@ -153,7 +153,6 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         help.put("stinger_count:int", "Minimum amount of stingers");
         help.put("armor:int","Minimum required armor");
         help.put("full_hp","Require full health");
-        help.put("sprinting","Require Sprinting");
         help.put("blocking","Require Blocking");
         help.put("climbing","Require Climbing");
         help.put("using","Require using items");
