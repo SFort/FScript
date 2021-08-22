@@ -12,10 +12,18 @@ public interface Help {
     }
     static String formatHelp(Map<String, String> in, Set<String> exclude){
         StringBuilder out = new StringBuilder();
+        int space = 8;
+        for (String key :in.keySet())
+            if (space<key.length())
+                space = key.length();
+
         for (String key :in.keySet()){
             if(exclude==null || !exclude.contains(key))
-                out.append(String.format("\t%-20s- %s%n", key, in.get(key)));
+                out.append(String.format("\t%-"+(space+2)+"s- %s%n", key, in.get(key)));
         }
         return out.toString();
+    }
+    static String formatHelp(Map<String, String> in){
+        return formatHelp(in, null);
     }
 }

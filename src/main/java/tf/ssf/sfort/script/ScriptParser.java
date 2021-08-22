@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class ScriptParser<T> {
-    public static void main(String[] arg){
-        new ScriptParser<>(Default.SERVER_PLAYER_ENTITY).parse("~hand:item:dirt");
-    }
     //TODO maybe dedup / cache squish?
     public List<Predicate<T>> squish = new ArrayList<>();
     public PredicateProvider<T> make = null;
