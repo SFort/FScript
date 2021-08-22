@@ -22,15 +22,15 @@ import java.util.stream.Stream;
 public class EntityScript<T extends Entity> implements PredicateProvider<T>, Help {
 	public Predicate<T> getLP(String in, String val){
 		return switch (in){
-			case "X" -> {
+			case "x" -> {
 				double arg = Double.parseDouble(val);
 				yield entity -> entity.getX()>=arg;
 			}
-			case "Y" -> {
+			case "y" -> {
 				double arg = Double.parseDouble(val);
 				yield entity -> entity.getY()>=arg;
 			}
-			case "Z" -> {
+			case "z" -> {
 				double arg = Double.parseDouble(val);
 				yield entity -> entity.getZ()>=arg;
 			}
