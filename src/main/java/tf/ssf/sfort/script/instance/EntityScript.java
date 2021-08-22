@@ -153,7 +153,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		help.put("Z:double","Minimum required entity z");
 		help.put("local_difficulty:float","Minimum required regional/local difficulty");
 		help.put("in_block:BlockID", "Require being in specified block");
-		help.put("biome:","Required biome");
+		help.put("biome:BiomeID","Required biome");
 		help.put("sprinting","Require Sprinting");
 		help.put("in_lava","Require being in lava");
 		help.put("on_fire","Require being on fire");
