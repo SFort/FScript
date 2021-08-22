@@ -15,6 +15,9 @@
   "license": "MIT",
 
   "environment": "*",
+  "mixins": [
+    "libfscript.mixins.json"
+  ],
   "depends": {
     "minecraft": "*"
   }

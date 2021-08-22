@@ -3,14 +3,12 @@ package tf.ssf.sfort.script.instance;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
-import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.ScriptParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,33 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LivingEntityScript<T extends LivingEntity> implements PredicateProvider<T>, Help {
-    private final EntityScript<T> ENTITY = new EntityScript<>();
+    public ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(new ItemStackScript());
+    public EntityScript<T> ENTITY = new EntityScript<>();
     public Predicate<T> getLP(String in, String val){
         return switch (in){
-            case "hand" -> {
-                Item arg = getItem(val);
-                yield entity -> eq(arg, entity.getMainHandStack());
-            }
-            case "offhand" -> {
-                Item arg = getItem(val);
-                yield entity -> eq(arg, entity.getOffHandStack());
-            }
-            case "helm" -> {
-                Item arg = getItem(val);
-                yield entity -> eq(arg, entity.getEquippedStack(EquipmentSlot.HEAD));
-            }
-            case "chest" -> {
-                Item arg = getItem(val);
-                yield entity -> eq(arg, entity.getEquippedStack(EquipmentSlot.CHEST));
-            }
-            case "legs" -> {
-                Item arg = getItem(val);
-                yield entity -> eq(arg, entity.getEquippedStack(EquipmentSlot.LEGS));
-            }
-            case "boots" -> {
-                Item arg = getItem(val);
-                yield entity -> eq(arg, entity.getEquippedStack(EquipmentSlot.FEET));
-            }
+            case "hand", "offhand", "helm", "chest", "legs", "boots" ->
+                    getEmbed(in, "item:"+val);
             case "health" -> {
                 float arg = Float.parseFloat(val);
                 yield entity -> entity.getHealth()>=arg;
@@ -132,8 +109,34 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         }
         return null;
     }
+    @Override
+    public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
+        switch (in) {
+            case "hand", "offhand", "helm", "chest", "legs", "boots": {
+                if (dejavu.add(ItemStackScript.class)) {
+                    Predicate<ItemStack> out = ITEM_STACK_PARSER.parse(script);
+                    if (out != null)
+                    if ("hand".equals(in)) {
+                        return entity -> out.test(entity.getMainHandStack());
+                    }else if ("offhand".equals(in)) {
+                        return entity -> out.test(entity.getOffHandStack());
+                    }else if ("helm".equals(in)) {
+                        return entity -> out.test(entity.getEquippedStack(EquipmentSlot.HEAD));
+                    }else if ("chest".equals(in)) {
+                        return entity -> out.test(entity.getEquippedStack(EquipmentSlot.CHEST));
+                    }else if ("legs".equals(in)) {
+                        return entity -> out.test(entity.getEquippedStack(EquipmentSlot.LEGS));
+                    }else { //boots
+                        return entity -> out.test(entity.getEquippedStack(EquipmentSlot.FEET));
+                    }
+                }
+            }
+        }
+        return null;
+    }
     public static final Map<String, String> help = new HashMap<>();
     static {
+        //TODO add ~ embed
         help.put("hand:ItemID","Require item in main hand");
         help.put("offhand:ItemID","Require item in off hand");
         help.put("helm:ItemID","Require item as helmet");
@@ -165,15 +168,9 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     @Override
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
-        if (dejavu.add(EntityScript.class)) out = Stream.concat(out, Default.ENTITY.getAllHelp(dejavu).entrySet().stream());
+        if (dejavu.add(EntityScript.class)) out = Stream.concat(out, ENTITY.getAllHelp(dejavu).entrySet().stream());
         out = Stream.concat(out, getHelp().entrySet().stream());
 
         return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-    private static Item getItem(String id){
-        return Registry.ITEM.get(new Identifier(id));
-    }
-    private static boolean eq(Item required, ItemStack current){
-        return required != null && required == current.getItem();
     }
 }

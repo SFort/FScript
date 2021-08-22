@@ -15,13 +15,7 @@ public class BiomeScript implements PredicateProvider<Biome>, Help {
 	public Predicate<Biome> getPredicate(String in, String val, Set<Class<?>> dejavu){
 		return getLP(in,val);
 	}
-	@Override
-	public Predicate<Biome> getPredicate(String in, Set<Class<?>> dejavu){
-		return getLP(in);
-	}
-	public Predicate<Biome> getLP(String in){
-		return null;
-	}
+
 	public Predicate<Biome> getLP(String in, String val){
 		return switch (in){
 			case "tempeture" -> {

@@ -18,13 +18,6 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
             default -> null;
         };
     }
-    public Predicate<GameMode> getLP(String in, String val){
-        return null;
-    }
-    @Override
-    public Predicate<GameMode> getPredicate(String in, String val, Set<Class<?>> dejavu){
-        return getLP(in, val);
-    }
 
     @Override
     public Predicate<GameMode> getPredicate(String in, Set<Class<?>> dejavu){

@@ -13,22 +13,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FishingBobberEntityScript<T extends FishingBobberEntity> implements PredicateProvider<T>, Help {
-    private final EntityScript<T> ENTITY = new EntityScript<>();
+    public EntityScript<T> ENTITY = new EntityScript<>();
     public Predicate<T> getLP(String in){
         return switch (in){
             case "is_bobber_in_open_water" -> FishingBobberEntity::isInOpenWater;
             default -> null;
         };
     }
-    public Predicate<T> getLP(String in, String val){
-        return null;
-    }
     @Override
     public Predicate<T> getPredicate(String in, String val, Set<Class<?>> dejavu){
-        {
-            Predicate<T> out = getLP(in, val);
-            if (out != null) return out;
-        }
         if (dejavu.add(EntityScript.class)){
             Predicate<T> out = ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;

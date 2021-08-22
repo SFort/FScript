@@ -14,13 +14,7 @@ public class ChunkScript implements PredicateProvider<Chunk>, Help {
 	public Predicate<Chunk> getPredicate(String in, String val, Set<Class<?>> dejavu){
 		return getLP(in,val);
 	}
-	@Override
-	public Predicate<Chunk> getPredicate(String in, Set<Class<?>> dejavu){
-		return getLP(in);
-	}
-	public Predicate<Chunk> getLP(String in){
-		return null;
-	}
+
 	public Predicate<Chunk> getLP(String in, String val){
 		return switch (in){
 			case "inhabited" -> {

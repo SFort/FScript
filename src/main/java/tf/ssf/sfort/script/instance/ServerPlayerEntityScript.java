@@ -20,10 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements PredicateProvider<T>, Help {
-    private final PlayerEntityScript<T> PLAYER_ENTITY = new PlayerEntityScript<>();
-    public Predicate<T> getLP(String in){
-        return null;
-    }
+    public PlayerEntityScript<T> PLAYER_ENTITY = new PlayerEntityScript<>();
     public Predicate<T> getLP(String in, String val){
         return switch (in){
             case "respawn_distance" ->{
@@ -64,13 +61,8 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
         return null;
     }
 
-
     @Override
     public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
-        {
-            Predicate<T> out = getLP(in);
-            if (out != null) return out;
-        }
         if (dejavu.add(PlayerEntityScript.class)){
             Predicate<T> out = PLAYER_ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
@@ -81,6 +73,16 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
         }
         return null;
     }
+
+    @Override
+    public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
+        if (dejavu.add(PlayerEntityScript.class)){
+            Predicate<T> out = PLAYER_ENTITY.getEmbed(in, script, dejavu);
+            if (out !=null) return out;
+        }
+        return null;
+    }
+
     public static final Map<String, String> help = new HashMap<>();
     static {
         help.put("advancement:AdvancementID","Require advancement unlocked");
@@ -93,7 +95,7 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
     @Override
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
-        if (dejavu.add(PlayerEntityScript.class)) out = Stream.concat(out, Default.PLAYER_ENTITY.getAllHelp(dejavu).entrySet().stream());
+        if (dejavu.add(PlayerEntityScript.class)) out = Stream.concat(out, PLAYER_ENTITY.getAllHelp(dejavu).entrySet().stream());
         if (dejavu.add(GameModeScript.class)) out = Stream.concat(out, Default.GAME_MODE.getAllHelp(dejavu).entrySet().stream());
         out = Stream.concat(out, getHelp().entrySet().stream());
 

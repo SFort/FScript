@@ -15,5 +15,6 @@ public class Default {
     public static final ChunkScript CHUNK = new ChunkScript();
     public static final WorldScript WORLD = new WorldScript();
     public static final BiomeScript BIOME = new BiomeScript();
+    public static final ItemStackScript ITEM_STACK = new ItemStackScript();
     public static final GameModeScript GAME_MODE = new GameModeScript();
 }

@@ -11,10 +11,6 @@ import java.util.function.Predicate;
 
 public class DimensionTypeScript implements PredicateProvider<DimensionType>, Help {
     @Override
-    public Predicate<DimensionType> getPredicate(String in, String val, Set<Class<?>> dejavu){
-        return getLP(in,val);
-    }
-    @Override
     public Predicate<DimensionType> getPredicate(String in, Set<Class<?>> dejavu){
         return getLP(in);
     }
@@ -27,9 +23,6 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
             case "dim_does_anchor_work" -> DimensionType::isRespawnAnchorWorking;
             default -> null;
         };
-    }
-    public Predicate<DimensionType> getLP(String in, String val){
-        return null;
     }
     public static final Map<String, String> help = new HashMap<>();
     static {
