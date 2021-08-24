@@ -26,6 +26,25 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
 				yield item -> EnchantmentHelper.get(item).containsKey(arg);
 			}
+			case "count" -> {
+				final int arg = Integer.parseInt(val);
+				yield item -> item.getCount()>=arg;
+			}
+			default -> null;
+		};
+	}
+
+	public Predicate<ItemStack> getLP(String in){
+		return switch (in){
+			case "damageable" -> ItemStack::isDamageable;
+			case "empty" -> ItemStack::isEmpty;
+			case "damaged" -> ItemStack::isDamaged;
+			case "stackable" -> ItemStack::isStackable;
+			case "enchantable" -> ItemStack::isEnchantable;
+			case "has_glint" -> ItemStack::hasGlint;
+			case "has_nbt" -> ItemStack::hasNbt;
+			case "has_enchantments" -> ItemStack::hasEnchantments;
+			case "in_frame" -> ItemStack::isInFrame;
 			default -> null;
 		};
 	}
@@ -68,6 +87,11 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 	@Override
 	public Predicate<ItemStack> getPredicate(String in, String val, Set<Class<?>> dejavu){
 		return getLP(in,val);
+	}
+
+	@Override
+	public Predicate<ItemStack> getPredicate(String in, Set<Class<?>> dejavu){
+		return getLP(in);
 	}
 
 	@Override
