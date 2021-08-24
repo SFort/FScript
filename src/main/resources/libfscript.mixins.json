@@ -5,6 +5,10 @@
   "plugin": "tf.ssf.sfort.script.mixin_extended.Config",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "FishingBobberEntityExtended",
+    "ItemExtended",
+    "LivingEntityExtended",
+    "ServerPlayerEntityExtended"
   ],
   "injectors": {
     "defaultRequire": 1

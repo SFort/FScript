@@ -9,6 +9,8 @@ import net.minecraft.util.registry.SimpleRegistry;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.ScriptParser;
+import tf.ssf.sfort.script.mixin_extended.Config;
+import tf.ssf.sfort.script.mixin_extended.LivingEntityExtended;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     public Predicate<T> getLP(String in, String val){
         return switch (in){
             case "hand", "offhand", "helm", "chest", "legs", "boots" ->
-                    getLE(in, "item:"+val);
+                    getLE(in, ".:"+val);
             case "health" -> {
                 final float arg = Float.parseFloat(val);
                 yield entity -> entity.getHealth()>=arg;
@@ -105,6 +107,13 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         };
     }
 
+    public Predicate<LivingEntityExtended> getEP(String in){
+        return switch (in){
+            case "sleeping_in_bed" -> LivingEntityExtended::fscript$isSleepingInBed;
+            default -> null;
+        };
+    }
+
     //==================================================================================================================
 
     @Override
@@ -125,6 +134,10 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
             final Predicate<T> out = getLP(in);
             if (out != null) return out;
         }
+        if (Config.extended){
+            final Predicate<LivingEntityExtended> out = getEP(in);
+            if (out != null) return item -> out.test((LivingEntityExtended) item);
+        }
         if (dejavu.add(EntityScript.class)){
             final Predicate<T> out = ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
@@ -132,8 +145,10 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         return null;
     }
     @Override
-    public Predicate<T> getEmbed(String in, String script){
-        return getLE(in, script);
+    public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
+        if (dejavu.add(ITEM_STACK_PARSER.make.getClass()))
+            return getLE(in, script);
+        return null;
     }
 
     //==================================================================================================================

@@ -64,9 +64,9 @@ public class ScriptParser<T> {
         }
         boolean negate = in.charAt(0) == '!';
         if (negate)
-            in = in.replaceFirst("!", "");
+            in = in.substring(1);
         if (in.charAt(0) == '\u0007') {
-            in = in.replaceFirst("\u0007", "");
+            in = in.substring(1);
             return negate ? squish.get(Integer.parseInt(in)).negate() : squish.get(Integer.parseInt(in));
         }else{
             return negate ? predicateCheck(in, make).negate() : predicateCheck(in, make);
@@ -83,9 +83,9 @@ public class ScriptParser<T> {
         for (String predicateString : in.split(";")) {
             negate = predicateString.charAt(0) == '!';
             if (negate)
-                predicateString = predicateString.replaceFirst("!", "");
+                predicateString = predicateString.substring(1);
             if (predicateString.charAt(0) == '\u0007') {
-                predicateString = predicateString.replaceFirst("\u0007", "");
+                predicateString = predicateString.substring(1);
                 out = BracketMerge(firstchar, out, squish.get(Integer.parseInt(predicateString)));
             }else{
                 out = BracketMerge(firstchar, out, predicateCheck(predicateString, make));

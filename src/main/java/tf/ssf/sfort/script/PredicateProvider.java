@@ -11,10 +11,11 @@ public interface PredicateProvider<T> {
     default Predicate<T> getPredicate(String key, String arg, Set<Class<?>> dejavu){
         return null;
     }
-    default Predicate<T> getEmbed(String key, String script){
+    //TODO bring back embed dejavu
+    default Predicate<T> getEmbed(String key, String script, Set<Class<?>> dejavu){
         return null;
     }
-    default Predicate<T> getEmbed(String key, String arg, String script){
+    default Predicate<T> getEmbed(String key, String arg, String script, Set<Class<?>> dejavu){
         return null;
     }
     default Predicate<T> getPredicate(String key){
@@ -22,5 +23,11 @@ public interface PredicateProvider<T> {
     }
     default Predicate<T> getPredicate(String key, String arg){
         return getPredicate(key, arg, new HashSet<>());
+    }
+    default Predicate<T> getEmbed(String key, String script){
+        return getEmbed(key, script, new HashSet<>());
+    }
+    default Predicate<T> getEmbed(String key, String arg, String script){
+        return getEmbed(key, arg, script, new HashSet<>());
     }
 }

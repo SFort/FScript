@@ -3,6 +3,7 @@ package tf.ssf.sfort.script;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.instance.*;
 
@@ -19,4 +20,5 @@ public class Default {
     public static EnchantmentScript ENCHANTMENT = new EnchantmentScript();
     public static EnchantmentLevelEntryScript ENCHANTMENT_LEVEL_ENTRY = new EnchantmentLevelEntryScript();
     public static GameModeScript GAME_MODE = new GameModeScript();
+    public static FishingBobberEntityScript FISHING_BOBBER_ENTITY = new FishingBobberEntityScript();
 }

@@ -3,6 +3,7 @@ package tf.ssf.sfort.script.instance;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -69,6 +70,10 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			case "in_block" -> {
 				final Block arg = Registry.BLOCK.get(new Identifier(val));;
 				yield entity -> entity.world.getBlockState(entity.getBlockPos()).isOf(arg);
+			}
+			case "type" -> {
+				final EntityType<?> arg = Registry.ENTITY_TYPE.get(new Identifier(val));
+				yield entity -> entity.getType().equals(arg);
 			}
 			default -> null;
 		};

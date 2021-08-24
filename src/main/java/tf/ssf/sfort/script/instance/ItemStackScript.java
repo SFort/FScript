@@ -18,7 +18,7 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 
 	public Predicate<ItemStack> getLP(String in, String val){
 		return switch (in){
-			case "item" -> {
+			case "." -> {
 				final Item arg = Registry.ITEM.get(new Identifier(val));
 				yield item -> item.isOf(arg);
 			}
@@ -30,6 +30,7 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 				final int arg = Integer.parseInt(val);
 				yield item -> item.getCount()>=arg;
 			}
+			case "rarity" -> item -> item.getRarity().name().equals(val);
 			default -> null;
 		};
 	}
@@ -95,13 +96,19 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 	}
 
 	@Override
-	public Predicate<ItemStack> getEmbed(String in, String script){
-		return getLE(in, script);
+	public Predicate<ItemStack> getEmbed(String in, String script, Set<Class<?>> dejavu){
+		//TODO
+		if (dejavu.add(ENCHANTMENT_PARSER.make.getClass()))
+			return getLE(in, script);
+		return null;
 	}
 
 	@Override
-	public Predicate<ItemStack> getEmbed(String in, String val, String script){
-		return getLE(in, val, script);
+	public Predicate<ItemStack> getEmbed(String in, String val, String script, Set<Class<?>> dejavu){
+		//TODO
+		if (dejavu.add(ENCHANTMENT_PARSER.make.getClass()))
+			return getLE(in, val, script);
+		return null;
 	}
 
 	//==================================================================================================================

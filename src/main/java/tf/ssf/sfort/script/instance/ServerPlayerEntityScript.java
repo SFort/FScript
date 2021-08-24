@@ -11,6 +11,8 @@ import net.minecraft.world.World;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.mixin_extended.Config;
+import tf.ssf.sfort.script.mixin_extended.ServerPlayerEntityExtended;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +47,13 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
         };
     }
 
+    public Predicate<ServerPlayerEntityExtended> getEP(String in){
+        return switch (in){
+            case "seen_credits" -> ServerPlayerEntityExtended::fscript$seenCredits;
+            default -> null;
+        };
+    }
+
     //==================================================================================================================
 
     @Override
@@ -66,6 +75,10 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
 
     @Override
     public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
+        if (Config.extended){
+            final Predicate<ServerPlayerEntityExtended> out = getEP(in);
+            if (out != null) return item -> out.test((ServerPlayerEntityExtended) item);
+        }
         if (dejavu.add(PlayerEntityScript.class)){
             final Predicate<T> out = PLAYER_ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
@@ -78,13 +91,19 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
     }
 
     @Override
-    public Predicate<T> getEmbed(String in, String script){
-        return PLAYER_ENTITY.getEmbed(in, script);
+    public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
+        //TODO
+        if (dejavu.add(PLAYER_ENTITY.getClass()))
+            return PLAYER_ENTITY.getEmbed(in, script);
+        return null;
     }
 
     @Override
-    public Predicate<T> getEmbed(String in, String val, String script){
-        return PLAYER_ENTITY.getEmbed(in, val, script);
+    public Predicate<T> getEmbed(String in, String val, String script, Set<Class<?>> dejavu){
+        //TODO
+        if (dejavu.add(PLAYER_ENTITY.getClass()))
+            return PLAYER_ENTITY.getEmbed(in, val, script);
+        return null;
     }
 
     //==================================================================================================================

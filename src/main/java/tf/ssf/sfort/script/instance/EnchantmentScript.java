@@ -19,7 +19,7 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 			case "max_level" -> enchant -> enchant.getMinLevel() == enchant.getMaxLevel();
 			case "treasure", "is_treasure" -> Enchantment::isTreasure;
 			case "cursed", "is_cursed" -> Enchantment::isCursed;
-			case "villiger_traded", "available_for_enchanted_book_offer" ->
+			case "villager_traded", "is_villager_traded", "available_for_enchanted_book_offer" ->
 					Enchantment::isAvailableForEnchantedBookOffer;
 			case "loot", "is_loot", "available_for_random_selection" ->
 					Enchantment::isAvailableForRandomSelection;
@@ -29,7 +29,7 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 
 	public Predicate<Enchantment> getLP(String in, String val){
 		return switch (in){
-			case "enchant" -> {
+			case "." -> {
 				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
 				yield enchant -> enchant.equals(arg);
 			}
@@ -41,14 +41,11 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 				final int arg = Integer.parseInt(val);
 				yield enchant -> enchant.getMaxLevel()>arg;
 			}
-			case "rarity" -> {
-				final int arg = Integer.parseInt(val);
-				yield enchant -> enchant.getRarity().getWeight()>arg;
-			}
 			case "acceptable_item" -> {
 				final Item arg = Registry.ITEM.get(new Identifier(val));
 				yield enchant -> enchant.type.isAcceptableItem(arg);
 			}
+			case "rarity" -> enchant -> enchant.getRarity().name().equals(val);
 			case "type" -> enchant -> enchant.type.name().equals(val);
 			default -> null;
 		};

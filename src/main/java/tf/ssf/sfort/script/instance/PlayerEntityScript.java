@@ -1,7 +1,10 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.GameMode;
+import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.ScriptParser;
@@ -29,13 +32,6 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
             default -> null;
         };
     }
-    //TODO
-    public Predicate<T> getLE(String in, String script){
-        return null;
-    }
-    public Predicate<T> getLE(String in, String val, String script){
-        return null;
-    }
     //==================================================================================================================
 
     @Override
@@ -48,6 +44,10 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
             final Predicate<T> out = LIVING_ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
         }
+        if (dejavu.add(FishingBobberEntityScript.class)){
+            final Predicate<FishingBobberEntity> out = Default.FISHING_BOBBER_ENTITY.getPredicate(in, val, dejavu);
+            if (out !=null) return player -> out.test(player.fishHook);
+        }
         return null;
     }
     @Override
@@ -56,23 +56,19 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
             final Predicate<T> out = LIVING_ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
         }
+        if (dejavu.add(FishingBobberEntityScript.class)){
+            final Predicate<FishingBobberEntity> out = Default.FISHING_BOBBER_ENTITY.getPredicate(in, dejavu);
+            if (out !=null) return player -> out.test(player.fishHook);
+        }
         return null;
     }
     @Override
-    public Predicate<T> getEmbed(String in, String script){
-        {
-            final Predicate<T> out = getLE(in, script);
-            if (out != null) return out;
-        }
-        {
+    public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
+        if (dejavu.add(LIVING_ENTITY.getClass())){
             final Predicate<T> out = LIVING_ENTITY.getEmbed(in, script);
             if (out !=null) return out;
         }
         return null;
-    }
-    @Override
-    public Predicate<T> getEmbed(String in, String val, String script){
-        return getLE(in, val, script);
     }
 
     //==================================================================================================================

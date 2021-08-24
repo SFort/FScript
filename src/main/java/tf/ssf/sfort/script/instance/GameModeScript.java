@@ -18,12 +18,30 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
             default -> null;
         };
     }
+    public Predicate<GameMode> getLP(String in, String val){
+        return switch (in){
+            case "." -> mode -> mode.name().equals(val);
+            case "name" -> mode -> mode.getName().equals(val);
+            case "id" ->{
+                final int arg = Integer.parseInt(val);
+                yield mode -> mode.getId() == arg;
+            }
+            default -> null;
+        };
+    }
+
     //==================================================================================================================
 
     @Override
     public Predicate<GameMode> getPredicate(String in, Set<Class<?>> dejavu){
         return getLP(in);
     }
+
+    @Override
+    public Predicate<GameMode> getPredicate(String in, String val, Set<Class<?>> dejavu){
+        return getLP(in, val);
+    }
+
 
     //==================================================================================================================
 
