@@ -20,56 +20,57 @@ import java.util.stream.Stream;
 public class LivingEntityScript<T extends LivingEntity> implements PredicateProvider<T>, Help {
     public ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(new ItemStackScript());
     public EntityScript<T> ENTITY = new EntityScript<>();
+
     public Predicate<T> getLP(String in, String val){
         return switch (in){
             case "hand", "offhand", "helm", "chest", "legs", "boots" ->
-                    getEmbed(in, "item:"+val);
+                    getLE(in, "item:"+val);
             case "health" -> {
-                float arg = Float.parseFloat(val);
+                final float arg = Float.parseFloat(val);
                 yield entity -> entity.getHealth()>=arg;
             }
             case "max_health" -> {
-                float arg = Float.parseFloat(val);
+                final float arg = Float.parseFloat(val);
                 yield entity -> entity.getMaxHealth()>=arg;
             }
             case "armor" -> {
-                float arg = Integer.parseInt(val);
+                final float arg = Integer.parseInt(val);
                 yield entity -> entity.getArmor()>=arg;
             }
             case "effect" -> {
-                StatusEffect arg = SimpleRegistry.STATUS_EFFECT.get(new Identifier(val));
+                final StatusEffect arg = SimpleRegistry.STATUS_EFFECT.get(new Identifier(val));
                 yield entity -> entity.hasStatusEffect(arg);
             }
             case "attack" -> {
-                int arg = Integer.parseInt(val);
+                final int arg = Integer.parseInt(val);
                 yield entity -> entity.age - entity.getLastAttackTime() > arg;
             }
             case "attacked" -> {
-                int arg = Integer.parseInt(val);
+                final int arg = Integer.parseInt(val);
                 yield entity -> entity.age - entity.getLastAttackedTime() > arg;
             }
             case "stuck_arrow_count" -> {
-                int arg = Integer.parseInt(val);
+                final int arg = Integer.parseInt(val);
                 yield entity -> entity.getStuckArrowCount() > arg;
             }
             case "stinger_count" -> {
-                int arg = Integer.parseInt(val);
+                final int arg = Integer.parseInt(val);
                 yield entity -> entity.getStingerCount() > arg;
             }
             case "sideways_speed" -> {
-                float arg = Float.parseFloat(val);
+                final float arg = Float.parseFloat(val);
                 yield entity -> entity.sidewaysSpeed>=arg;
             }
             case "upward_speed" -> {
-                float arg = Float.parseFloat(val);
+                final float arg = Float.parseFloat(val);
                 yield entity -> entity.upwardSpeed>=arg;
             }
             case "forward_speed" -> {
-                float arg = Float.parseFloat(val);
+                final float arg = Float.parseFloat(val);
                 yield entity -> entity.forwardSpeed>=arg;
             }
             case "movement_speed" -> {
-                float arg = Float.parseFloat(val);
+                final float arg = Float.parseFloat(val);
                 yield entity -> entity.getMovementSpeed()>=arg;
             }
             default -> null;
@@ -77,7 +78,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     }
     public Predicate<T> getLP(String in){
         return switch (in) {
-            case "full_hp" -> entity -> entity.getHealth() == entity.getMaxHealth();
+            case "full_hp", "max_hp" -> entity -> entity.getHealth() == entity.getMaxHealth();
             case "blocking" -> LivingEntity::isBlocking;
             case "climbing" -> LivingEntity::isClimbing;
             case "using" -> LivingEntity::isUsingItem;
@@ -85,14 +86,35 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
             default -> null;
         };
     }
+
+    public Predicate<T> getLE(String in, String script){
+        return switch (in) {
+            case "hand", "offhand", "helm", "chest", "legs", "boots" ->{
+                final Predicate<ItemStack> predicate = ITEM_STACK_PARSER.parse(script);
+                if (predicate == null) yield null;
+                yield switch (in) {
+                    case "hand" -> entity -> predicate.test(entity.getMainHandStack());
+                    case "offhand" -> entity -> predicate.test(entity.getOffHandStack());
+                    case "helm" -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.HEAD));
+                    case "chest" -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.CHEST));
+                    case "legs" -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.LEGS));
+                    default -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.FEET));
+                };
+            }
+            default -> null;
+        };
+    }
+
+    //==================================================================================================================
+
     @Override
     public Predicate<T> getPredicate(String in, String val, Set<Class<?>> dejavu){
         {
-            Predicate<T> out = getLP(in, val);
+            final Predicate<T> out = getLP(in, val);
             if (out != null) return out;
         }
         if (dejavu.add(EntityScript.class)){
-            Predicate<T> out = ENTITY.getPredicate(in, val, dejavu);
+            final Predicate<T> out = ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
         }
         return null;
@@ -100,43 +122,25 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     @Override
     public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
         {
-            Predicate<T> out = getLP(in);
+            final Predicate<T> out = getLP(in);
             if (out != null) return out;
         }
         if (dejavu.add(EntityScript.class)){
-            Predicate<T> out = ENTITY.getPredicate(in, dejavu);
+            final Predicate<T> out = ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
         }
         return null;
     }
     @Override
-    public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
-        switch (in) {
-            case "hand", "offhand", "helm", "chest", "legs", "boots": {
-                if (dejavu.add(ItemStackScript.class)) {
-                    Predicate<ItemStack> out = ITEM_STACK_PARSER.parse(script);
-                    if (out != null)
-                    if ("hand".equals(in)) {
-                        return entity -> out.test(entity.getMainHandStack());
-                    }else if ("offhand".equals(in)) {
-                        return entity -> out.test(entity.getOffHandStack());
-                    }else if ("helm".equals(in)) {
-                        return entity -> out.test(entity.getEquippedStack(EquipmentSlot.HEAD));
-                    }else if ("chest".equals(in)) {
-                        return entity -> out.test(entity.getEquippedStack(EquipmentSlot.CHEST));
-                    }else if ("legs".equals(in)) {
-                        return entity -> out.test(entity.getEquippedStack(EquipmentSlot.LEGS));
-                    }else { //boots
-                        return entity -> out.test(entity.getEquippedStack(EquipmentSlot.FEET));
-                    }
-                }
-            }
-        }
-        return null;
+    public Predicate<T> getEmbed(String in, String script){
+        return getLE(in, script);
     }
+
+    //==================================================================================================================
+
     public static final Map<String, String> help = new HashMap<>();
     static {
-        //TODO add ~ embed
+        //TODO add ~ embed, max_hp
         help.put("hand:ItemID","Require item in main hand");
         help.put("offhand:ItemID","Require item in off hand");
         help.put("helm:ItemID","Require item as helmet");

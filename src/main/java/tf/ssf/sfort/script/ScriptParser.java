@@ -1,17 +1,18 @@
 package tf.ssf.sfort.script;
 
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class ScriptParser<T> {
     //TODO maybe dedup / cache squish?
     public List<Predicate<T>> squish = new ArrayList<>();
     public PredicateProvider<T> make = null;
+    //TODO upper to under
+    public boolean upperToUnder = false;
+
     public ScriptParser(PredicateProvider<T> predicate){
         make=predicate;
     }
@@ -20,25 +21,6 @@ public class ScriptParser<T> {
         for (int i = 0; i<in.length(); i++) {
             char ch = in.charAt(i);
             switch (ch) {
-                case '~' ->{
-                    int i_split = in.indexOf(':', i);
-                    if (i_split != -1) {
-                        int i_end = i_split+1;
-                        char start = in.charAt(i_end);
-                        char end = start == '(' ? ')' : start == '[' ? ']' : start == '{' ? '}' : 0;
-                        if (end != 0) {
-                            int c = 1;
-                            while (c != 0){
-                                i_end++;
-                                char cur = in.charAt(i_end);
-                                if (cur == start) c++;
-                                else if (cur == end) c--;
-                            }
-                            squish.add(predicateCheck(in.substring(i, i_end+1), make));
-                            in = in.substring(0, i)+"\u0007"+(squish.size()-1)+in.substring(i_end+1);
-                        }
-                    }
-                }
                 case '{', '[', '(' -> deque.addFirst(i);
                 case '}', ']', ')' -> {
                     int indx = deque.removeFirst();
@@ -46,6 +28,37 @@ public class ScriptParser<T> {
                     i = indx;
                     in = in.replace(str, "\u0007" + squish.size());
                     squish.add(getPredicates(str));
+                }
+                case '~' -> {
+                    int ii = i;
+                    int c = 0;
+                    char end = ';';
+                    char start = ';';
+                    while (ii<in.length()) {
+                        char cur = in.charAt(ii);
+                        if (c == 0){
+                            if (cur == ';') break;
+                            if (cur == '(' || cur == '[' || cur == '{') {
+                                c++;
+                                start = cur;
+                                end = start == '(' ? ')' : start == '[' ? ']' : '}';
+                            }
+                        }else{
+                            if (cur == start) c++;
+                            else if (cur == end){
+                                if (c == 1){
+                                    ii++;
+                                    break;
+                                }
+                                c--;
+                            }
+                        }
+                        ii++;
+                    }
+                    if (ii+1 != in.length()) {
+                        squish.add(predicateCheck(in.substring(i, ii), make));
+                        in = in.substring(0, i) + "\u0007" + (squish.size() - 1) + in.substring(ii);
+                    }
                 }
             }
         }
@@ -84,10 +97,15 @@ public class ScriptParser<T> {
     }
     @ApiStatus.Internal
     public static<T> Predicate<T> predicateCheck(String in, PredicateProvider<T> make){
-        int colon = in.indexOf(':');
-        return colon == -1 ? make.getPredicate(in): in.charAt(0) == '~'?
-                make.getEmbed(in.substring(1, colon), in.substring(colon + 1)) :
-                make.getPredicate(in.substring(0, colon), in.substring(colon + 1));
+        final int colon = in.indexOf(':');
+        //TODO if uppercase_to_underscore do "D" to "_d" only on key
+        if (colon == -1) return make.getPredicate(in);
+        if (in.charAt(0) == '~'){
+            final int delim = in.indexOf('~',1);
+            if (delim == -1 || delim>=colon) return make.getEmbed(in.substring(1,colon), in.substring(colon+1));
+            return make.getEmbed(in.substring(1,delim), in.substring(delim+1, colon), in.substring(colon+1));
+        }
+        return make.getPredicate(in.substring(0, colon), in.substring(colon + 1));
     }
 
     @ApiStatus.Internal

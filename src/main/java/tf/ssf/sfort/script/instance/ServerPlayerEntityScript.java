@@ -24,19 +24,19 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
     public Predicate<T> getLP(String in, String val){
         return switch (in){
             case "respawn_distance" ->{
-                double arg = Double.parseDouble(val);
+                final double arg = Double.parseDouble(val);
                 yield player -> {
-                    BlockPos pos = player.getSpawnPointPosition();
-                    ServerWorld world = player.getServerWorld();
-                    RegistryKey<World> dim = player.getSpawnPointDimension();
+                    final BlockPos pos = player.getSpawnPointPosition();
+                    final ServerWorld world = player.getServerWorld();
+                    final RegistryKey<World> dim = player.getSpawnPointDimension();
                     if (pos == null || world == null) return false;
                     return dim.equals(world.getRegistryKey()) && pos.isWithinDistance(player.getPos(), arg);
                 };
             }
             case "advancement" -> {
-                Identifier arg = new Identifier(val);
+                final Identifier arg = new Identifier(val);
                 yield player -> {
-                    MinecraftServer server = player.getServer();
+                    final MinecraftServer server = player.getServer();
                     if (server == null) return false;
                     return player.getAdvancementTracker().getProgress(server.getAdvancementLoader().get(arg)).isDone();
                 };
@@ -44,18 +44,21 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
             default -> null;
         };
     }
+
+    //==================================================================================================================
+
     @Override
     public Predicate<T> getPredicate(String in, String val, Set<Class<?>> dejavu){
         {
-            Predicate<T> out = getLP(in, val);
+            final Predicate<T> out = getLP(in, val);
             if (out != null) return out;
         }
         if (dejavu.add(PlayerEntityScript.class)){
-            Predicate<T> out = PLAYER_ENTITY.getPredicate(in, val, dejavu);
+            final Predicate<T> out = PLAYER_ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
         }
         if (dejavu.add(GameModeScript.class)){
-            Predicate<GameMode> out = Default.GAME_MODE.getPredicate(in, val, dejavu);
+            final Predicate<GameMode> out = Default.GAME_MODE.getPredicate(in, val, dejavu);
             if (out !=null) return player -> out.test(player.interactionManager.getGameMode());
         }
         return null;
@@ -64,24 +67,27 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
     @Override
     public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
         if (dejavu.add(PlayerEntityScript.class)){
-            Predicate<T> out = PLAYER_ENTITY.getPredicate(in, dejavu);
+            final Predicate<T> out = PLAYER_ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
         }
         if (dejavu.add(GameModeScript.class)){
-            Predicate<GameMode> out = Default.GAME_MODE.getPredicate(in, dejavu);
+            final Predicate<GameMode> out = Default.GAME_MODE.getPredicate(in, dejavu);
             if (out !=null) return player -> out.test(player.interactionManager.getGameMode());
         }
         return null;
     }
 
     @Override
-    public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
-        if (dejavu.add(PlayerEntityScript.class)){
-            Predicate<T> out = PLAYER_ENTITY.getEmbed(in, script, dejavu);
-            if (out !=null) return out;
-        }
-        return null;
+    public Predicate<T> getEmbed(String in, String script){
+        return PLAYER_ENTITY.getEmbed(in, script);
     }
+
+    @Override
+    public Predicate<T> getEmbed(String in, String val, String script){
+        return PLAYER_ENTITY.getEmbed(in, val, script);
+    }
+
+    //==================================================================================================================
 
     public static final Map<String, String> help = new HashMap<>();
     static {

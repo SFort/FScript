@@ -23,51 +23,51 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 	public Predicate<T> getLP(String in, String val){
 		return switch (in){
 			case "x" -> {
-				double arg = Double.parseDouble(val);
+				final double arg = Double.parseDouble(val);
 				yield entity -> entity.getX()>=arg;
 			}
 			case "y" -> {
-				double arg = Double.parseDouble(val);
+				final double arg = Double.parseDouble(val);
 				yield entity -> entity.getY()>=arg;
 			}
 			case "z" -> {
-				double arg = Double.parseDouble(val);
+				final double arg = Double.parseDouble(val);
 				yield entity -> entity.getZ()>=arg;
 			}
 			case "age" -> {
-				int arg = Integer.parseInt(val);
+				final int arg = Integer.parseInt(val);
 				yield entity -> entity.age>arg;
 			}
 			case "local_difficulty" -> {
-				float arg = Float.parseFloat(val);
+				final float arg = Float.parseFloat(val);
 				yield entity -> entity.world.getLocalDifficulty(entity.getBlockPos()).isHarderThan(arg);
 			}
 			case "biome" -> {
-				Identifier arg = new Identifier(val);
+				final Identifier arg = new Identifier(val);
 				yield entity -> entity.world.getBiomeKey(entity.getBlockPos()).map(x->x.getValue().equals(arg)).orElse(false);
 			}
 			case "air" -> {
-				int arg = Integer.parseInt(val);
+				final int arg = Integer.parseInt(val);
 				yield entity -> entity.getAir()>arg;
 			}
 			case "max_air" -> {
-				int arg = Integer.parseInt(val);
+				final int arg = Integer.parseInt(val);
 				yield entity -> entity.getMaxAir()>arg;
 			}
 			case "frozen_ticks" -> {
-				int arg = Integer.parseInt(val);
+				final int arg = Integer.parseInt(val);
 				yield entity -> entity.getFrozenTicks()>arg;
 			}
 			case "height" -> {
-				float arg = Float.parseFloat(val);
+				final float arg = Float.parseFloat(val);
 				yield entity -> entity.getHeight()>arg;
 			}
 			case "width" -> {
-				float arg = Float.parseFloat(val);
+				final float arg = Float.parseFloat(val);
 				yield entity -> entity.getWidth()>arg;
 			}
 			case "in_block" -> {
-				Block arg = Registry.BLOCK.get(new Identifier(val));;
+				final Block arg = Registry.BLOCK.get(new Identifier(val));;
 				yield entity -> entity.world.getBlockState(entity.getBlockPos()).isOf(arg);
 			}
 			default -> null;
@@ -100,22 +100,25 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			default -> null;
 		};
 	}
+
+	//==================================================================================================================
+
 	@Override
 	public Predicate<T> getPredicate(String in, String val, Set<Class<?>> dejavu) {
 		{
-			Predicate<T> out = getLP(in, val);
+			final Predicate<T> out = getLP(in, val);
 			if (out != null) return out;
 		}
 		if (dejavu.add(WorldScript.class)){
-			Predicate<World> out = Default.WORLD.getPredicate(in, val, dejavu);
+			final Predicate<World> out = Default.WORLD.getPredicate(in, val, dejavu);
 			if (out !=null) return entity -> out.test(entity.world);
 		}
 		if (dejavu.add(BiomeScript.class)){
-			Predicate<Biome> out = Default.BIOME.getPredicate(in, val, dejavu);
+			final Predicate<Biome> out = Default.BIOME.getPredicate(in, val, dejavu);
 			if (out !=null) return entity -> out.test(entity.world.getBiome(entity.getBlockPos()));
 		}
 		if (dejavu.add(ChunkScript.class)){
-			Predicate<Chunk> out = Default.CHUNK.getPredicate(in, val, dejavu);
+			final Predicate<Chunk> out = Default.CHUNK.getPredicate(in, val, dejavu);
 			if (out !=null) return entity -> out.test(entity.world.getWorldChunk(entity.getBlockPos()));
 		}
 		return null;
@@ -123,23 +126,26 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 	@Override
 	public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
 		{
-			Predicate<T> out = getLP(in);
+			final Predicate<T> out = getLP(in);
 			if (out != null) return out;
 		}
 		if (dejavu.add(WorldScript.class)){
-			Predicate<World> out = Default.WORLD.getPredicate(in, dejavu);
+			final Predicate<World> out = Default.WORLD.getPredicate(in, dejavu);
 			if (out !=null) return entity -> out.test(entity.world);
 		}
 		if (dejavu.add(BiomeScript.class)){
-			Predicate<Biome> out = Default.BIOME.getPredicate(in, dejavu);
+			final Predicate<Biome> out = Default.BIOME.getPredicate(in, dejavu);
 			if (out !=null) return entity -> out.test(entity.world.getBiome(entity.getBlockPos()));
 		}
 		if (dejavu.add(ChunkScript.class)){
-			Predicate<Chunk> out = Default.CHUNK.getPredicate(in, dejavu);
+			final Predicate<Chunk> out = Default.CHUNK.getPredicate(in, dejavu);
 			if (out !=null) return entity -> out.test(entity.world.getWorldChunk(entity.getBlockPos()));
 		}
 		return null;
 	}
+
+	//==================================================================================================================
+
 	public static final Map<String, String> help = new HashMap<>();
 	static {
 		help.put("air:int", "Minimum required air");
@@ -177,6 +183,9 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		help.put( "swimming", "Require swimming");
 		help.put("full_air", "Require having full air");
 	}
+
+	//==================================================================================================================
+
 	@Override
 	public Map<String, String> getHelp(){
 		return help;

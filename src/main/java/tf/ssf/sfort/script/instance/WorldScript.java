@@ -26,20 +26,23 @@ public class WorldScript implements PredicateProvider<World>, Help {
     public Predicate<World> getLP(String in, String val){
         return switch (in){
             case "dimension" -> {
-                Identifier arg = new Identifier(val);
+                final Identifier arg = new Identifier(val);
                 yield world -> world.getRegistryKey().getValue().equals(arg);
             }
             default -> null;
         };
     }
+
+    //==================================================================================================================
+
     @Override
     public Predicate<World> getPredicate(String in, String val, Set<Class<?>> dejavu){
         {
-            Predicate<World> out = getLP(in, val);
+            final Predicate<World> out = getLP(in, val);
             if (out != null) return out;
         }
         if (dejavu.add(Default.DIMENSION_TYPE.getClass())){
-            Predicate<DimensionType> out = Default.DIMENSION_TYPE.getPredicate(in, val, dejavu);
+            final Predicate<DimensionType> out = Default.DIMENSION_TYPE.getPredicate(in, val, dejavu);
             if (out !=null) return world -> out.test(world.getDimension());
         }
         return null;
@@ -47,15 +50,18 @@ public class WorldScript implements PredicateProvider<World>, Help {
     @Override
     public Predicate<World> getPredicate(String in, Set<Class<?>> dejavu){
         {
-            Predicate<World> out = getLP(in);
+            final Predicate<World> out = getLP(in);
             if (out != null) return out;
         }
         if (dejavu.add(Default.DIMENSION_TYPE.getClass())){
-            Predicate<DimensionType> out = Default.DIMENSION_TYPE.getPredicate(in, dejavu);
+            final Predicate<DimensionType> out = Default.DIMENSION_TYPE.getPredicate(in, dejavu);
             if (out !=null) return world -> out.test(world.getDimension());
         }
         return null;
     }
+
+    //==================================================================================================================
+
     public static final Map<String, String> help = new HashMap<>();
     static {
         help.put("dimension:DimensionID","Require being in dimension overworld|the_nether|the_end");

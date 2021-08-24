@@ -18,11 +18,15 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
             default -> null;
         };
     }
+    //==================================================================================================================
 
     @Override
     public Predicate<GameMode> getPredicate(String in, Set<Class<?>> dejavu){
         return getLP(in);
     }
+
+    //==================================================================================================================
+
     public static final Map<String, String> help = new HashMap<>();
     static {
         help.put("is_block_breaking_restricted","Require player gamemode to prevent breaking blocks");

@@ -20,10 +20,13 @@ public class FishingBobberEntityScript<T extends FishingBobberEntity> implements
             default -> null;
         };
     }
+
+    //==================================================================================================================
+
     @Override
     public Predicate<T> getPredicate(String in, String val, Set<Class<?>> dejavu){
         if (dejavu.add(EntityScript.class)){
-            Predicate<T> out = ENTITY.getPredicate(in, val, dejavu);
+            final Predicate<T> out = ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
         }
         return null;
@@ -32,15 +35,18 @@ public class FishingBobberEntityScript<T extends FishingBobberEntity> implements
     @Override
     public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
         {
-            Predicate<T> out = getLP(in);
+            final Predicate<T> out = getLP(in);
             if (out != null) return out;
         }
         if (dejavu.add(EntityScript.class)){
-            Predicate<T> out = ENTITY.getPredicate(in, dejavu);
+            final Predicate<T> out = ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
         }
         return null;
     }
+
+    //==================================================================================================================
+
     public static final Map<String, String> help = new HashMap<>();
     static {
         help.put("is_bobber_in_open_water","Require a fishing bobber in open water");

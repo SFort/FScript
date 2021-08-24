@@ -10,10 +10,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class DimensionTypeScript implements PredicateProvider<DimensionType>, Help {
-    @Override
-    public Predicate<DimensionType> getPredicate(String in, Set<Class<?>> dejavu){
-        return getLP(in);
-    }
+
     public Predicate<DimensionType> getLP(String in){
         return switch (in){
             case "dim_natural" -> DimensionType::isNatural;
@@ -24,6 +21,16 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
             default -> null;
         };
     }
+
+    //==================================================================================================================
+
+    @Override
+    public Predicate<DimensionType> getPredicate(String in, Set<Class<?>> dejavu){
+        return getLP(in);
+    }
+
+    //==================================================================================================================
+
     public static final Map<String, String> help = new HashMap<>();
     static {
         help.put("dim_natural","Require natural dimension");
@@ -32,9 +39,11 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
         help.put("dim_does_bed_work","Require dimension where beds don't blow");
         help.put("dim_does_anchor_work","Require dimension where respawn anchors work");
     }
+    @Override
     public Map<String, String> getHelp(){
         return help;
     }
+    @Override
     public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
         return getHelp();
     }
