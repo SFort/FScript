@@ -11,7 +11,6 @@ public interface PredicateProvider<T> {
     default Predicate<T> getPredicate(String key, String arg, Set<Class<?>> dejavu){
         return null;
     }
-    //TODO bring back embed dejavu
     default Predicate<T> getEmbed(String key, String script, Set<Class<?>> dejavu){
         return null;
     }
