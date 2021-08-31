@@ -9,11 +9,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class ScriptParser<T> {
-    public static void main(String arg[]){
-        //TODO parses improperly
-        String a = "[~hand:enchant:sharpness;!hand:stick]";
-        new ScriptParser<>(Default.SERVER_PLAYER_ENTITY).parse(a);
-    }
     //TODO maybe dedup / cache squish?
     public List<Predicate<T>> squish = new ArrayList<>();
     public PredicateProvider<T> make = null;
@@ -32,7 +27,7 @@ public class ScriptParser<T> {
                 case '}', ']', ')' -> {
                     int indx = deque.removeFirst();
                     squish.add(getPredicates(in.substring(indx, i + 1)));
-                    in = in.substring(0, indx) + "\u0007" + (squish.size() - 1) + in.substring(i+1);
+                    in = in.substring(0, indx) + "\u0007"+ (squish.size() - 1) + in.substring(i+1);
                     i = indx;
                 }
                 case '~' -> {

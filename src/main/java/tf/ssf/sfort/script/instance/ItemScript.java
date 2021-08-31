@@ -1,8 +1,10 @@
 package tf.ssf.sfort.script.instance;
 
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
@@ -17,7 +19,7 @@ import java.util.function.Predicate;
 public class ItemScript implements PredicateProvider<Item>, Help {
 	public Predicate<Item> getLP(String in, String val){
 		return switch (in){
-			case "." -> {
+			case ".", "item" -> {
 				final Item arg = Registry.ITEM.get(new Identifier(val));
 				yield item -> item == arg;
 			}
@@ -25,23 +27,26 @@ public class ItemScript implements PredicateProvider<Item>, Help {
 				final ItemGroup group = item.getGroup();
 				return group != null && group.getName().equals(val);
 			};
-			//TODO
 			default -> null;
 		};
 	}
 
 	public Predicate<Item> getLP(String in){
 		return switch (in){
-			case "damageable" -> Item::isDamageable;
-			case "food" -> Item::isFood;
-			case "fireproof" -> Item::isFireproof;
+			case "damageable", "is_damageable" -> Item::isDamageable;
+			case "food", "is_food" -> Item::isFood;
+			case "block_item", "is_block_item" -> item -> item instanceof BlockItem;
+			case "fireproof", "is_fireproof" -> Item::isFireproof;
 			default -> null;
 		};
 	}
 
 	public Predicate<ItemExtended> getEP(String in, String val){
 		return switch (in){
-			case "rarity" -> item -> item.fscript$rarity().name().equals(val);
+			case "rarity" ->{
+				Rarity arg = Rarity.valueOf(val);
+				yield item -> item.fscript$rarity().equals(arg);
+			}
 			default -> null;
 		};
 	}
@@ -69,16 +74,17 @@ public class ItemScript implements PredicateProvider<Item>, Help {
 
 	//==================================================================================================================
 
-	public static final Map<String, String> help = new HashMap<>();
+	public static final Map<String, Object> help = new HashMap<>();
 	static {
-		help.put("damageable","Item has to be damageable");
-		help.put("food","Item is food");
-		help.put("fireproof","Item is fireproof");
+		help.put("damageable is_damageable","Item has to be damageable");
+		help.put("food is_food","Item is food");
+		help.put("fireproof is_fireproof","Item is fireproof");
+		help.put("block_item is_block_item","Item is a block");
+		if (Config.extended) help.put("rarity:RarityID", "Item has specified rarity");
+		help.put("item .:ItemID", "Has to be the specified item");
+		help.put("group:ItemGroupID", "Item has specified item group");
 	}
-	public Map<String, String> getHelp(){
+	public Map<String, Object> getHelp(){
 		return help;
-	}
-	public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
-		return getHelp();
 	}
 }

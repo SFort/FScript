@@ -36,18 +36,16 @@ public class BiomeScript implements PredicateProvider<Biome>, Help {
 	}
 
 	//==================================================================================================================
-	public static final Map<String, String> help = new HashMap<>();
+
+	@Override
+	public Map<String, Object> getHelp(){
+		return help;
+	}
+
+	public static final Map<String, Object> help = new HashMap<>();
 	static {
 		help.put("tempeture:float","Player must be in biome warmer then this");
 		help.put("precipitation:BiomePrecipitationID","Player must be in biome with this precipitation: rain | snow | none");
 		help.put("catagory:BiomeCatagoryID","Player must be in biome with this catagory");
-	}
-	@Override
-	public Map<String, String> getHelp(){
-		return help;
-	}
-	@Override
-	public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
-		return getHelp();
 	}
 }

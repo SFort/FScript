@@ -6,18 +6,15 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.SimpleRegistry;
+import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.ScriptParser;
 import tf.ssf.sfort.script.mixin_extended.Config;
 import tf.ssf.sfort.script.mixin_extended.LivingEntityExtended;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class LivingEntityScript<T extends LivingEntity> implements PredicateProvider<T>, Help {
     public ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(new ItemStackScript());
@@ -27,11 +24,11 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         return switch (in){
             case "hand", "offhand", "helm", "chest", "legs", "boots" ->
                     getLE(in, ".:"+val);
-            case "health" -> {
+            case "health", "hp" -> {
                 final float arg = Float.parseFloat(val);
                 yield entity -> entity.getHealth()>=arg;
             }
-            case "max_health" -> {
+            case "max_health", "max_hp" -> {
                 final float arg = Float.parseFloat(val);
                 yield entity -> entity.getMaxHealth()>=arg;
             }
@@ -80,11 +77,12 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     }
     public Predicate<T> getLP(String in){
         return switch (in) {
-            case "full_hp", "max_hp" -> entity -> entity.getHealth() == entity.getMaxHealth();
-            case "blocking" -> LivingEntity::isBlocking;
-            case "climbing" -> LivingEntity::isClimbing;
-            case "using" -> LivingEntity::isUsingItem;
-            case "fall_flying" -> LivingEntity::isFallFlying;
+            case "full_hp", "max_hp", "full_health", "max_health", "is_full_hp", "is_max_hp", "is_full_health", "is_max_health"
+                    -> entity -> entity.getHealth() == entity.getMaxHealth();
+            case "blocking", "is_blocking" -> LivingEntity::isBlocking;
+            case "climbing", "is_climbing" -> LivingEntity::isClimbing;
+            case "using", "is_using" -> LivingEntity::isUsingItem;
+            case "fall_flying", "is_fall_flying" -> LivingEntity::isFallFlying;
             default -> null;
         };
     }
@@ -109,7 +107,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
 
     public Predicate<LivingEntityExtended> getEP(String in){
         return switch (in){
-            case "sleeping_in_bed" -> LivingEntityExtended::fscript$isSleepingInBed;
+            case "sleeping_in_bed", "is_sleeping_in_bed" -> LivingEntityExtended::fscript$isSleepingInBed;
             default -> null;
         };
     }
@@ -153,7 +151,16 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
 
     //==================================================================================================================
 
-    public static final Map<String, String> help = new HashMap<>();
+    @Override
+    public Map<String, Object> getHelp(){
+        return help;
+    }
+    @Override
+    public Set<Help> getImported(){
+        return extend_help;
+    }
+    public static final Map<String, Object> help = new HashMap<>();
+    public static final Set<Help> extend_help = new LinkedHashSet<>();
     static {
         //TODO add ~ embed, max_hp
         help.put("hand:ItemID","Require item in main hand");
@@ -162,9 +169,21 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         help.put("chest:ItemID","Require item as chestplate");
         help.put("legs:ItemID","Require item as leggings");
         help.put("boots:ItemID","Require item as boots");
+        help.put("~hand:ITEM_STACK","Require item in main hand");
+        help.put("~offhand:ITEM_STACK","Require item in off hand");
+        help.put("~helm:ITEM_STACK","Require item as helmet");
+        help.put("~chest:ITEM_STACK","Require item as chestplate");
+        help.put("~legs:ITEM_STACK","Require item as leggings");
+        help.put("~boots:ITEM_STACK","Require item as boots");
+        help.put("~hand~EnchantID:ITEM_STACK","Require item in main hand");
+        help.put("~offhand~EnchantID:ITEM_STACK","Require item in off hand");
+        help.put("~helm~EnchantID:ITEM_STACK","Require item as helmet");
+        help.put("~chest~EnchantID:ITEM_STACK","Require item as chestplate");
+        help.put("~legs~EnchantID:ITEM_STACK","Require item as leggings");
+        help.put("~boots~EnchantID:ITEM_STACK","Require item as boots");
         help.put("effect:EffectID","Require potion effect");
-        help.put("health:float","Minimum required heath");
-        help.put("max_health:float","Minimum required max heath");
+        help.put("hp health:float","Minimum required heath");
+        help.put("max_hp max_health:float","Minimum required max heath");
         help.put("movement_speed:float","Require going at this speed");
         help.put("sideways_speed:float","Require going sideways at this speed");
         help.put("upward_speed:float","Require going up at this speed");
@@ -174,22 +193,13 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         help.put("stuck_arrow_count:int", "Minimum amount of arrows stuck in entity");
         help.put("stinger_count:int", "Minimum amount of stingers");
         help.put("armor:int","Minimum required armor");
-        help.put("full_hp","Require full health");
-        help.put("blocking","Require Blocking");
-        help.put("climbing","Require Climbing");
-        help.put("using","Require using items");
-        help.put("fall_flying","Require flying with elytra");
-    }
-    @Override
-    public Map<String, String> getHelp(){
-        return help;
-    }
-    @Override
-    public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
-        Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
-        if (dejavu.add(EntityScript.class)) out = Stream.concat(out, ENTITY.getAllHelp(dejavu).entrySet().stream());
-        out = Stream.concat(out, getHelp().entrySet().stream());
+        help.put("full_hp max_hp full_health max_health is_full_hp is_max_hp is_full_health is_max_health","Require full health");
+        help.put("blocking is_blocking","Require Blocking");
+        help.put("climbing is_climbing","Require Climbing");
+        help.put("using is_using","Require using items");
+        help.put("fall_flying is_fall_flying","Require flying with elytra");
+        if (Config.extended) help.put("sleeping_in_bed is_sleeping_in_bed","Require sleeping in a bed");
 
-        return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        extend_help.add(Default.ENTITY);
     }
 }

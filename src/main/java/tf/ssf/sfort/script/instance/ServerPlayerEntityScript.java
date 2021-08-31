@@ -14,12 +14,8 @@ import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.mixin_extended.Config;
 import tf.ssf.sfort.script.mixin_extended.ServerPlayerEntityExtended;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements PredicateProvider<T>, Help {
     public PlayerEntityScript<T> PLAYER_ENTITY = new PlayerEntityScript<>();
@@ -108,22 +104,22 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
 
     //==================================================================================================================
 
-    public static final Map<String, String> help = new HashMap<>();
-    static {
-        help.put("advancement:AdvancementID","Require advancement unlocked");
-        help.put("respawn_distance:double","Require player to be nearby their respawn (usually a bed)");
-    }
     @Override
-    public Map<String, String> getHelp(){
+    public Map<String, Object> getHelp(){
         return help;
     }
     @Override
-    public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
-        Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
-        if (dejavu.add(PlayerEntityScript.class)) out = Stream.concat(out, PLAYER_ENTITY.getAllHelp(dejavu).entrySet().stream());
-        if (dejavu.add(GameModeScript.class)) out = Stream.concat(out, Default.GAME_MODE.getAllHelp(dejavu).entrySet().stream());
-        out = Stream.concat(out, getHelp().entrySet().stream());
+    public Set<Help> getImported(){
+        return extend_help;
+    }
+    public static final Map<String, Object> help = new HashMap<>();
+    public static final Set<Help> extend_help = new LinkedHashSet<>();
+    static {
+        help.put("advancement:AdvancementID","Require advancement unlocked");
+        help.put("respawn_distance:double","Require player to be nearby their respawn (usually a bed)");
+        if (Config.extended) help.put("seen_credits", "Require player to have seen the end credits");
 
-        return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        extend_help.add(Default.PLAYER_ENTITY);
+        extend_help.add(Default.GAME_MODE);
     }
 }

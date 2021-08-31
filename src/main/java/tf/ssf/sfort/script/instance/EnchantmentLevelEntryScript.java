@@ -2,17 +2,17 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.enchantment.Enchantment;
 import tf.ssf.sfort.script.Default;
+import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
-public class EnchantmentLevelEntryScript implements PredicateProvider<Map.Entry<Enchantment, Integer>> {
+public class EnchantmentLevelEntryScript implements PredicateProvider<Map.Entry<Enchantment, Integer>>, Help {
     @Override
     public Predicate<Map.Entry<Enchantment, Integer>> getPredicate(String in, String val, Set<Class<?>> dejavu) {
         return switch (in) {
-            case "level" -> {
+            case "level", "enchant_level" -> {
                 final int arg = Integer.parseInt(val);
                 yield entry -> entry.getValue()>=arg;
             }
@@ -23,6 +23,25 @@ public class EnchantmentLevelEntryScript implements PredicateProvider<Map.Entry<
     @Override
     public Predicate<Map.Entry<Enchantment, Integer>> getPredicate(String in, Set<Class<?>> dejavu) {
         return entry -> Default.ENCHANTMENT.getPredicate(in, dejavu).test(entry.getKey());
+    }
+
+    //==================================================================================================================
+    @Override
+    public Map<String, Object> getHelp(){
+        return help;
+    }
+    @Override
+    public Set<Help> getImported(){
+        return extend_help;
+    }
+
+    public static final Map<String, Object> help = new HashMap<>();
+    public static final Set<Help> extend_help = new LinkedHashSet<>();
+
+    static {
+        help.put("enchant_level level:int","Minimum enchantment level");
+
+        extend_help.add(Default.ENCHANTMENT);
     }
 
 }

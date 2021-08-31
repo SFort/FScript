@@ -3,9 +3,11 @@ package tf.ssf.sfort.script;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.instance.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Default {
     public static EntityScript<Entity> ENTITY = new EntityScript<>();
@@ -16,6 +18,7 @@ public class Default {
     public static ChunkScript CHUNK = new ChunkScript();
     public static WorldScript WORLD = new WorldScript();
     public static BiomeScript BIOME = new BiomeScript();
+    public static ItemScript ITEM = new ItemScript();
     public static ItemStackScript ITEM_STACK = new ItemStackScript();
     public static EnchantmentScript ENCHANTMENT = new EnchantmentScript();
     public static EnchantmentLevelEntryScript ENCHANTMENT_LEVEL_ENTRY = new EnchantmentLevelEntryScript();

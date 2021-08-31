@@ -7,12 +7,8 @@ import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.mixin_extended.Config;
 import tf.ssf.sfort.script.mixin_extended.FishingBobberEntityExtended;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FishingBobberEntityScript implements PredicateProvider<FishingBobberEntity>, Help {
     public EntityScript<FishingBobberEntity> ENTITY = new EntityScript<>();
@@ -60,20 +56,21 @@ public class FishingBobberEntityScript implements PredicateProvider<FishingBobbe
 
     //==================================================================================================================
 
-    public static final Map<String, String> help = new HashMap<>();
-    static {
-        help.put("is_bobber_in_open_water","Require a fishing bobber in open water");
-    }
+
     @Override
-    public Map<String, String> getHelp(){
+    public Map<String, Object> getHelp(){
         return help;
     }
     @Override
-    public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
-        Stream<Map.Entry<String, String>> out = new HashMap<String, String>().entrySet().stream();
-        if (dejavu.add(EntityScript.class)) out = Stream.concat(out, Default.ENTITY.getAllHelp(dejavu).entrySet().stream());
-        out = Stream.concat(out, getHelp().entrySet().stream());
+    public Set<Help> getImported(){
+        return extend_help;
+    }
+    public static final Map<String, Object> help = new HashMap<>();
+    public static final Set<Help> extend_help = new LinkedHashSet<>();
+    static {
+        help.put("bobber_in_open_water is_bobber_in_open_water","Require a fishing bobber in open water");
+        if (Config.extended) help.put("caught_fish has_caught_fish", "Require bobber to have cought a fish");
 
-        return out.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        extend_help.add(Default.ENTITY);
     }
 }

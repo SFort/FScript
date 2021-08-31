@@ -15,6 +15,9 @@
   "license": "MIT",
 
   "environment": "*",
+  "entrypoints": {
+    "modmenu": ["tf.ssf.sfort.script.ModMenu"]
+  },
   "mixins": [
     "libfscript.mixins.json"
   ],

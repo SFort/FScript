@@ -1,6 +1,7 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -16,7 +17,7 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 
 	public Predicate<Enchantment> getLP(String in){
 		return switch (in){
-			case "max_level" -> enchant -> enchant.getMinLevel() == enchant.getMaxLevel();
+			case "max_level", "is_max_level" -> enchant -> enchant.getMinLevel() == enchant.getMaxLevel();
 			case "treasure", "is_treasure" -> Enchantment::isTreasure;
 			case "cursed", "is_cursed" -> Enchantment::isCursed;
 			case "villager_traded", "is_villager_traded", "available_for_enchanted_book_offer" ->
@@ -29,7 +30,7 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 
 	public Predicate<Enchantment> getLP(String in, String val){
 		return switch (in){
-			case "." -> {
+			case ".", "enchant" -> {
 				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
 				yield enchant -> enchant.equals(arg);
 			}
@@ -45,8 +46,14 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 				final Item arg = Registry.ITEM.get(new Identifier(val));
 				yield enchant -> enchant.type.isAcceptableItem(arg);
 			}
-			case "rarity" -> enchant -> enchant.getRarity().name().equals(val);
-			case "type" -> enchant -> enchant.type.name().equals(val);
+			case "rarity" ->{
+				final Enchantment.Rarity arg = Enchantment.Rarity.valueOf(val);
+				yield enchant -> enchant.getRarity().equals(arg);
+			}
+			case "target" -> {
+				final EnchantmentTarget arg = EnchantmentTarget.valueOf(val);
+				yield enchant -> enchant.type.equals(arg);
+			}
 			default -> null;
 		};
 	}
@@ -65,15 +72,24 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 
 	//==================================================================================================================
 
-	//TODO
-	public static final Map<String, String> help = new HashMap<>();
-	static {
-		help.put("enchant:EnchantID","Require specified enchant");
-	}
-	public Map<String, String> getHelp(){
+	@Override
+	public Map<String, Object> getHelp(){
 		return help;
 	}
-	public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
-		return getHelp();
+
+	public static final Map<String, Object> help = new HashMap<>();
+	static {
+		help.put("enchant .:EnchantID","Require specified enchant");
+		help.put("min_level:int","Minimum min enchantment level");
+		help.put("max_level:int","Minimum max enchantment level");
+		help.put("acceptable_item:ItemID","Require enchantment to be applicable to item");
+		help.put("rarity:EnchantRarityID","Require enchantment to be this rarity");
+		help.put("target:EnchantTargetID","Require enchantment to have this target type requirement");
+		help.put("treasure is_treasure","Require enchantment to be obtainable as a treasure");
+		help.put("max_level is_max_level","Require maximum obtainable enchantment level");
+		help.put("cursed is_cursed","Require enchantment to be a curse");
+		help.put("villager_traded is_villager_traded available_for_enchanted_book_offer","Require enchantment to be tradable by villagers");
+		help.put("loot is_loot available_for_random_selection","Require enchantment to be obtainable as a random chest loot");
+
 	}
 }

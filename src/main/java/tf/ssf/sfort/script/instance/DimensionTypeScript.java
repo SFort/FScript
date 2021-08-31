@@ -13,16 +13,16 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
 
     public Predicate<DimensionType> getLP(String in){
         return switch (in){
-            case "natural" -> DimensionType::isNatural;
-            case "ultrawarn" -> DimensionType::isUltrawarm;
-            case "piglin_safe" -> DimensionType::isPiglinSafe;
-            case "does_bed_work" -> DimensionType::isBedWorking;
-            case "does_anchor_work" -> DimensionType::isRespawnAnchorWorking;
-            case "has_skylight" -> DimensionType::hasSkyLight;
-            case "has_ceiling" -> DimensionType::hasCeiling;
-            case "has_raids" -> DimensionType::hasRaids;
-            case "has_ender_dragon_fight" -> DimensionType::hasEnderDragonFight;
-            case "has_fixed_time" -> DimensionType::hasFixedTime;
+            case "natural", "is_natural" -> DimensionType::isNatural;
+            case "ultrawarn", "is_ultrawarm" -> DimensionType::isUltrawarm;
+            case "piglin_safe", "is_piglin_safe" -> DimensionType::isPiglinSafe;
+            case "does_bed_work", "is_bed_working", "bed_working" -> DimensionType::isBedWorking;
+            case "does_anchor_work", "respawn_anchor_working", "is_respawn_anchor_working" -> DimensionType::isRespawnAnchorWorking;
+            case "skylight", "has_skylight" -> DimensionType::hasSkyLight;
+            case "ceiling", "has_ceiling" -> DimensionType::hasCeiling;
+            case "raids", "has_raids" -> DimensionType::hasRaids;
+            case "ender_dragon_fight", "has_ender_dragon_fight" -> DimensionType::hasEnderDragonFight;
+            case "fixed_time", "has_fixed_time" -> DimensionType::hasFixedTime;
             default -> null;
         };
     }
@@ -49,20 +49,23 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
 
     //==================================================================================================================
 
-    public static final Map<String, String> help = new HashMap<>();
-    static {
-        help.put("dim_natural","Require natural dimension");
-        help.put("dim_ultrawarn","Require ultra warm dimension");
-        help.put("dim_piglin_safe","Require piglin safe dimension");
-        help.put("dim_does_bed_work","Require dimension where beds don't blow");
-        help.put("dim_does_anchor_work","Require dimension where respawn anchors work");
-    }
     @Override
-    public Map<String, String> getHelp(){
+    public Map<String, Object> getHelp(){
         return help;
     }
-    @Override
-    public Map<String, String> getAllHelp(Set<Class<?>> dejavu){
-        return getHelp();
+
+    public static final Map<String, Object> help = new HashMap<>();
+    static {
+        help.put("natural is_natural","Require natural dimension");
+        help.put("ultrawarn is_ultrawarm","Require ultra warm dimension");
+        help.put("piglin_safe is_piglin_safe","Require piglin safe dimension");
+        help.put("bed_working is_bed_working does_bed_work","Require dimension where beds don't blow");
+        help.put("respawn_anchor_working is_respawn_anchor_working does_anchor_work","Require dimension where respawn anchors work");
+        help.put("skylight has_skylight", "Require dimension to have a skylight");
+        help.put("ceiling has_ceiling", "Require dimension to have a ceiling");
+        help.put("raids has_raids", "Require dimension to have raids");
+        help.put("ender_dragon_fight has_ender_dragon_fight", "Require dimension to have an ender dragon");
+        help.put("fixed_time has_fixed_time", "Require dimension to have fixed time");
+        help.put("coordinate_scale:double", "Minimum dimension coordinate scale");
     }
 }
