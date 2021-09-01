@@ -84,7 +84,9 @@ public class ItemScript implements PredicateProvider<Item>, Help {
 		help.put("item .:ItemID", "Has to be the specified item");
 		help.put("group:ItemGroupID", "Item has specified item group");
 	}
+	@Override
 	public Map<String, Object> getHelp(){
 		return help;
 	}
+
 }

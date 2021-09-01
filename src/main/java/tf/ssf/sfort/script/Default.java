@@ -6,9 +6,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.instance.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Default {
     public static EntityScript<Entity> ENTITY = new EntityScript<>();
     public static LivingEntityScript<LivingEntity> LIVING_ENTITY = new LivingEntityScript<>();

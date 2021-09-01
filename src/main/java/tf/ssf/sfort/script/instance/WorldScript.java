@@ -63,17 +63,17 @@ public class WorldScript implements PredicateProvider<World>, Help {
         return help;
     }
     @Override
-    public Set<Help> getImported(){
+    public List<Help> getImported(){
         return extend_help;
     }
     public static final Map<String, Object> help = new HashMap<>();
-    public static final Set<Help> extend_help = new LinkedHashSet<>();
+    public static final List<Help> extend_help = new ArrayList<>();
     static {
         help.put("dimension:DimensionID","Require being in dimension");
         help.put("thundering is_thundering","Require thunder");
         help.put("raining is_raining","Require rain");
         help.put("day is_day","Require daytime");
 
-        extend_help.add(Default.DIMENSION_TYPE);
+        extend_help.add(new DimensionTypeScript());
     }
 }

@@ -109,17 +109,17 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
         return help;
     }
     @Override
-    public Set<Help> getImported(){
+    public List<Help> getImported(){
         return extend_help;
     }
     public static final Map<String, Object> help = new HashMap<>();
-    public static final Set<Help> extend_help = new LinkedHashSet<>();
+    public static final List<Help> extend_help = new ArrayList<>();
     static {
         help.put("advancement:AdvancementID","Require advancement unlocked");
         help.put("respawn_distance:double","Require player to be nearby their respawn (usually a bed)");
         if (Config.extended) help.put("seen_credits", "Require player to have seen the end credits");
 
-        extend_help.add(Default.PLAYER_ENTITY);
-        extend_help.add(Default.GAME_MODE);
+        extend_help.add(new PlayerEntityScript<ServerPlayerEntity>());
+        extend_help.add(new GameModeScript());
     }
 }

@@ -34,6 +34,8 @@ public class ScriptingScreen extends Screen {
     private final Screen parent;
 
     private Script selected_script;
+    private String val_make;
+    private Tip selected_tip;
     private List<String> script = new ArrayList<>();
     private int script_cursor = 0;
     private float sidebarScrollTarget;
@@ -65,9 +67,35 @@ public class ScriptingScreen extends Screen {
         super(new LiteralText("FScript"));
         this.parent = parent;
     }
-    private void setTip(List<String> in, Map<String, Help> embedable){
+    private void selectScript(int i){
+        selected_script = scripts.get(i);
+        setTip();
+
+    }
+    private void clearTip(){
+        sidebarScrollTarget = -20;
         tip = new ArrayList<>();
-        for (String os : in) {
+    }
+    private void setTip(List<Help.Parameter> par){
+        clearTip();
+        for (Help.Parameter pa : par)
+            tip.addAll(pa.getParameters().stream().map(p->new Tip(new String[]{p}, "", new ArrayList<>(), null)).collect(Collectors.toSet()));
+    }
+    private void setTip(List<Help.Parameter> par, Help embed){
+        clearTip();
+        for (Help.Parameter pa : par)
+            tip.addAll(pa.getParameters().stream().map(p->new Tip(new String[]{p}, "", new ArrayList<>(), embed)).collect(Collectors.toSet()));
+    }
+    private void setTip(){
+        setTip(selected_script.help);
+    }
+    private void setTip(Help help){
+        setTip(Help.recurseImported(help, new HashSet<>()));
+    }
+    private void setTip(Map<String, Object> help){
+        clearTip();
+        for (Map.Entry<String, Object> as : help.entrySet()) {
+            String os = as.getKey();
             int colon = os.indexOf(':');
             List<Help.Parameter> val = new ArrayList<>();
             Help embed = null;
@@ -75,7 +103,7 @@ public class ScriptingScreen extends Screen {
                 String arg = os.substring(colon+1);
                 os = os.substring(0, colon);
                 if (os.startsWith("~")){
-                    if (embedable != null) embed = embedable.getOrDefault(arg, null);
+                    if (selected_script.embedable != null) embed = selected_script.embedable.getOrDefault(arg, null);
                     if (embed == null) continue;
                     os = os.substring(1);
                     int i = os.indexOf('~');
@@ -91,7 +119,7 @@ public class ScriptingScreen extends Screen {
                     if (p != null) val.add(p);
                 }
             }
-            tip.add(new Tip(os.split(" "), 0, val, embed));
+            tip.add(new Tip(os.split(" "), as.getValue(), val, embed));
         }
     }
     @Override
@@ -99,10 +127,7 @@ public class ScriptingScreen extends Screen {
         super.init();
         searchField = new TextFieldWidget(textRenderer, 1, 1, 128, 14, searchField, new LiteralText("Search"));
         searchField.setChangedListener((s) -> s = s.trim());
-        if(!scripts.isEmpty()){
-            selected_script = scripts.get(0);
-            setTip(selected_script.help.keySet().stream().toList(), selected_script.embedable);
-        }
+        if(!scripts.isEmpty()) selectScript(0);
     }
 
     @Override
@@ -113,7 +138,59 @@ public class ScriptingScreen extends Screen {
         else drawForeground(matrices, mouseX, mouseY, delta);
         matrices.pop();
     }
-
+    
+    private void pushValMake(Tip os){
+        if (val_make == null) {
+            boolean e = os.embed != null;
+            boolean p = os.par.size() > 0;
+            if (e || p) {
+                StringBuilder out = new StringBuilder();
+                if (e) out.append('~');
+                out.append(os.name[0]);
+                if (e && p){
+                    setTip(os.par, os.embed);
+                    out.append('~');
+                } else{
+                    if (e) setTip(os.embed);
+                    else setTip(os.par);
+                    out.append(':');
+                }
+                val_make = out.toString();
+            } else {
+                script.add(script_cursor, os.name[0]);
+            }
+        }else {
+            char ec = val_make.charAt(val_make.length()-1);
+            if(ec == ':' && val_make.charAt(0) != '~'){
+                script.add(script_cursor, val_make+os.name[0]);
+                clearValMake();
+            }else if (ec == '~'){
+                val_make += os.name[0]+":";
+                setTip(os.embed);
+            }else {
+                boolean e = os.embed != null;
+                boolean p = os.par.size() > 0;
+                if (e || p) {
+                    StringBuilder out = new StringBuilder();
+                    out.append(val_make);
+                    if (e) out.append('~');
+                    out.append(os.name[0]);
+                    if (e && p){
+                        setTip(os.par, os.embed);
+                        out.append('~');
+                    } else{
+                        if (e) setTip(os.embed);
+                        else setTip(os.par);
+                        out.append(':');
+                    }
+                    val_make = out.toString();
+                } else {
+                    script.add(script_cursor, val_make+os.name[0]);
+                    clearValMake();
+                }
+            }
+        }
+    }
     private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         textRenderer.drawWithShadow(matrices, selected_script.name, 136, 4, -1);
         fill(matrices, 0, 16, 130, height, 0x44000000);
@@ -122,11 +199,19 @@ public class ScriptingScreen extends Screen {
         float y = 22-scroll;
         int newHeight = 8;
         for (Tip os : tip) {
-            if(Arrays.stream(os.name).noneMatch(s -> s.toLowerCase().contains(searchField.getText().toLowerCase()))) continue;
+            {
+                final String match = searchField.getText().toLowerCase();
+                if (!os.desc.toString().toLowerCase().contains(match) && Arrays.stream(os.name).noneMatch(s -> s.toLowerCase().contains(match)))
+                    continue;
+            }
             String s = os.name[os.name.length == 1? 0 : (ticks>>5) %os.name.length];
             s = formatTitleCase(s);
-            if (os.embed != null && os.par.size() == 0) s = "~"+s;
-            else if (os.embed != null) s = "~"+s+"~";
+            if (os.par.size() == 0) {
+                if (os.embed != null) s = "~" + s;
+            }else {
+                if (os.embed != null) s = "~" + s + "~";
+                else s = s + ":";
+            }
             int thisHeight = 0;
             float startY = y;
             thisHeight += 12;
@@ -134,7 +219,7 @@ public class ScriptingScreen extends Screen {
                 int x = 8;
                 int line = 0;
                 for (String word : Splitter.on(CharMatcher.whitespace()).split(s)) {
-                    if (textRenderer.getWidth(word)+x > 100 && line == 0) {
+                    if (textRenderer.getWidth(word)+x > 115 && line == 0) {
                         x = 8;
                         y += 12;
                         newHeight += 12;
@@ -143,7 +228,7 @@ public class ScriptingScreen extends Screen {
                     if(y<22) continue;
                     x = textRenderer.draw(matrices, word+" ", x, y, -1);
                 }
-                if(line == 0 && Arrays.stream(os.name).anyMatch(st -> textRenderer.getWidth(st)>90)){
+                if(line == 0 && Arrays.stream(os.name).anyMatch(st -> textRenderer.getWidth(st)>115)){
                     y += 12;
                     newHeight += 12;
                 }
@@ -153,9 +238,7 @@ public class ScriptingScreen extends Screen {
             if (didClick) {
                 if (mouseX >= 0 && mouseX <= 130 && mouseY > startY-4 && mouseY < y && mouseY > 22) {
                     client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
-                    //TODO
-                    //PICK first option write it in script if has no parameters
-                    //if it has parameters add : to to search bar indicating to switch it's mode to parameter mode
+                    pushValMake(os);
                 }
             }
             thisHeight += 8;
@@ -179,6 +262,13 @@ public class ScriptingScreen extends Screen {
         y = 22-scroll;
         newHeight = 8;
         int x = 140;
+        if(val_make != null && script.size() == 0){
+            textRenderer.draw(matrices, val_make, x, y, -2000);
+            if(didClick && mouseX < width && mouseX > 132 && mouseY < y+12 && mouseY > 20){
+                client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
+                clearValMake();
+            }
+        }
         for (int i = 0; i<script.size(); i++) {
             String s = script.get(i);
             int thisHeight = 0;
@@ -186,10 +276,12 @@ public class ScriptingScreen extends Screen {
             thisHeight += 12;
             char chr = s.charAt(s.length() - 1);
             if (chr == ']' || chr == ')' || chr == '}') x -= 8;
-            if(y>20 && y<height-30) {
-                 textRenderer.draw(matrices, s, x, y, -1);
+            int lx = 0;
+            if(script_cursor == i){
+                if(val_make != null) lx = textRenderer.draw(matrices, val_make, x-8, y, -2000) - x +16;
+                textRenderer.draw(matrices, ">", x+lx-8, y, -1);
             }
-            if(script_cursor == i) textRenderer.draw(matrices, ">", 132, y, -1);
+            if(y>20 && y<height-30) textRenderer.draw(matrices, s, x+lx, y, -1);
             chr = s.charAt(0);
             if (chr == '[' || chr == '(' || chr == '{') x += 8;
             y += 12;
@@ -202,9 +294,8 @@ public class ScriptingScreen extends Screen {
                         script.remove(i);
                         if (i <= script_cursor && script_cursor != 0) script_cursor--;
                     } else{
+                        clearValMake();
                         script_cursor = i;
-                        if (s.contains(":") || s.contains("~"))
-                            searchField.setText(s);
                     }
                 }
             }
@@ -237,12 +328,12 @@ public class ScriptingScreen extends Screen {
             x = 100;
             if (selected_script.save != null) {
                 if (drawButton(matrices, width - x, height - 20, 50, 20, "Save", mouseX, mouseY))
-                    selected_script.save.accept(String.join("", script));
+                    selected_script.save.accept(unloadScript());
                 x += 50;
             }
             if (selected_script.apply != null){
                 if (drawButton(matrices, width - x, height - 20, 50, 20, "Apply", mouseX, mouseY))
-                    selected_script.apply.accept(String.join("", script));
+                    selected_script.apply.accept(unloadScript());
                 x += 50;
                 }
             if (selected_script.load != null){
@@ -265,7 +356,10 @@ public class ScriptingScreen extends Screen {
 
         matrices.pop();
     }
-
+    private void clearValMake(){
+        val_make=null;
+        setTip();
+    }
     private void drawHelp(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         String hlp = """
         F1 - Toggles Help
@@ -278,16 +372,24 @@ public class ScriptingScreen extends Screen {
             y+=16;
         }
     }
-
+    private String unloadScript(){
+        //TODO
+        return String.join("", script);
+    }
     private void loadScript(String in){
         //TODO maybe accurately escape embed keys?
         script.clear();
         script_cursor=0;
         for (int i = 0; i<in.length(); i++) {
             switch (in.charAt(i)){
-                case '[','{','(',';' -> {
+                case '[','{','(' -> {
                     if(i+1 == in.length()) break;
                     script.add(in.substring(0, i+1));
+                    in = in.substring(i+1);
+                    i = -1;
+                }
+                case ';' -> {
+                    script.add(in.substring(0, i));
                     in = in.substring(i+1);
                     i = -1;
                 }
@@ -429,11 +531,15 @@ public class ScriptingScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        System.out.println(keyCode);
         //TODO if search selected & has parameter write to index
-        if(keyCode == 290/*F1*/){
-            renderHelp = !renderHelp;
-        }
+        if(keyCode == 290/*F1*/) renderHelp = !renderHelp;
         if (renderHelp) return super.keyPressed(keyCode, scanCode, modifiers);
+        if (searchField.isActive() && (keyCode == 257 || keyCode == 335)/*Enter*/) {
+            //TODO maybe handle inputting scripts not just values?
+            pushValMake(new Tip(new String[]{searchField.getText()}, "", new ArrayList<>(), null));
+            searchField.setText("");
+        }
         if (hasControlDown() && keyCode == 89/*F*/){
             searchField.setTextFieldFocused(true);
         }
@@ -511,7 +617,7 @@ public class ScriptingScreen extends Screen {
 
     private final static record Tip(
             String[] name,
-            int max_lines,
+            Object desc,
             List<Help.Parameter> par,
             Help embed
     ) { }

@@ -70,4 +70,5 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
     public Map<String, Object> getHelp(){
         return help;
     }
+
 }

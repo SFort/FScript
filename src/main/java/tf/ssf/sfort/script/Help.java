@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 
 public interface Help {
 
-    default Set<Help> getImported(){
-        return new HashSet<>();
+    default List<Help> getImported(){
+        return new ArrayList<>();
     }
     Map<String, Object> getHelp();
     static String formatHelp(Help help, Set<String> exclude){

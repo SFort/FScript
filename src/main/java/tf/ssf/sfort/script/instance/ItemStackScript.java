@@ -11,7 +11,6 @@ import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.ScriptParser;
-import tf.ssf.sfort.script.mixin_extended.Config;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -137,11 +136,11 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 		return help;
 	}
 	@Override
-	public Set<Help> getImported(){
+	public List<Help> getImported(){
 		return extend_help;
 	}
 	public static final Map<String, Object> help = new HashMap<>();
-	public static final Set<Help> extend_help = new LinkedHashSet<>();
+	public static final List<Help> extend_help = new ArrayList<>();
 	static {
 		help.put("item .:ItemID", "Has to be the specified item");
 		help.put("enchant:EnchantID","Item has to have specified enchantment");
@@ -158,6 +157,6 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 		help.put("has_enchants","Require item to have enchantments");
 		help.put("in_frame","Require item to be in a item frame");
 
-		extend_help.add(Default.ITEM);
+		extend_help.add(new ItemStackScript());
 	}
 }

@@ -74,16 +74,16 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
         return help;
     }
     @Override
-    public Set<Help> getImported(){
+    public List<Help> getImported(){
         return extend_help;
     }
     public static final Map<String, Object> help = new HashMap<>();
-    public static final Set<Help> extend_help = new LinkedHashSet<>();
+    public static final List<Help> extend_help = new ArrayList<>();
     static {
         help.put("level:int","Minimum required player level");
         help.put("food:float","Minimum required food");
 
-        extend_help.add(Default.LIVING_ENTITY);
-        extend_help.add(Default.FISHING_BOBBER_ENTITY);
+        extend_help.add(new LivingEntityScript<PlayerEntity>());
+        extend_help.add(new FishingBobberEntityScript());
     }
 }

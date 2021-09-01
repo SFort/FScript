@@ -31,17 +31,17 @@ public class EnchantmentLevelEntryScript implements PredicateProvider<Map.Entry<
         return help;
     }
     @Override
-    public Set<Help> getImported(){
+    public List<Help> getImported(){
         return extend_help;
     }
 
     public static final Map<String, Object> help = new HashMap<>();
-    public static final Set<Help> extend_help = new LinkedHashSet<>();
+    public static final List<Help> extend_help = new ArrayList<>();
 
     static {
         help.put("enchant_level level:int","Minimum enchantment level");
 
-        extend_help.add(Default.ENCHANTMENT);
+        extend_help.add(new EnchantmentScript());
     }
 
 }

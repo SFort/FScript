@@ -62,15 +62,15 @@ public class FishingBobberEntityScript implements PredicateProvider<FishingBobbe
         return help;
     }
     @Override
-    public Set<Help> getImported(){
+    public List<Help> getImported(){
         return extend_help;
     }
     public static final Map<String, Object> help = new HashMap<>();
-    public static final Set<Help> extend_help = new LinkedHashSet<>();
+    public static final List<Help> extend_help = new ArrayList<>();
     static {
         help.put("bobber_in_open_water is_bobber_in_open_water","Require a fishing bobber in open water");
         if (Config.extended) help.put("caught_fish has_caught_fish", "Require bobber to have cought a fish");
 
-        extend_help.add(Default.ENTITY);
+        extend_help.add(new EntityScript<FishingBobberEntity>());
     }
 }

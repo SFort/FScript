@@ -156,11 +156,11 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         return help;
     }
     @Override
-    public Set<Help> getImported(){
+    public List<Help> getImported(){
         return extend_help;
     }
     public static final Map<String, Object> help = new HashMap<>();
-    public static final Set<Help> extend_help = new LinkedHashSet<>();
+    public static final List<Help> extend_help = new ArrayList<>();
     static {
         //TODO add ~ embed, max_hp
         help.put("hand:ItemID","Require item in main hand");
@@ -175,12 +175,6 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         help.put("~chest:ITEM_STACK","Require item as chestplate");
         help.put("~legs:ITEM_STACK","Require item as leggings");
         help.put("~boots:ITEM_STACK","Require item as boots");
-        help.put("~hand~EnchantID:ITEM_STACK","Require item in main hand");
-        help.put("~offhand~EnchantID:ITEM_STACK","Require item in off hand");
-        help.put("~helm~EnchantID:ITEM_STACK","Require item as helmet");
-        help.put("~chest~EnchantID:ITEM_STACK","Require item as chestplate");
-        help.put("~legs~EnchantID:ITEM_STACK","Require item as leggings");
-        help.put("~boots~EnchantID:ITEM_STACK","Require item as boots");
         help.put("effect:EffectID","Require potion effect");
         help.put("hp health:float","Minimum required heath");
         help.put("max_hp max_health:float","Minimum required max heath");
@@ -200,6 +194,6 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         help.put("fall_flying is_fall_flying","Require flying with elytra");
         if (Config.extended) help.put("sleeping_in_bed is_sleeping_in_bed","Require sleeping in a bed");
 
-        extend_help.add(Default.ENTITY);
+        extend_help.add(new EntityScript<LivingEntity>());
     }
 }

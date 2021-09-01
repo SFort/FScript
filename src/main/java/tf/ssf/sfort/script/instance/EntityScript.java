@@ -151,12 +151,12 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		return help;
 	}
 	@Override
-	public Set<Help> getImported(){
+	public List<Help> getImported(){
 		return extend_help;
 	}
 
 	public static final Map<String, Object> help = new HashMap<>();
-	public static final Set<Help> extend_help = new LinkedHashSet<>();
+	public static final List<Help> extend_help = new ArrayList<>();
 	static {
 		help.put("air:int", "Minimum required air");
 		help.put("max_air:int", "Minimum required max air");
@@ -194,8 +194,8 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		help.put("swimming is_swimming", "Require swimming");
 		help.put("full_air max_air", "Require having full air");
 
-		extend_help.add(Default.WORLD);
-		extend_help.add(Default.BIOME);
-		extend_help.add(Default.CHUNK);
+		extend_help.add(new WorldScript());
+		extend_help.add(new BiomeScript());
+		extend_help.add(new ChunkScript());
 	}
 }
