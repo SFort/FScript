@@ -94,7 +94,7 @@ public class ScriptParser<T> {
         if (in.charAt(0) == '~'){
             final int delim = in.indexOf('~',1);
             if (delim == -1 || delim>=colon) return make.getEmbed(in.substring(1,colon), in.substring(colon+1));
-            return make.getEmbed(in.substring(1,delim), in.substring(delim+1, colon), in.substring(colon+1));
+            return make.getEmbed(in.substring(1,delim), in.substring(delim+1, colon).replaceAll(";", ":"), in.substring(colon+1));
         }
         return make.getPredicate(in.substring(0, colon), in.substring(colon + 1));
     }

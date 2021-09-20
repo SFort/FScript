@@ -14,7 +14,6 @@ import oshi.util.tuples.Triplet;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public interface Help {
@@ -37,27 +36,28 @@ public interface Help {
         }
         return out.toString();
     }
+
+    static Triplet<String, Set<String>, String> dismantle (String s) {
+        String prefix = "";
+        String postfix = "";
+        int colon = s.indexOf(':');
+        if (colon != -1) {
+            if (s.startsWith("~")) {
+                prefix = "~";
+                s = s.substring(1);
+                int i = s.indexOf('~');
+                if (i != -1) colon = i;
+            }
+            postfix = s.substring(colon);
+            s = s.substring(0, colon);
+        }
+        return new Triplet<>(prefix, Arrays.stream(s.split(" ")).collect(Collectors.toSet()), postfix);
+    };
     static Map<String, Object> recurseImported(Help help, Set<Help> dejavu){
         Map<String, Object> out = new HashMap<>();
-        final Function<String, Triplet<String, Set<String>, String>> dismantle = s -> {
-            String prefix = "";
-            String postfix = "";
-            int colon = s.indexOf(':');
-            if (colon != -1) {
-                if (s.startsWith("~")) {
-                    prefix = "~";
-                    s = s.substring(1);
-                    int i = s.indexOf('~');
-                    if (i != -1) colon = i;
-                }
-                postfix = s.substring(colon);
-                s = s.substring(0, colon);
-            }
-            return new Triplet<>(prefix, Arrays.stream(s.split(" ")).collect(Collectors.toSet()), postfix);
-        };
         Set<String> existing = new HashSet<>();
         final Consumer<Map.Entry<String, Object>> addUnique = s ->{
-            final Triplet<String, Set<String>, String> triple = dismantle.apply(s.getKey());
+            final Triplet<String, Set<String>, String> triple = dismantle(s.getKey());
             Set<String> names = triple.getB();
             names.removeIf(n -> !existing.add(triple.getA()+n+triple.getC()));
             if (names.size()>0)
@@ -70,6 +70,26 @@ public interface Help {
                 if(h != null)
                 for (Map.Entry<String, Object> str : recurseImported(h, dejavu).entrySet())
                     addUnique.accept(str);
+        }
+        return out;
+    }
+    static Map<String, Object> recurseImportedSeperate(Help help, Set<Help> dejavu){
+        Map<String, Object> out = new HashMap<>();
+        Set<String> existing = new HashSet<>();
+        final Consumer<Map.Entry<String, Object>> addUnique = s ->{
+            final Triplet<String, Set<String>, String> triple = dismantle(s.getKey());
+            Set<String> names = triple.getB();
+            names.removeIf(n -> !existing.add(triple.getA()+n+triple.getC()));
+            for (String name : names)
+                out.put(triple.getA()+name+triple.getC(), s.getValue());
+        };
+        if (dejavu.add(help)) {
+            for (Map.Entry<String, Object> str : help.getHelp().entrySet())
+                addUnique.accept(str);
+            for (Help h : help.getImported())
+                if(h != null)
+                    for (Map.Entry<String, Object> str : recurseImported(h, dejavu).entrySet())
+                        addUnique.accept(str);
         }
         return out;
     }

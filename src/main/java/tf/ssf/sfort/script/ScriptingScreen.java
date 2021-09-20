@@ -13,8 +13,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.text.Text;
 import tf.ssf.sfort.script.instance.ServerPlayerEntityScript;
 
 import java.util.*;
@@ -25,19 +24,14 @@ import java.util.stream.Collectors;
 //A good chunk of this class was copied from github.com/unascribed/fabrication
 
 public class ScriptingScreen extends Screen {
-    private static List<Script> scripts = new ArrayList<>();
-    private static Map<String, Help> default_embed = new HashMap<>();
-    //TODO remove test
-    static {
-        addScript("§2Test", Help.recurseImported(new ServerPlayerEntityScript<>(), new HashSet<>()), null, null, () -> "[on_fire;on_file]", default_embed);
-    }
+    private static final Map<String, Help> default_embed = new HashMap<>();
     private final Screen parent;
+    private final Script script;
 
-    private Script selected_script;
-    private String val_make;
-    private Tip selected_tip;
-    private List<String> script = new ArrayList<>();
-    private int script_cursor = 0;
+    private Tip valMake;
+    private String last_par = "";
+    private List<Line> lines = new ArrayList<>();
+    private int cursor = 0;
     private float sidebarScrollTarget;
     private float sidebarScroll;
     private float sidebarHeight;
@@ -50,44 +44,63 @@ public class ScriptingScreen extends Screen {
     private boolean didRightClick;
     private boolean renderHelp = false;
 
-
     private int tooltipBlinkTicks = 0;
-
 
     private List<Tip> tip = new ArrayList<>();
 
     private boolean bufferTooltips = false;
     private final List<Runnable> bufferedTooltips = Lists.newArrayList();
 
-    private int noteIndex = 0;
-
     private TextFieldWidget searchField;
 
+    //TODO remove test
     public ScriptingScreen(Screen parent) {
-        super(new LiteralText("FScript"));
-        this.parent = parent;
+        this(new LiteralText("FScript"), parent, new Script("§2Test", new ServerPlayerEntityScript<>(), null, System.out::println, () -> "[on_fire;on_file]", default_embed));
     }
-    private void selectScript(int i){
-        selected_script = scripts.get(i);
-        setTip();
 
+    public ScriptingScreen(Text title, Screen parent, Script script) {
+        super(title);
+        this.parent = parent;
+        this.script = script;
+        setTip();
     }
+    @Override
+    public void init(){
+        super.init();
+        searchField = new TextFieldWidget(textRenderer, 1, 1, 128, 14, searchField, new LiteralText("Search"));
+        searchField.setChangedListener((s) -> s = s.trim());
+    }
+
+    @Override
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        matrices.push();
+        if (client.world == null) this.renderBackground(matrices);
+        if (renderHelp) drawHelp(matrices, mouseX, mouseY, delta);
+        else drawForeground(matrices, mouseX, mouseY, delta);
+        matrices.pop();
+    }
+
     private void clearTip(){
         sidebarScrollTarget = -20;
         tip = new ArrayList<>();
+        last_par = "";
     }
     private void setTip(List<Help.Parameter> par){
         clearTip();
-        for (Help.Parameter pa : par)
-            tip.addAll(pa.getParameters().stream().map(p->new Tip(new String[]{p}, "", new ArrayList<>(), null)).collect(Collectors.toSet()));
+        for (Help.Parameter pa : par) {
+            last_par += pa.name;
+            tip.addAll(pa.getParameters().stream().map(p -> new Tip(p, "", new ArrayList<>(), null)).collect(Collectors.toSet()));
+        }
     }
     private void setTip(List<Help.Parameter> par, Help embed){
         clearTip();
-        for (Help.Parameter pa : par)
-            tip.addAll(pa.getParameters().stream().map(p->new Tip(new String[]{p}, "", new ArrayList<>(), embed)).collect(Collectors.toSet()));
+        for (Help.Parameter pa : par) {
+            last_par += pa.name;
+            tip.addAll(pa.getParameters().stream().map(p -> new Tip(p.replace(':', ';'), "", new ArrayList<>(), embed)).collect(Collectors.toSet()));
+        }
     }
     private void setTip(){
-        setTip(selected_script.help);
+        setTip(script.help);
     }
     private void setTip(Help help){
         setTip(Help.recurseImported(help, new HashSet<>()));
@@ -103,7 +116,7 @@ public class ScriptingScreen extends Screen {
                 String arg = os.substring(colon+1);
                 os = os.substring(0, colon);
                 if (os.startsWith("~")){
-                    if (selected_script.embedable != null) embed = selected_script.embedable.getOrDefault(arg, null);
+                    if (script.embedable != null) embed = script.embedable.getOrDefault(arg, null);
                     if (embed == null) continue;
                     os = os.substring(1);
                     int i = os.indexOf('~');
@@ -122,77 +135,56 @@ public class ScriptingScreen extends Screen {
             tip.add(new Tip(os.split(" "), as.getValue(), val, embed));
         }
     }
-    @Override
-    protected void init() {
-        super.init();
-        searchField = new TextFieldWidget(textRenderer, 1, 1, 128, 14, searchField, new LiteralText("Search"));
-        searchField.setChangedListener((s) -> s = s.trim());
-        if(!scripts.isEmpty()) selectScript(0);
-    }
 
-    @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        matrices.push();
-        if (client.world == null) this.renderBackground(matrices);
-        if (renderHelp) drawHelp(matrices, mouseX, mouseY, delta);
-        else drawForeground(matrices, mouseX, mouseY, delta);
-        matrices.pop();
+    private void negateVal(){
+        if (lines.size() > 0) {
+            lines.get(cursor).negate();
+        }
     }
-    
     private void pushValMake(Tip os){
-        if (val_make == null) {
+        if (valMake == null) {
             boolean e = os.embed != null;
             boolean p = os.par.size() > 0;
             if (e || p) {
-                StringBuilder out = new StringBuilder();
-                if (e) out.append('~');
-                out.append(os.name[0]);
                 if (e && p){
                     setTip(os.par, os.embed);
-                    out.append('~');
                 } else{
                     if (e) setTip(os.embed);
                     else setTip(os.par);
-                    out.append(':');
                 }
-                val_make = out.toString();
+                valMake = os;
             } else {
-                script.add(script_cursor, os.name[0]);
+                lines.add(cursor, new Line(os));
             }
         }else {
-            char ec = val_make.charAt(val_make.length()-1);
-            if(ec == ':' && val_make.charAt(0) != '~'){
-                script.add(script_cursor, val_make+os.name[0]);
+            //TODO all sorts of broken
+            if(valMake.par.size()>0 && valMake.embed == null){
+                lines.add(cursor, new Line(valMake, os.name[0]));
                 clearValMake();
-            }else if (ec == '~'){
-                val_make += os.name[0]+":";
+            }else if (os.embed != null){
+                lines.add(cursor, new Line(valMake, os.name[0]));
                 setTip(os.embed);
+                clearValMake();
             }else {
                 boolean e = os.embed != null;
                 boolean p = os.par.size() > 0;
                 if (e || p) {
-                    StringBuilder out = new StringBuilder();
-                    out.append(val_make);
-                    if (e) out.append('~');
-                    out.append(os.name[0]);
                     if (e && p){
                         setTip(os.par, os.embed);
-                        out.append('~');
                     } else{
                         if (e) setTip(os.embed);
                         else setTip(os.par);
-                        out.append(':');
                     }
-                    val_make = out.toString();
+                    valMake = os;
                 } else {
-                    script.add(script_cursor, val_make+os.name[0]);
+                    lines.add(cursor, new Line(valMake, os.name[0]));
                     clearValMake();
                 }
             }
         }
     }
     private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        textRenderer.drawWithShadow(matrices, selected_script.name, 136, 4, -1);
+        textRenderer.drawWithShadow(matrices, script.name, 136, 4, -1);
         fill(matrices, 0, 16, 130, height, 0x44000000);
         float scroll = sidebarHeight < height ? 0 : sidebarScroll;
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
@@ -262,23 +254,23 @@ public class ScriptingScreen extends Screen {
         y = 22-scroll;
         newHeight = 8;
         int x = 140;
-        if(val_make != null && script.size() == 0){
-            textRenderer.draw(matrices, val_make, x, y, -2000);
+        if(valMake != null && lines.size() == 0){
+            textRenderer.draw(matrices, valMake + " §7"+last_par, x, y, -2000);
             if(didClick && mouseX < width && mouseX > 132 && mouseY < y+12 && mouseY > 20){
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
                 clearValMake();
             }
         }
-        for (int i = 0; i<script.size(); i++) {
-            String s = script.get(i);
+        for (int i = 0; i< lines.size(); i++) {
+            String s = lines.get(i).toString();
             int thisHeight = 0;
             float startY = y;
             thisHeight += 12;
             char chr = s.charAt(s.length() - 1);
             if (chr == ']' || chr == ')' || chr == '}') x -= 8;
             int lx = 0;
-            if(script_cursor == i){
-                if(val_make != null) lx = textRenderer.draw(matrices, val_make, x-8, y, -2000) - x +16;
+            if(cursor == i){
+                if(valMake != null) lx = textRenderer.draw(matrices, valMake + " §7"+last_par, x-8, y, -2000) - x +16;
                 textRenderer.draw(matrices, ">", x+lx-8, y, -1);
             }
             if(y>20 && y<height-30) textRenderer.draw(matrices, s, x+lx, y, -1);
@@ -291,11 +283,11 @@ public class ScriptingScreen extends Screen {
                     client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
                     //TODO verify removal
                     if (didRightClick){
-                        script.remove(i);
-                        if (i <= script_cursor && script_cursor != 0) script_cursor--;
+                        lines.remove(i);
+                        if (i <= cursor && cursor != 0) cursor--;
                     } else{
                         clearValMake();
-                        script_cursor = i;
+                        cursor = i;
                     }
                 }
             }
@@ -324,25 +316,37 @@ public class ScriptingScreen extends Screen {
         if (drawButton(matrices, width-50, height-20, 50, 20, "Done", mouseX, mouseY)) {
             onClose();
         }
-        if (selected_script != null) {
-            x = 100;
-            if (selected_script.save != null) {
-                if (drawButton(matrices, width - x, height - 20, 50, 20, "Save", mouseX, mouseY))
-                    selected_script.save.accept(unloadScript());
-                x += 50;
+        if (script != null) {
+            x = width-100;
+            if (script.save != null) {
+                if (drawButton(matrices, x, height - 20, 50, 20, "Save", mouseX, mouseY))
+                    script.save.accept(unloadScript());
+                x -= 50;
             }
-            if (selected_script.apply != null){
-                if (drawButton(matrices, width - x, height - 20, 50, 20, "Apply", mouseX, mouseY))
-                    selected_script.apply.accept(unloadScript());
-                x += 50;
+            if (script.apply != null){
+                if (drawButton(matrices, x, height - 20, 50, 20, "Apply", mouseX, mouseY))
+                    script.apply.accept(unloadScript());
+                x -= 50;
                 }
-            if (selected_script.load != null){
-                if (drawButton(matrices, width - x, height - 20, 50, 20, "Load", mouseX, mouseY))
-                    loadScript(selected_script.load.get());
-                x += 50;
+            if (script.load != null){
+                if (drawButton(matrices, x, height - 20, 50, 20, "Load", mouseX, mouseY))
+                    loadScript(script.load.get());
+                x -= 50;
             }
+            x = 130;
+            //TODO
+            if (drawButton(matrices, x, height - 20, 20, 20, "!", mouseX, mouseY))
+                negateVal();
+            x += 20;
+            if (drawButton(matrices, x, height - 20, 20, 20, "[]", mouseX, mouseY))
+                loadScript(script.load.get());
+            x += 20;
+            if (drawButton(matrices, x, height - 20, 20, 20, "()", mouseX, mouseY))
+                loadScript(script.load.get());
+            x += 20;
+            if (drawButton(matrices, x, height - 20, 20, 20, "{}", mouseX, mouseY))
+                loadScript(script.load.get());
         }
-        //TODO save as / open
         if (didClick) didClick = false;
         if (didRightClick) didRightClick = false;
 
@@ -357,14 +361,17 @@ public class ScriptingScreen extends Screen {
         matrices.pop();
     }
     private void clearValMake(){
-        val_make=null;
+        valMake =null;
         setTip();
     }
     private void drawHelp(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        //TODO MMB negate, F2 - AND, F3- OR, F4- XOR, F5 - load, F6 - Apply, F7 - Save
         String hlp = """
         F1 - Toggles Help
-        Crl-F - Selects Search field
+        Ctrl-F - Selects Search field
         RMB - Clears Search / Removes elements
+        MMB - Negate element
+        ESC - Closes the UI
         """;
         int y = 16;
         for (String h : hlp.lines().collect(Collectors.toSet())) {
@@ -374,70 +381,110 @@ public class ScriptingScreen extends Screen {
     }
     private String unloadScript(){
         //TODO
-        return String.join("", script);
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i< lines.size(); i++) {
+            Line s = lines.get(i);
+            Tip os = s.tip;
+            String key = os.name[0];
+            if (s.negate) out.append('!');
+            out.append(key);
+            char chr = key.charAt(0);
+            if (chr == '[' || chr == '{' || chr == '(' || chr == ']' || chr == '}' || chr == ')') continue;
+            boolean e = os.embed != null;
+            boolean p = os.par.size() > 0;
+            if (e || p) {
+                if (e) out.insert(out.length()-1,'~');
+                if (e && p) out.append('~');
+                else out.append(':');
+                out.append(s.val);
+            }
+            //TODO
+            if (lines.size() != i+1)
+                out.append(';');
+        }
+        return out.toString();
     }
     private void loadScript(String in){
         //TODO maybe accurately escape embed keys?
-        script.clear();
-        script_cursor=0;
+        lines.clear();
+        cursor =0;
         for (int i = 0; i<in.length(); i++) {
             switch (in.charAt(i)){
                 case '[','{','(' -> {
                     if(i+1 == in.length()) break;
-                    script.add(in.substring(0, i+1));
+                    scriptLoadingB(in.substring(0, i+1));
                     in = in.substring(i+1);
                     i = -1;
                 }
                 case ';' -> {
-                    script.add(in.substring(0, i));
+                    scriptLoading(in.substring(0, i));
                     in = in.substring(i+1);
                     i = -1;
                 }
                 case ']','}',')' -> {
-                    script.add(in.substring(0, i));
+                    scriptLoading(in.substring(0, i));
                     if(i+1 == in.length()){
                         in = in.substring(i);
                         break;
                     }
-                    script.add(String.valueOf(in.charAt(i)));
+                    scriptLoadingB(String.valueOf(in.charAt(i)));
                     in = in.substring(i+1);
                     i = -1;
                 }
             }
         }
-        script.add(in);
+        scriptLoading(in);
+    }
+    private void scriptLoadingB(String str){
+        boolean negate = false;
+        if (str.charAt(0) == '!'){
+            negate = true;
+            str = str.substring(1);
+        }
+        lines.add(new Line(getTip(str), negate));
+    }
+    private void scriptLoading(String str){
+        boolean negate = false;
+        if (str.charAt(0) == '!'){
+            negate = true;
+            str = str.substring(1);
+        }
+        int i = str.indexOf(':');
+        if (i != -1){
+            lines.add(new Line(getTip(str.substring(0, i)), str.substring(i+1), negate));
+        }else{
+            lines.add(new Line(getTip(str), negate));
+        }
+    }
+    //TODO
+    private Tip getTip(String str){
+        Map<String, Object> h = Help.recurseImportedSeperate(script.help, new HashSet<>());
+        return null;
     }
 
     private boolean drawButton(MatrixStack matrices, int x, int y, int w, int h, String text, float mouseX, float mouseY) {
-        boolean click = false;
-        boolean hover = mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
-        fill(matrices, x, y, x+w, y+h, 0x44FFFFFF);
-        if (hover) {
+        int textWidth = textRenderer.getWidth(text);
+        textRenderer.draw(matrices, text, x+((w-textWidth)/2), y+((h-8)/2), -1);
+        if (mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h) {
             fill(matrices, x, y, x+w, y+1, -1);
             fill(matrices, x, y, x+1, y+h, -1);
             fill(matrices, x, y+h-1, x+w, y+h, -1);
             fill(matrices, x+w-1, y, x+w, y+h, -1);
             if (didClick) {
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
-                click = true;
+                return true;
             }
         }
-        int textWidth = textRenderer.getWidth(text);
-        textRenderer.draw(matrices, text, x+((w-textWidth)/2), y+((h-8)/2), -1);
-        return click;
+        return false;
     }
 
     public static String formatTitleCase(String in) {
-        String[] pieces = new String[] { in };
-        if (in.contains("_")) {
-            pieces = in.toLowerCase().split("_");
-        }
-
+        String[] pieces = in.toLowerCase().split("[_ ;:]");
         StringBuilder result = new StringBuilder();
         for (String s : pieces) {
             if (s == null)
                 continue;
-            String t = s.trim().toLowerCase();
+            String t = s.trim();
             if (t.isEmpty())
                 continue;
             result.append(Character.toUpperCase(t.charAt(0)));
@@ -532,7 +579,6 @@ public class ScriptingScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         System.out.println(keyCode);
-        //TODO if search selected & has parameter write to index
         if(keyCode == 290/*F1*/) renderHelp = !renderHelp;
         if (renderHelp) return super.keyPressed(keyCode, scanCode, modifiers);
         if (searchField.isActive() && (keyCode == 257 || keyCode == 335)/*Enter*/) {
@@ -606,27 +652,64 @@ public class ScriptingScreen extends Screen {
         }
     }
 
-    public final static record Script(
+    public static record Script(
             String name,
-            Map<String, Object> help,
+            Help help,
             Consumer<String> save,
             Consumer<String> apply,
             Supplier<String> load,
             Map<String, Help> embedable
     ) { }
 
-    private final static record Tip(
+    private static record Tip(
             String[] name,
             Object desc,
             List<Help.Parameter> par,
             Help embed
-    ) { }
-    public static void addScript(Script script){
-        scripts.add(script);
+    ) {
+        Tip(String name, Object desc, List<Help.Parameter> par, Help embed){
+            this(new String[]{name}, desc, par, embed);
+        }
+
+        @Override
+        public String toString() {
+            return  (embed == null ? "" : "~")+
+                    name[0] +
+                    (par.size()>0 ? embed == null ? ":" : "~" : "");
+        }
     }
-    public static void addScript(@NotNull String name, @NotNull Map<String, Object> help, @Nullable Consumer<String> save, @Nullable Consumer<String> apply, @Nullable Supplier<String> load, @Nullable Map<String, Help> embedable){
-        addScript(new Script(name, help, save, apply, load, embedable));
+    private static class Line {
+        final Tip tip;
+        final String val;
+        boolean negate = false;
+        Line (Tip tip, String val){
+            this.val = val;
+            this.tip = tip;
+        }
+        Line (Tip tip, boolean negate){
+            this(tip, null);
+            this.negate = negate;
+        }
+        Line (Tip tip, String val, boolean negate){
+            this(tip, val);
+            this.negate = negate;
+        }
+        Line(Tip tip){
+            this(tip, null);
+        }
+        void negate(){
+            negate = !negate;
+        }
+
+        @Override
+        public String toString() {
+            return  (negate ? "!" : "") +
+                    tip +
+                    (tip.embed != null || tip.par.size()>0? val : "")
+                    ;
+        }
     }
+
     public static Map<String, Help> getDefaultEmbed(){
         return default_embed;
     }
