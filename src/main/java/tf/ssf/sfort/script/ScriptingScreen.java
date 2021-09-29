@@ -337,7 +337,7 @@ public class ScriptingScreen extends Screen {
         if (drawButton(matrices, width-50, height-20, 50, 20, "Done", mouseX, mouseY)) {
             onClose();
         }
-        if (script != null) {
+        {
             x = width-100;
             if (script.save != null) {
                 if (drawButton(matrices, x, height - 20, 50, 20, "Save", mouseX, mouseY))
@@ -355,7 +355,6 @@ public class ScriptingScreen extends Screen {
                 x -= 50;
             }
             x = 130;
-            //TODO
             if (drawButton(matrices, x, height - 20, 20, 20, "!", mouseX, mouseY))
                 negateVal();
             x += 20;
@@ -386,15 +385,17 @@ public class ScriptingScreen extends Screen {
         setTip();
     }
     private void drawHelp(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        //TODO MMB negate, F2 - AND, F3- OR, F4- XOR, F5 - load, F6 - Apply, F7 - Save
         String hlp = """
         F1 - Toggles Help
+        F5 - Load Script
+        F6 - Apply Script
+        F7 - Save Script
         Ctrl-F - Selects Search field
         RMB - Clears Search / Removes elements
         ESC - Closes the UI
         """;
         int y = 16;
-        for (String h : hlp.lines().collect(Collectors.toSet())) {
+        for (String h : hlp.lines().collect(Collectors.toList())) {
             textRenderer.drawWithShadow(matrices, h, 16, y, -1);
             y+=16;
         }
@@ -599,14 +600,29 @@ public class ScriptingScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if(keyCode == 290/*F1*/) renderHelp = !renderHelp;
         if (renderHelp) return super.keyPressed(keyCode, scanCode, modifiers);
-        if (searchField.isActive() && (keyCode == 257 || keyCode == 335)/*Enter*/) {
-            //TODO maybe handle inputting scripts not just values?
-            pushValMake(new Tip(searchField.getText(), "", new ArrayList<>(), null));
-            searchField.setText("");
+
+        switch (keyCode){
+            case 257: { //Enter
+                if (searchField.isActive()){
+                    //TODO maybe handle inputting scripts not just values?
+                    pushValMake(new Tip(searchField.getText(), "", new ArrayList<>(), null));
+                    searchField.setText("");
+                }
+            }
+            case 89: { //F
+                if (hasControlDown()) searchField.setTextFieldFocused(true);
+            }
+            case 294: { //F5
+                if (script.load != null) loadScript(script.load.get());
+            }
+            case 295: { //F6
+                if (script.apply != null) script.apply.accept(unloadScript());
+            }
+            case 296: { //F7
+                if (script.save != null) script.save.accept(unloadScript());
+            }
         }
-        if (hasControlDown() && keyCode == 89/*F*/){
-            searchField.setTextFieldFocused(true);
-        }
+
         searchField.keyPressed(keyCode, scanCode, modifiers);
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
