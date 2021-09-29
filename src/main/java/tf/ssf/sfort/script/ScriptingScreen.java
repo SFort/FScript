@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 
 //A good chunk of this class was copied from github.com/unascribed/fabrication
 
+//SpaghetGettingOutOfHand TM
+
 public class ScriptingScreen extends Screen {
     private static final Map<String, Help> default_embed = new HashMap<>();
     private final Screen parent;
@@ -266,25 +268,44 @@ public class ScriptingScreen extends Screen {
             int thisHeight = 0;
             float startY = y;
             thisHeight += 12;
-            char chr = s.charAt(s.length() - 1);
-            if (chr == ']' || chr == ')' || chr == '}') x -= 8;
+            if (isCloseBracket(s.charAt(s.length() - 1))) x -= 8;
             int lx = 0;
             if(cursor == i){
                 if(valMake != null) lx = textRenderer.draw(matrices, valMake + " §7"+last_par, x-8, y, -2000) - x +16;
                 textRenderer.draw(matrices, ">", x+lx-8, y, -1);
             }
             if(y>20 && y<height-30) textRenderer.draw(matrices, s, x+lx, y, -1);
-            chr = s.charAt(0);
-            if (chr == '[' || chr == '(' || chr == '{') x += 8;
+            if (isOpenBracket(s)) x += 8;
             y += 12;
             thisHeight += 12;
             if (didClick) {
                 if (mouseX < width && mouseX > 132 && mouseY > startY-4 && mouseY < y && mouseY > 20) {
                     client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
-                    //TODO verify removal
                     if (didRightClick){
-                        lines.remove(i);
-                        if (i <= cursor && cursor != 0) cursor--;
+                        if(!isBracket(i)) {
+                            lines.remove(i);
+                            if (i <= cursor && cursor != 0) cursor--;
+                            if (i < lines.size() && i > 0 && isBracket(i) && isBracket(i-1)){
+                                lines.remove(i);
+                                lines.remove(i-1);
+                                if (i <= cursor) cursor--;
+                                if (i-1 <= cursor && cursor != 0) cursor--;
+                            }
+                        }else if (isOpenBracket(i)){
+                            if (i < lines.size()-1 && isCloseBracket(i+1)){
+                                lines.remove(i);
+                                lines.remove(i);
+                                if (i <= cursor && cursor != 0) cursor--;
+                                if (i-1 <= cursor && cursor != 0) cursor--;
+                            }
+                        }else{
+                            if (i > 0 && isOpenBracket(i-1)){
+                                lines.remove(i);
+                                lines.remove(i-1);
+                                if (i <= cursor) cursor--;
+                                if (i-1 <= cursor && cursor != 0) cursor--;
+                            }
+                        }
                     } else{
                         clearValMake();
                         cursor = i;
@@ -339,13 +360,13 @@ public class ScriptingScreen extends Screen {
                 negateVal();
             x += 20;
             if (drawButton(matrices, x, height - 20, 20, 20, "[]", mouseX, mouseY))
-                loadScript(script.load.get());
+                bracketLine('[', ']');
             x += 20;
             if (drawButton(matrices, x, height - 20, 20, 20, "()", mouseX, mouseY))
-                loadScript(script.load.get());
+                bracketLine('(', ')');
             x += 20;
             if (drawButton(matrices, x, height - 20, 20, 20, "{}", mouseX, mouseY))
-                loadScript(script.load.get());
+                bracketLine('{', '}');
         }
         if (didClick) didClick = false;
         if (didRightClick) didRightClick = false;
@@ -370,7 +391,6 @@ public class ScriptingScreen extends Screen {
         F1 - Toggles Help
         Ctrl-F - Selects Search field
         RMB - Clears Search / Removes elements
-        MMB - Negate element
         ESC - Closes the UI
         """;
         int y = 16;
@@ -388,8 +408,7 @@ public class ScriptingScreen extends Screen {
             String key = os.name[0];
             if (s.negate) out.append('!');
             out.append(key);
-            char chr = key.charAt(0);
-            if (chr == '[' || chr == '{' || chr == '(' || chr == ']' || chr == '}' || chr == ')') continue;
+            if (isBracket(key)) continue;
             boolean e = os.embed != null;
             boolean p = os.par.size() > 0;
             if (e || p) {
@@ -412,7 +431,7 @@ public class ScriptingScreen extends Screen {
             switch (in.charAt(i)){
                 case '[','{','(' -> {
                     if(i+1 == in.length()) break;
-                    scriptLoadingB(in.substring(0, i+1));
+                    scriptLoadingBracket(in.substring(0, i+1));
                     in = in.substring(i+1);
                     i = -1;
                 }
@@ -427,7 +446,7 @@ public class ScriptingScreen extends Screen {
                         in = in.substring(i);
                         break;
                     }
-                    scriptLoadingB(String.valueOf(in.charAt(i)));
+                    scriptLoadingBracket(String.valueOf(in.charAt(i)));
                     in = in.substring(i+1);
                     i = -1;
                 }
@@ -435,7 +454,7 @@ public class ScriptingScreen extends Screen {
         }
         scriptLoading(in);
     }
-    private void scriptLoadingB(String str){
+    private void scriptLoadingBracket(String str){
         boolean negate = false;
         if (str.charAt(0) == '!'){
             negate = true;
@@ -578,12 +597,11 @@ public class ScriptingScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        System.out.println(keyCode);
         if(keyCode == 290/*F1*/) renderHelp = !renderHelp;
         if (renderHelp) return super.keyPressed(keyCode, scanCode, modifiers);
         if (searchField.isActive() && (keyCode == 257 || keyCode == 335)/*Enter*/) {
             //TODO maybe handle inputting scripts not just values?
-            pushValMake(new Tip(new String[]{searchField.getText()}, "", new ArrayList<>(), null));
+            pushValMake(new Tip(searchField.getText(), "", new ArrayList<>(), null));
             searchField.setText("");
         }
         if (hasControlDown() && keyCode == 89/*F*/){
@@ -652,6 +670,50 @@ public class ScriptingScreen extends Screen {
         }
     }
 
+    private void bracketLine(char c1, char c2){
+        if (lines.size()<1 || isBracket()) return;
+        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), null));
+        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), null));
+    }
+    private boolean isBracket(){
+        return isBracket(cursor);
+    }
+    private boolean isBracket(int in){
+        return isBracket(lines.get(in));
+    }
+    private boolean isBracket(Line in){
+        return isBracket(in.tip.name[0]);
+    }
+    private boolean isBracket(String in){
+        return isBracket(in.charAt(0));
+    }
+    private boolean isBracket(char in){
+        return isOpenBracket(in) || isCloseBracket(in);
+    }
+    private boolean isOpenBracket(int in){
+        return isOpenBracket(lines.get(in));
+    }
+    private boolean isOpenBracket(Line in){
+        return isOpenBracket(in.tip.name[0]);
+    }
+    private boolean isOpenBracket(String in){
+        return isOpenBracket(in.charAt(0));
+    }
+    private boolean isOpenBracket(char in){
+        return in == '[' || in == '(' || in == '{';
+    }
+    private boolean isCloseBracket(int in){
+        return isCloseBracket(lines.get(in));
+    }
+    private boolean isCloseBracket(Line in){
+        return isCloseBracket(in.tip.name[0]);
+    }
+    private boolean isCloseBracket(String in){
+        return isCloseBracket(in.charAt(0));
+    }
+    private boolean isCloseBracket(char in){
+        return in == ']' || in == ')' || in == '}';
+    }
     public static record Script(
             String name,
             Help help,
