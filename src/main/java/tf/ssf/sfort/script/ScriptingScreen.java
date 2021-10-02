@@ -30,7 +30,7 @@ public class ScriptingScreen extends Screen {
     private final Screen parent;
     private final Script script;
 
-    private Tip valMake;
+    private Line valMake;
     private String last_par = "";
     private List<Line> lines = new ArrayList<>();
     private int cursor = 0;
@@ -94,15 +94,9 @@ public class ScriptingScreen extends Screen {
             tip.addAll(pa.getParameters().stream().map(p -> new Tip(p, "", new ArrayList<>(), null)).collect(Collectors.toSet()));
         }
     }
-    private void setTip(List<Help.Parameter> par, Help embed){
-        clearTip();
-        for (Help.Parameter pa : par) {
-            last_par += pa.name;
-            tip.addAll(pa.getParameters().stream().map(p -> new Tip(p.replace(':', ';'), "", new ArrayList<>(), embed)).collect(Collectors.toSet()));
-        }
-    }
+    
     private void setTip(){
-        setTip(script.help);
+        setTip(getCursorHelp());
     }
     private void setTip(Help help){
         setTip(Help.recurseImported(help, new HashSet<>()));
@@ -145,45 +139,42 @@ public class ScriptingScreen extends Screen {
     }
     private void pushValMake(Tip os){
         if (valMake == null) {
-            boolean e = os.embed != null;
-            boolean p = os.par.size() > 0;
-            if (e || p) {
-                if (e && p){
-                    setTip(os.par, os.embed);
-                } else{
-                    if (e) setTip(os.embed);
-                    else setTip(os.par);
-                }
-                valMake = os;
+            if (os.par.size() > 0) {
+                setTip(os.par);
+                valMake = new Line(os, getCursorHelp(os));
             } else {
-                lines.add(cursor, new Line(os));
+                lines.add(cursor+(lines.size()>0?1:0), new Line(os, getCursorHelp(os)));
+                setTip();
+                valMake = null;
+                searchField.setText("");
             }
         }else {
-            //TODO all sorts of broken
-            if(valMake.par.size()>0 && valMake.embed == null){
-                lines.add(cursor, new Line(valMake, os.name[0]));
-                clearValMake();
-            }else if (os.embed != null){
-                lines.add(cursor, new Line(valMake, os.name[0]));
-                setTip(os.embed);
-                clearValMake();
-            }else {
-                boolean e = os.embed != null;
-                boolean p = os.par.size() > 0;
-                if (e || p) {
-                    if (e && p){
-                        setTip(os.par, os.embed);
-                    } else{
-                        if (e) setTip(os.embed);
-                        else setTip(os.par);
-                    }
-                    valMake = os;
-                } else {
-                    lines.add(cursor, new Line(valMake, os.name[0]));
-                    clearValMake();
-                }
-            }
+           pushValMake(os.name[0]);
         }
+    }
+    private void pushValMake(String os){
+        if (valMake == null) {
+            lines.add(cursor+(lines.size()>0?1:0), new Line(new Tip(os, "", new ArrayList<>(), null), getCursorHelp()));
+            searchField.setText("");
+        }else {
+            valMake.val = os;
+            lines.add(cursor+(lines.size()>0?1:0), valMake);
+            setTip(valMake.help);
+            searchField.setText("");
+            valMake = null;
+        }
+    }
+    private Help getCursorHelp(Tip os) {
+        return getCursorHelp(os.embed);
+    }
+    private Help getCursorHelp(Help embed) {
+        return embed == null ? getCursorHelp() : embed;
+    }
+    private Help getCursorHelp() {
+        if (lines.size() > 0){
+            return lines.get(cursor).help;
+        }
+        return script.help;
     }
     private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         textRenderer.drawWithShadow(matrices, script.name, 136, 4, -1);
@@ -201,7 +192,7 @@ public class ScriptingScreen extends Screen {
             String s = os.name[os.name.length == 1? 0 : (ticks>>5) %os.name.length];
             s = formatTitleCase(s);
             if (os.par.size() == 0) {
-                if (os.embed != null) s = "~" + s;
+                if (os.embed != null) s = "~" + s + ":";
             }else {
                 if (os.embed != null) s = "~" + s + "~";
                 else s = s + ":";
@@ -260,7 +251,8 @@ public class ScriptingScreen extends Screen {
             textRenderer.draw(matrices, valMake + " §7"+last_par, x, y, -2000);
             if(didClick && mouseX < width && mouseX > 132 && mouseY < y+12 && mouseY > 20){
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
-                clearValMake();
+                valMake = null;
+                setTip();
             }
         }
         for (int i = 0; i< lines.size(); i++) {
@@ -307,9 +299,10 @@ public class ScriptingScreen extends Screen {
                             }
                         }
                     } else{
-                        clearValMake();
+                        valMake = null;
                         cursor = i;
                     }
+                    setTip();
                 }
             }
             thisHeight += 8;
@@ -380,10 +373,7 @@ public class ScriptingScreen extends Screen {
 
         matrices.pop();
     }
-    private void clearValMake(){
-        valMake =null;
-        setTip();
-    }
+
     private void drawHelp(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         String hlp = """
         F1 - Toggles Help
@@ -461,7 +451,8 @@ public class ScriptingScreen extends Screen {
             negate = true;
             str = str.substring(1);
         }
-        lines.add(new Line(getTip(str), negate));
+        //TODO insert help context
+        //lines.add(new Line(getTip(str), negate));
     }
     private void scriptLoading(String str){
         boolean negate = false;
@@ -470,10 +461,11 @@ public class ScriptingScreen extends Screen {
             str = str.substring(1);
         }
         int i = str.indexOf(':');
+        //TODO script help context
         if (i != -1){
-            lines.add(new Line(getTip(str.substring(0, i)), str.substring(i+1), negate));
+            //lines.add(new Line(getTip(str.substring(0, i)), str.substring(i+1), negate));
         }else{
-            lines.add(new Line(getTip(str), negate));
+            //lines.add(new Line(getTip(str), negate));
         }
     }
     //TODO
@@ -602,23 +594,19 @@ public class ScriptingScreen extends Screen {
         if (renderHelp) return super.keyPressed(keyCode, scanCode, modifiers);
 
         switch (keyCode){
-            case 257: { //Enter
-                if (searchField.isActive()){
-                    //TODO maybe handle inputting scripts not just values?
-                    pushValMake(new Tip(searchField.getText(), "", new ArrayList<>(), null));
-                    searchField.setText("");
-                }
+            case 257 -> { //Enter
+                if (searchField.isActive()) pushValMake(searchField.getText());
             }
-            case 89: { //F
+            case 89 -> { //F
                 if (hasControlDown()) searchField.setTextFieldFocused(true);
             }
-            case 294: { //F5
+            case 294 -> { //F5
                 if (script.load != null) loadScript(script.load.get());
             }
-            case 295: { //F6
+            case 295 -> { //F6
                 if (script.apply != null) script.apply.accept(unloadScript());
             }
-            case 296: { //F7
+            case 296 -> { //F7
                 if (script.save != null) script.save.accept(unloadScript());
             }
         }
@@ -688,8 +676,9 @@ public class ScriptingScreen extends Screen {
 
     private void bracketLine(char c1, char c2){
         if (lines.size()<1 || isBracket()) return;
-        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), null));
-        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), null));
+        Help help = getCursorHelp();
+        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), help, null));
+        lines.add(cursor + (lines.get(cursor).tip.embed == null ? 0 : 1), new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
     }
     private boolean isBracket(){
         return isBracket(cursor);
@@ -753,27 +742,29 @@ public class ScriptingScreen extends Screen {
         public String toString() {
             return  (embed == null ? "" : "~")+
                     name[0] +
-                    (par.size()>0 ? embed == null ? ":" : "~" : "");
+                    (par.size()>0 ? embed == null ? ":" : "~" : embed == null ? "" : ":");
         }
     }
     private static class Line {
         final Tip tip;
-        final String val;
+        final Help help;
+        String val;
         boolean negate = false;
-        Line (Tip tip, String val){
+        Line (Tip tip, Help help, String val){
             this.val = val;
+            this.help = help;
             this.tip = tip;
         }
-        Line (Tip tip, boolean negate){
-            this(tip, null);
+        Line (Tip tip, Help help, boolean negate){
+            this(tip, help, null);
             this.negate = negate;
         }
-        Line (Tip tip, String val, boolean negate){
-            this(tip, val);
+        Line (Tip tip, Help help, String val, boolean negate){
+            this(tip, help, val);
             this.negate = negate;
         }
-        Line(Tip tip){
-            this(tip, null);
+        Line(Tip tip, Help help){
+            this(tip, help, null);
         }
         void negate(){
             negate = !negate;
@@ -783,7 +774,7 @@ public class ScriptingScreen extends Screen {
         public String toString() {
             return  (negate ? "!" : "") +
                     tip +
-                    (tip.embed != null || tip.par.size()>0? val : "")
+                    (val !=null? val : "")
                     ;
         }
     }
