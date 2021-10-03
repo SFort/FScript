@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 //A good chunk of this class was copied from github.com/unascribed/fabrication
 
-//SpaghetGettingOutOfHand TM
+//There's this amazing life hack called planning, but not to worry i'm no cheat
 
 public class ScriptingScreen extends Screen {
     private static final Map<String, Help> default_embed = new HashMap<>();
@@ -77,7 +77,7 @@ public class ScriptingScreen extends Screen {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         matrices.push();
         if (client.world == null) this.renderBackground(matrices);
-        if (renderHelp) drawHelp(matrices, mouseX, mouseY, delta);
+        if (renderHelp) drawHelp(matrices);
         else drawForeground(matrices, mouseX, mouseY, delta);
         matrices.pop();
     }
@@ -94,7 +94,7 @@ public class ScriptingScreen extends Screen {
             tip.addAll(pa.getParameters().stream().map(p -> new Tip(p, "", new ArrayList<>(), null)).collect(Collectors.toSet()));
         }
     }
-    
+
     private void setTip(){
         setTip(getCursorHelp());
     }
@@ -133,7 +133,7 @@ public class ScriptingScreen extends Screen {
     }
 
     private void negateVal(){
-        if (lines.size() > 0) {
+        if (!lines.isEmpty()) {
             lines.get(cursor).negate();
         }
     }
@@ -143,7 +143,11 @@ public class ScriptingScreen extends Screen {
                 setTip(os.par);
                 valMake = new Line(os, getCursorHelp(os));
             } else {
-                lines.add(cursor+(lines.size()>0?1:0), new Line(os, getCursorHelp(os)));
+                Help h2 = getCursorHelp();
+                if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
+                lines.add(cursor+(lines.isEmpty()?0:1), new Line(os, getCursorHelp(os)));
+                if (lines.size()>1) cursor++;
+                if (os.embed != null) bracketLine('[', ']', h2);
                 setTip();
                 valMake = null;
                 searchField.setText("");
@@ -154,11 +158,18 @@ public class ScriptingScreen extends Screen {
     }
     private void pushValMake(String os){
         if (valMake == null) {
-            lines.add(cursor+(lines.size()>0?1:0), new Line(new Tip(os, "", new ArrayList<>(), null), getCursorHelp()));
+            if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
+            lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(os, "", new ArrayList<>(), null), getCursorHelp()));
+            if (lines.size()>1) cursor++;
             searchField.setText("");
         }else {
-            valMake.val = os;
+            Help h2 = getCursorHelp();
+            boolean bl = valMake.tip.embed == null;
+            valMake.val = bl ? os : os.replace(':', ';');
+            if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
             lines.add(cursor+(lines.size()>0?1:0), valMake);
+            if (lines.size()>1) cursor++;
+            if (!bl) bracketLine('[', ']', h2);
             setTip(valMake.help);
             searchField.setText("");
             valMake = null;
@@ -171,7 +182,7 @@ public class ScriptingScreen extends Screen {
         return embed == null ? getCursorHelp() : embed;
     }
     private Help getCursorHelp() {
-        if (lines.size() > 0){
+        if (!lines.isEmpty()){
             return lines.get(cursor).help;
         }
         return script.help;
@@ -247,7 +258,7 @@ public class ScriptingScreen extends Screen {
         y = 22-scroll;
         newHeight = 8;
         int x = 140;
-        if(valMake != null && lines.size() == 0){
+        if(valMake != null && lines.isEmpty()){
             textRenderer.draw(matrices, valMake + " §7"+last_par, x, y, -2000);
             if(didClick && mouseX < width && mouseX > 132 && mouseY < y+12 && mouseY > 20){
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
@@ -274,30 +285,33 @@ public class ScriptingScreen extends Screen {
                 if (mouseX < width && mouseX > 132 && mouseY > startY-4 && mouseY < y && mouseY > 20) {
                     client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
                     if (didRightClick){
-                        if(!isBracket(i)) {
-                            lines.remove(i);
-                            if (i <= cursor && cursor != 0) cursor--;
-                            if (i < lines.size() && i > 0 && isBracket(i) && isBracket(i-1)){
-                                lines.remove(i);
-                                lines.remove(i-1);
-                                if (i <= cursor) cursor--;
-                                if (i-1 <= cursor && cursor != 0) cursor--;
-                            }
+                        int rmStart = 0;
+                        int rmEnd = 0;
+                        if (lines.get(i).tip.embed != null){
+                            if (i+2 < lines.size() && isOpenBracket(i+1) && isCloseBracket(i+2))
+                                rmEnd = 3;
+                        }else if(!isBracket(i)) {
+                            rmEnd = 1;
                         }else if (isOpenBracket(i)){
-                            if (i < lines.size()-1 && isCloseBracket(i+1)){
-                                lines.remove(i);
-                                lines.remove(i);
-                                if (i <= cursor && cursor != 0) cursor--;
-                                if (i-1 <= cursor && cursor != 0) cursor--;
+                            if (i > 0 && i+1 < lines.size() && lines.get(i-1).tip.embed != null && isCloseBracket(i+1)){
+                                rmStart = -1;
+                                rmEnd = 2;
+                            }else if (i+1 < lines.size() && isCloseBracket(i+1)){
+                                rmEnd = 2;
                             }
                         }else{
-                            if (i > 0 && isOpenBracket(i-1)){
-                                lines.remove(i);
-                                lines.remove(i-1);
-                                if (i <= cursor) cursor--;
-                                if (i-1 <= cursor && cursor != 0) cursor--;
+                            if (i > 1 && lines.get(i-2).tip.embed != null && isOpenBracket(i-1)){
+                                rmStart = -2;
+                                rmEnd = 1;
+                            }else if (i > 0 && isOpenBracket(i-1)){
+                                rmStart = -1;
+                                rmEnd = 1;
                             }
                         }
+                        lines.subList(rmStart+i,rmEnd+i).clear();
+                        if (i+rmStart <= cursor) cursor+=rmStart-rmEnd;
+                        if (cursor<0) cursor = 0;
+
                     } else{
                         valMake = null;
                         cursor = i;
@@ -345,7 +359,6 @@ public class ScriptingScreen extends Screen {
             if (script.load != null){
                 if (drawButton(matrices, x, height - 20, 50, 20, "Load", mouseX, mouseY))
                     loadScript(script.load.get());
-                x -= 50;
             }
             x = 130;
             if (drawButton(matrices, x, height - 20, 20, 20, "!", mouseX, mouseY))
@@ -374,7 +387,7 @@ public class ScriptingScreen extends Screen {
         matrices.pop();
     }
 
-    private void drawHelp(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    private void drawHelp(MatrixStack matrices) {
         String hlp = """
         F1 - Toggles Help
         F5 - Load Script
@@ -673,18 +686,25 @@ public class ScriptingScreen extends Screen {
             matrices.pop();
         }
     }
-
-    private void bracketLine(char c1, char c2){
-        if (lines.size()<1 || isBracket()) return;
+    private void bracketLine(char c1, char c2, Help h2){
+        if (isBracket()) return;
         Help help = getCursorHelp();
+        if(!lines.isEmpty()) cursor++;
+        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
+        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), h2, null));
+    }
+    private void bracketLine(char c1, char c2){
+        if (isBracket()) return;
+        Help help = getCursorHelp();
+        if(!lines.isEmpty()) cursor++;
+        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
         lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), help, null));
-        lines.add(cursor + (lines.get(cursor).tip.embed == null ? 0 : 1), new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
     }
     private boolean isBracket(){
         return isBracket(cursor);
     }
     private boolean isBracket(int in){
-        return isBracket(lines.get(in));
+        return !lines.isEmpty() && isBracket(lines.get(in));
     }
     private boolean isBracket(Line in){
         return isBracket(in.tip.name[0]);
@@ -696,7 +716,7 @@ public class ScriptingScreen extends Screen {
         return isOpenBracket(in) || isCloseBracket(in);
     }
     private boolean isOpenBracket(int in){
-        return isOpenBracket(lines.get(in));
+        return !lines.isEmpty() && isOpenBracket(lines.get(in));
     }
     private boolean isOpenBracket(Line in){
         return isOpenBracket(in.tip.name[0]);
@@ -708,7 +728,7 @@ public class ScriptingScreen extends Screen {
         return in == '[' || in == '(' || in == '{';
     }
     private boolean isCloseBracket(int in){
-        return isCloseBracket(lines.get(in));
+        return !lines.isEmpty() && isCloseBracket(lines.get(in));
     }
     private boolean isCloseBracket(Line in){
         return isCloseBracket(in.tip.name[0]);
