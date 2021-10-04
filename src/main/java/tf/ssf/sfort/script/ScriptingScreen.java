@@ -133,7 +133,7 @@ public class ScriptingScreen extends Screen {
     }
 
     private void negateVal(){
-        if (!lines.isEmpty()) {
+        if (!lines.isEmpty() && !isCloseBracket(lines.get(cursor))) {
             lines.get(cursor).negate();
         }
     }
@@ -187,6 +187,7 @@ public class ScriptingScreen extends Screen {
         }
         return script.help;
     }
+    //TODO tooltips
     private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         textRenderer.drawWithShadow(matrices, script.name, 136, 4, -1);
         fill(matrices, 0, 16, 130, height, 0x44000000);
@@ -222,7 +223,7 @@ public class ScriptingScreen extends Screen {
                         line = 1;
                     }
                     if(y<22) continue;
-                    x = textRenderer.draw(matrices, word+" ", x, y, -1);
+                    x = textRenderer.drawWithShadow(matrices, word+" ", x, y, -1);
                 }
                 if(line == 0 && Arrays.stream(os.name).anyMatch(st -> textRenderer.getWidth(st)>115)){
                     y += 12;
@@ -259,7 +260,7 @@ public class ScriptingScreen extends Screen {
         newHeight = 8;
         int x = 140;
         if(valMake != null && lines.isEmpty()){
-            textRenderer.draw(matrices, valMake + " §7"+last_par, x, y, -2000);
+            textRenderer.drawWithShadow(matrices, valMake + " §7"+last_par, x, y, -2000);
             if(didClick && mouseX < width && mouseX > 132 && mouseY < y+12 && mouseY > 20){
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
                 valMake = null;
@@ -267,17 +268,17 @@ public class ScriptingScreen extends Screen {
             }
         }
         for (int i = 0; i< lines.size(); i++) {
-            String s = lines.get(i).toString();
+            Line s = lines.get(i);
             int thisHeight = 0;
             float startY = y;
             thisHeight += 12;
-            if (isCloseBracket(s.charAt(s.length() - 1))) x -= 8;
+            if (isCloseBracket(s)) x -= 8;
             int lx = 0;
             if(cursor == i){
-                if(valMake != null) lx = textRenderer.draw(matrices, valMake + " §7"+last_par, x-8, y, -2000) - x +16;
-                textRenderer.draw(matrices, ">", x+lx-8, y, -1);
+                if(valMake != null) lx = textRenderer.drawWithShadow(matrices, valMake + " §7"+last_par, x-8, y, -2000) - x +16;
+                textRenderer.drawWithShadow(matrices, ">", x+lx-8, y, -1);
             }
-            if(y>20 && y<height-30) textRenderer.draw(matrices, s, x+lx, y, -1);
+            if(y>20 && y<height-30) textRenderer.drawWithShadow(matrices, s.toString(), x+lx, y, -1);
             if (isOpenBracket(s)) x += 8;
             y += 12;
             thisHeight += 12;
@@ -404,25 +405,11 @@ public class ScriptingScreen extends Screen {
         }
     }
     private String unloadScript(){
-        //TODO
         StringBuilder out = new StringBuilder();
         for (int i = 0; i< lines.size(); i++) {
             Line s = lines.get(i);
-            Tip os = s.tip;
-            String key = os.name[0];
-            if (s.negate) out.append('!');
-            out.append(key);
-            if (isBracket(key)) continue;
-            boolean e = os.embed != null;
-            boolean p = os.par.size() > 0;
-            if (e || p) {
-                if (e) out.insert(out.length()-1,'~');
-                if (e && p) out.append('~');
-                else out.append(':');
-                out.append(s.val);
-            }
-            //TODO
-            if (lines.size() != i+1)
+            out.append(s);
+            if (!isOpenBracket(s) && s.tip.embed == null && i+1<lines.size() && !isCloseBracket(lines.get(i+1)))
                 out.append(';');
         }
         return out.toString();
@@ -489,7 +476,7 @@ public class ScriptingScreen extends Screen {
 
     private boolean drawButton(MatrixStack matrices, int x, int y, int w, int h, String text, float mouseX, float mouseY) {
         int textWidth = textRenderer.getWidth(text);
-        textRenderer.draw(matrices, text, x+((w-textWidth)/2), y+((h-8)/2), -1);
+        textRenderer.drawWithShadow(matrices, text, x+((w-textWidth)/2), y+((h-8)/2), -1);
         if (mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h) {
             fill(matrices, x, y, x+w, y+1, -1);
             fill(matrices, x, y, x+1, y+h, -1);
@@ -504,7 +491,7 @@ public class ScriptingScreen extends Screen {
     }
 
     public static String formatTitleCase(String in) {
-        String[] pieces = in.toLowerCase().split("[_ ;:]");
+        String[] pieces = in.toLowerCase().split("[_ ;:/]");
         StringBuilder result = new StringBuilder();
         for (String s : pieces) {
             if (s == null)
@@ -607,7 +594,7 @@ public class ScriptingScreen extends Screen {
         if (renderHelp) return super.keyPressed(keyCode, scanCode, modifiers);
 
         switch (keyCode){
-            case 257 -> { //Enter
+            case 257, 335 -> { //Enter
                 if (searchField.isActive()) pushValMake(searchField.getText());
             }
             case 89 -> { //F
@@ -794,7 +781,7 @@ public class ScriptingScreen extends Screen {
         public String toString() {
             return  (negate ? "!" : "") +
                     tip +
-                    (val !=null? val : "")
+                    (val !=null? tip.embed == null ? val : val + ':' : "")
                     ;
         }
     }
