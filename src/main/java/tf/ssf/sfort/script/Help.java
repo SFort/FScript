@@ -57,21 +57,13 @@ public interface Help {
     static Map<String, String> recurseImported(Help help, Set<Help> dejavu){
         Map<String, String> out = new HashMap<>();
         Set<String> existing = new HashSet<>();
-        final Consumer<Map.Entry<String, String>> addUnique = s ->{
+        recurseAcceptor(help, dejavu,s ->{
             final Triplet<String, List<String>, String> triple = dismantle(s.getKey());
             List<String> names = triple.getB();
             names.removeIf(n -> !existing.add(triple.getA()+n+triple.getC()));
             if (names.size()>0)
                 out.put(triple.getA()+String.join(" ", names)+triple.getC(), s.getValue());
-        };
-        if (dejavu.add(help)) {
-            for (Map.Entry<String, String> str : help.getHelp().entrySet())
-                addUnique.accept(str);
-            for (Help h : help.getImported())
-                if(h != null)
-                for (Map.Entry<String, String> str : recurseImported(h, dejavu).entrySet())
-                    addUnique.accept(str);
-        }
+        });
         return out;
     }
     static void recurseAcceptor(Help help, Set<Help> dejavu, Consumer<Map.Entry<String, String>> acceptor){
