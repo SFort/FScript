@@ -58,14 +58,14 @@ public class FishingBobberEntityScript implements PredicateProvider<FishingBobbe
 
 
     @Override
-    public Map<String, Object> getHelp(){
+    public Map<String, String> getHelp(){
         return help;
     }
     @Override
     public List<Help> getImported(){
         return extend_help;
     }
-    public static final Map<String, Object> help = new HashMap<>();
+    public static final Map<String, String> help = new HashMap<String, String>();
     public static final List<Help> extend_help = new ArrayList<>();
     static {
         help.put("bobber_in_open_water is_bobber_in_open_water","Require a fishing bobber in open water");

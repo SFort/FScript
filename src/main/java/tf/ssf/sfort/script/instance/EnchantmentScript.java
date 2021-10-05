@@ -73,11 +73,11 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 	//==================================================================================================================
 
 	@Override
-	public Map<String, Object> getHelp(){
+	public Map<String, String> getHelp(){
 		return help;
 	}
 
-	public static final Map<String, Object> help = new HashMap<>();
+	public static final Map<String, String> help = new HashMap<>();
 	static {
 		help.put("enchant .:EnchantID","Require specified enchant");
 		help.put("min_level:int","Minimum min enchantment level");

@@ -31,11 +31,11 @@ public class ChunkScript implements PredicateProvider<Chunk>, Help {
 	//==================================================================================================================
 
 	@Override
-	public Map<String, Object> getHelp(){
+	public Map<String, String> getHelp(){
 		return help;
 	}
 
-	public static final Map<String, Object> help = new HashMap<>();
+	public static final Map<String, String> help = new HashMap<>();
 
 	static {
 		help.put("inhabited:long","Minimum time players have loaded the chunk in ticks");

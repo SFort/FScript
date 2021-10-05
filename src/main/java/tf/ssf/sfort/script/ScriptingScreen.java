@@ -10,10 +10,16 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
+import org.apache.http.util.Args;
+import oshi.util.tuples.Pair;
+import oshi.util.tuples.Triplet;
+import tf.ssf.sfort.script.instance.PlayerEntityScript;
 import tf.ssf.sfort.script.instance.ServerPlayerEntityScript;
 
 import java.util.*;
@@ -23,12 +29,11 @@ import java.util.stream.Collectors;
 
 //A good chunk of this class was copied from github.com/unascribed/fabrication
 
-//There's this amazing life hack called planning, but not to worry i'm no cheat
-
 public class ScriptingScreen extends Screen {
     private static final Map<String, Help> default_embed = new HashMap<>();
     private final Screen parent;
     private final Script script;
+    private final Map<String, Pair<String, String>> embed_help = new HashMap<>();
 
     private Line valMake;
     private String last_par = "";
@@ -40,11 +45,13 @@ public class ScriptingScreen extends Screen {
     private float sidebar2ScrollTarget;
     private float sidebar2Scroll;
     private float sidebar2Height;
+    private boolean tick = false;
     private int ticks;
 
     private boolean didClick;
     private boolean didRightClick;
     private boolean renderHelp = false;
+    private boolean renderTips = false;
 
     private int tooltipBlinkTicks = 0;
 
@@ -55,15 +62,23 @@ public class ScriptingScreen extends Screen {
 
     private TextFieldWidget searchField;
 
-    //TODO remove test
-    public ScriptingScreen(Screen parent) {
-        this(new LiteralText("FScript"), parent, new Script("§2Test", new ServerPlayerEntityScript<>(), null, System.out::println, () -> "[on_fire;on_file]", default_embed));
-    }
-
     public ScriptingScreen(Text title, Screen parent, Script script) {
         super(title);
         this.parent = parent;
         this.script = script;
+        Set<String> existing = new HashSet<>();
+        Help.recurseAcceptor(script.help, new HashSet<>(),
+                s -> {
+                    final Triplet<String, List<String>, String> triple = Help.dismantle(s.getKey());
+                    if (!triple.getA().startsWith("~")) return;
+                    List<String> names = triple.getB();
+                    names.removeIf(n -> !existing.add(n));
+                    String sc = triple.getC();
+                    int si = sc.indexOf('~');
+                    for (String name : names)
+                        embed_help.put(si ==-1 ? name : name+"~", new Pair<>(si == -1? sc : sc.substring(si), s.getValue()));
+                }
+        );
         setTip();
     }
     @Override
@@ -101,9 +116,9 @@ public class ScriptingScreen extends Screen {
     private void setTip(Help help){
         setTip(Help.recurseImported(help, new HashSet<>()));
     }
-    private void setTip(Map<String, Object> help){
+    private void setTip(Map<String, String> help){
         clearTip();
-        for (Map.Entry<String, Object> as : help.entrySet()) {
+        for (Map.Entry<String, String> as : help.entrySet()) {
             String os = as.getKey();
             int colon = os.indexOf(':');
             List<Help.Parameter> val = new ArrayList<>();
@@ -187,8 +202,16 @@ public class ScriptingScreen extends Screen {
         }
         return script.help;
     }
-    //TODO tooltips
+
     private void drawForeground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        fill(matrices, width-12, 10, width-10, (ticks>>3)%8+2, -1);
+        if (drawButton(matrices, width-16, 1, 10, 10, null, mouseX, mouseY)){
+            ticks = 0;
+            tick = !tick;
+        }
+        if (drawButton(matrices, width-28, 1, 10, 10, "?", mouseX, mouseY)){
+            renderTips = !renderTips;
+        }
         textRenderer.drawWithShadow(matrices, script.name, 136, 4, -1);
         fill(matrices, 0, 16, 130, height, 0x44000000);
         float scroll = sidebarHeight < height ? 0 : sidebarScroll;
@@ -237,6 +260,9 @@ public class ScriptingScreen extends Screen {
                     client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
                     pushValMake(os);
                 }
+            }
+            if (renderTips && mouseX >= 0 && mouseX <= 130 && mouseY > startY-4 && mouseY < y && mouseY > 22 && !os.desc.isEmpty()) {
+                renderTooltip(matrices, new LiteralText(os.desc), mouseX, mouseY);
             }
             thisHeight += 8;
 
@@ -414,69 +440,71 @@ public class ScriptingScreen extends Screen {
         }
         return out.toString();
     }
-    private void loadScript(String in){
-        //TODO maybe accurately escape embed keys?
+    public static void main(String[] args){
+        new ScriptingScreen(new LiteralText("wop"), null, new Script("  ", new ServerPlayerEntityScript<ServerPlayerEntity>(), null, null, null, default_embed)).loadScript("true");
+    }
+    public void loadScript(String in){
         lines.clear();
-        cursor =0;
+        cursor = 0;
+        boolean negate = false;
+        Help prev_help = null;
         for (int i = 0; i<in.length(); i++) {
-            switch (in.charAt(i)){
-                case '[','{','(' -> {
-                    if(i+1 == in.length()) break;
-                    scriptLoadingBracket(in.substring(0, i+1));
-                    in = in.substring(i+1);
-                    i = -1;
+            char chr = in.charAt(i);
+            switch (chr){
+                case '!' -> negate = !negate;
+                case '~' -> {
+                    int colon = in.indexOf(':', i);
+                    int tilde = findChr(in, '~', i+1, colon);
+                    Pair<String, String> shlp = embed_help.get(in.substring(i+1, tilde == -1 ? colon : (tilde+1))+":");
+                    Help hlp = script.embedable.get(shlp.getA());
+                    prev_help = getCursorHelp();
+                    if(!lines.isEmpty())cursor++;
+                    lines.add(cursor,
+                            new Line(
+                                    new Tip(in.substring(i+1, colon), "", new ArrayList<>(), hlp),
+                                    hlp,
+                                    tilde == -1 ? null : in.substring(tilde+1, colon),
+                                    negate
+                            )
+                    );
+                    i = colon;
                 }
-                case ';' -> {
-                    scriptLoading(in.substring(0, i));
-                    in = in.substring(i+1);
-                    i = -1;
-                }
-                case ']','}',')' -> {
-                    scriptLoading(in.substring(0, i));
-                    if(i+1 == in.length()){
-                        in = in.substring(i);
-                        break;
-                    }
-                    scriptLoadingBracket(String.valueOf(in.charAt(i)));
-                    in = in.substring(i+1);
-                    i = -1;
+                case '[' -> bracketLine('[', ']', prev_help, negate);
+                case '{' -> bracketLine('{', '}', prev_help, negate);
+                case '(' -> bracketLine('(', ')', prev_help, negate);
+                case ']','}',')' -> cursor++;
+                default -> {
+                    int scolon = findEndChr(in, i, in.length());
+                    int colon = findChr(in, ':', i, scolon);
+                    if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
+                    if (prev_help != null) bracketLine('[', ']', prev_help, negate);
+                    lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colon == -1 ? scolon : colon), "", new ArrayList<>(), null), getCursorHelp(), colon == -1 ? null : in.substring(colon, scolon), negate));
+                    negate = false;
+                    i = scolon;
+                    if (lines.size()>1) cursor++;
                 }
             }
-        }
-        scriptLoading(in);
-    }
-    private void scriptLoadingBracket(String str){
-        boolean negate = false;
-        if (str.charAt(0) == '!'){
-            negate = true;
-            str = str.substring(1);
-        }
-        //TODO insert help context
-        //lines.add(new Line(getTip(str), negate));
-    }
-    private void scriptLoading(String str){
-        boolean negate = false;
-        if (str.charAt(0) == '!'){
-            negate = true;
-            str = str.substring(1);
-        }
-        int i = str.indexOf(':');
-        //TODO script help context
-        if (i != -1){
-            //lines.add(new Line(getTip(str.substring(0, i)), str.substring(i+1), negate));
-        }else{
-            //lines.add(new Line(getTip(str), negate));
+            if(chr != '!') negate = false;
+            if(chr != '!' && chr != '~') prev_help = null;
         }
     }
-    //TODO
-    private Tip getTip(String str){
-        Map<String, Object> h = Help.recurseImportedSeperate(script.help, new HashSet<>());
-        return null;
+    private int findChr(String str, int chr, int from, int to){
+        for(int i = from; i < to; ++i)
+            if (str.charAt(i) == chr) return i;
+        return -1;
     }
-
+    private int findEndChr(String str, int from, int to){
+        for(int i = from; i < to; ++i) {
+            char chr = str.charAt(i);
+            if (chr == ';' || isCloseBracket(chr)) return i;
+        }
+        return to;
+    }
     private boolean drawButton(MatrixStack matrices, int x, int y, int w, int h, String text, float mouseX, float mouseY) {
-        int textWidth = textRenderer.getWidth(text);
-        textRenderer.drawWithShadow(matrices, text, x+((w-textWidth)/2), y+((h-8)/2), -1);
+        if (text != null) {
+            int textWidth = textRenderer.getWidth(text);
+            textRenderer.drawWithShadow(matrices, text, x + ((w - textWidth) / 2), y + ((h - 8) / 2), -1);
+        }
         if (mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h) {
             fill(matrices, x, y, x+w, y+1, -1);
             fill(matrices, x, y, x+1, y+h, -1);
@@ -515,7 +543,7 @@ public class ScriptingScreen extends Screen {
 
     @Override
     public void tick() {
-        ticks++;
+        if(tick)ticks++;
         super.tick();
         if (sidebarHeight > height) {
             sidebarScroll += (sidebarScrollTarget-sidebarScroll)/2;
@@ -687,6 +715,13 @@ public class ScriptingScreen extends Screen {
         lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
         lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), help, null));
     }
+    private void bracketLine(char c1, char c2, Help h2, boolean negate){
+        if (isBracket()) return;
+        Help help = getCursorHelp();
+        if(!lines.isEmpty()) cursor++;
+        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null, negate));
+        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), h2 == null? help : h2, null));
+    }
     private boolean isBracket(){
         return isBracket(cursor);
     }
@@ -737,11 +772,11 @@ public class ScriptingScreen extends Screen {
 
     private static record Tip(
             String[] name,
-            Object desc,
+            String desc,
             List<Help.Parameter> par,
             Help embed
     ) {
-        Tip(String name, Object desc, List<Help.Parameter> par, Help embed){
+        Tip(String name, String desc, List<Help.Parameter> par, Help embed){
             this(new String[]{name}, desc, par, embed);
         }
 

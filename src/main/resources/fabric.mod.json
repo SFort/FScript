@@ -11,12 +11,13 @@
   "contact": {
     "sources": "https://github.com/SFort/fscript"
   },
-
   "license": "MIT",
 
   "environment": "*",
-  "entrypoints": {
-    "modmenu": ["tf.ssf.sfort.script.ModMenu"]
+  "custom": {
+    "modmenu": {
+      "badges": [ "library" ]
+    }
   },
   "mixins": [
     "libfscript.mixins.json"

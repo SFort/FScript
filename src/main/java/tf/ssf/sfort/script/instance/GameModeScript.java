@@ -55,7 +55,7 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
 
     //==================================================================================================================
 
-    public static final Map<String, Object> help = new HashMap<>();
+    public static final Map<String, String> help = new HashMap<>();
     static {
         help.put("block_breaking_restricted is_block_breaking_restricted","Require player gamemode to prevent breaking blocks");
         help.put("creative is_creative","Require player gamemode to be creative");
@@ -67,7 +67,7 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
 
     }
     @Override
-    public Map<String, Object> getHelp(){
+    public Map<String, String> getHelp(){
         return help;
     }
 

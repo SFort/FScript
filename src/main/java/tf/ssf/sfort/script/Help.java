@@ -11,6 +11,7 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import oshi.util.tuples.Triplet;
+import oshi.util.tuples.Pair;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -21,15 +22,15 @@ public interface Help {
     default List<Help> getImported(){
         return new ArrayList<>();
     }
-    Map<String, Object> getHelp();
+    Map<String, String> getHelp();
     static String formatHelp(Help help, Set<String> exclude){
-        Map<String, Object> in = recurseImported(help, new HashSet<>());
+        Map<String, String> in = recurseImported(help, new HashSet<>());
         StringBuilder out = new StringBuilder();
         int space = 8;
         for (String key :in.keySet())
             if (space<key.length())
                 space = key.length();
-        for (Map.Entry<String, Object> entry :in.entrySet()){
+        for (Map.Entry<String, String> entry :in.entrySet()){
             final String key = entry.getKey();
             if(exclude==null || !exclude.contains(key))
                 out.append(String.format("\t%-"+(space+2)+"s- %s%n", key, entry.getValue()));
@@ -37,7 +38,7 @@ public interface Help {
         return out.toString();
     }
 
-    static Triplet<String, Set<String>, String> dismantle (String s) {
+    static Triplet<String, List<String>, String> dismantle (String s) {
         String prefix = "";
         String postfix = "";
         int colon = s.indexOf(':');
@@ -51,47 +52,37 @@ public interface Help {
             postfix = s.substring(colon);
             s = s.substring(0, colon);
         }
-        return new Triplet<>(prefix, Arrays.stream(s.split(" ")).collect(Collectors.toSet()), postfix);
+        return new Triplet<>(prefix, Arrays.stream(s.split(" ")).collect(Collectors.toList()), postfix);
     };
-    static Map<String, Object> recurseImported(Help help, Set<Help> dejavu){
-        Map<String, Object> out = new HashMap<>();
+    static Map<String, String> recurseImported(Help help, Set<Help> dejavu){
+        Map<String, String> out = new HashMap<>();
         Set<String> existing = new HashSet<>();
-        final Consumer<Map.Entry<String, Object>> addUnique = s ->{
-            final Triplet<String, Set<String>, String> triple = dismantle(s.getKey());
-            Set<String> names = triple.getB();
+        final Consumer<Map.Entry<String, String>> addUnique = s ->{
+            final Triplet<String, List<String>, String> triple = dismantle(s.getKey());
+            List<String> names = triple.getB();
             names.removeIf(n -> !existing.add(triple.getA()+n+triple.getC()));
             if (names.size()>0)
                 out.put(triple.getA()+String.join(" ", names)+triple.getC(), s.getValue());
         };
         if (dejavu.add(help)) {
-            for (Map.Entry<String, Object> str : help.getHelp().entrySet())
+            for (Map.Entry<String, String> str : help.getHelp().entrySet())
                 addUnique.accept(str);
             for (Help h : help.getImported())
                 if(h != null)
-                for (Map.Entry<String, Object> str : recurseImported(h, dejavu).entrySet())
+                for (Map.Entry<String, String> str : recurseImported(h, dejavu).entrySet())
                     addUnique.accept(str);
         }
         return out;
     }
-    static Map<String, Object> recurseImportedSeperate(Help help, Set<Help> dejavu){
-        Map<String, Object> out = new HashMap<>();
-        Set<String> existing = new HashSet<>();
-        final Consumer<Map.Entry<String, Object>> addUnique = s ->{
-            final Triplet<String, Set<String>, String> triple = dismantle(s.getKey());
-            Set<String> names = triple.getB();
-            names.removeIf(n -> !existing.add(triple.getA()+n+triple.getC()));
-            for (String name : names)
-                out.put(triple.getA()+name+triple.getC(), s.getValue());
-        };
+    static void recurseAcceptor(Help help, Set<Help> dejavu, Consumer<Map.Entry<String, String>> acceptor){
         if (dejavu.add(help)) {
-            for (Map.Entry<String, Object> str : help.getHelp().entrySet())
-                addUnique.accept(str);
+            for (Map.Entry<String, String> str : help.getHelp().entrySet())
+                acceptor.accept(str);
             for (Help h : help.getImported())
                 if(h != null)
-                    for (Map.Entry<String, Object> str : recurseImported(h, dejavu).entrySet())
-                        addUnique.accept(str);
+                    for (Map.Entry<String, String> str : recurseImported(h, dejavu).entrySet())
+                        acceptor.accept(str);
         }
-        return out;
     }
     enum Parameter{
         DIMENSION("DimensionID"){

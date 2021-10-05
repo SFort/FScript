@@ -74,7 +74,7 @@ public class ItemScript implements PredicateProvider<Item>, Help {
 
 	//==================================================================================================================
 
-	public static final Map<String, Object> help = new HashMap<>();
+	public static final Map<String, String> help = new HashMap<>();
 	static {
 		help.put("damageable is_damageable","Item has to be damageable");
 		help.put("food is_food","Item is food");
@@ -85,7 +85,7 @@ public class ItemScript implements PredicateProvider<Item>, Help {
 		help.put("group:ItemGroupID", "Item has specified item group");
 	}
 	@Override
-	public Map<String, Object> getHelp(){
+	public Map<String, String> getHelp(){
 		return help;
 	}
 

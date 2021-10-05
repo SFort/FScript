@@ -147,7 +147,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 	//==================================================================================================================
 
 	@Override
-	public Map<String, Object> getHelp(){
+	public Map<String, String> getHelp(){
 		return help;
 	}
 	@Override
@@ -155,7 +155,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		return extend_help;
 	}
 
-	public static final Map<String, Object> help = new HashMap<>();
+	public static final Map<String, String> help = new HashMap<String, String>();
 	public static final List<Help> extend_help = new ArrayList<>();
 	static {
 		help.put("air:int", "Minimum required air");

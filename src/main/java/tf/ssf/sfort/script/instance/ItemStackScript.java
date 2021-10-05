@@ -132,14 +132,14 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 	//==================================================================================================================
 
 	@Override
-	public Map<String, Object> getHelp(){
+	public Map<String, String> getHelp(){
 		return help;
 	}
 	@Override
 	public List<Help> getImported(){
 		return extend_help;
 	}
-	public static final Map<String, Object> help = new HashMap<>();
+	public static final Map<String, String> help = new HashMap<String, String>();
 	public static final List<Help> extend_help = new ArrayList<>();
 	static {
 		help.put("item .:ItemID", "Has to be the specified item");

@@ -50,11 +50,11 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
     //==================================================================================================================
 
     @Override
-    public Map<String, Object> getHelp(){
+    public Map<String, String> getHelp(){
         return help;
     }
 
-    public static final Map<String, Object> help = new HashMap<>();
+    public static final Map<String, String> help = new HashMap<>();
     static {
         help.put("natural is_natural","Require natural dimension");
         help.put("ultrawarn is_ultrawarm","Require ultra warm dimension");
