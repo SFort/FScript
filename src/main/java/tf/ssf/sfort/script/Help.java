@@ -11,7 +11,6 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import oshi.util.tuples.Triplet;
-import oshi.util.tuples.Pair;
 
 import java.util.*;
 import java.util.function.Consumer;
