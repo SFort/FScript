@@ -513,6 +513,10 @@ public class ScriptingScreen extends Screen {
         boolean hovering = mouseIn(x, y, w, h, mouseX, mouseY);
         if (hovering) {
             if (didClick) {
+                x+=2;
+                y+=2;
+                w-=4;
+                h-=4;
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
             }
             drawOutlineBox(matrix, x, y, w, h, -1);
@@ -527,6 +531,10 @@ public class ScriptingScreen extends Screen {
         boolean hovering = mouseIn(x, y, w, h, mouseX, mouseY);
         if (hovering) {
             if (didClick) {
+                x+=2;
+                y+=2;
+                w-=4;
+                h-=4;
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
             }
             if (desc != null && renderTips)
