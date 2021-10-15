@@ -413,6 +413,7 @@ public class ScriptingScreen extends Screen {
         matrix.pop();
     }
 
+    //TODO might to be visible in all resolutions
     private void drawHelp(MatrixStack matrices) {
         String hlp = """
         Keybinds:
