@@ -165,6 +165,8 @@ public interface Help {
         FLOAT,
         INT,
         LONG,
+        BYTE,
+        SHORT,
         ;
         public final String name;
         Parameter(){
@@ -176,8 +178,8 @@ public interface Help {
         public static Parameter byName(String name){
             return Arrays.stream(values()).filter(p -> p.name.equals(name)).findAny().orElse(null);
         }
-        Set<String> getParameters(){return new HashSet<>();};
-        
+        Set<String> getParameters(){return new HashSet<>();}
+
         public static String intoString(){
             StringBuilder out = new StringBuilder();
             for (Parameter h : Parameter.values()) {

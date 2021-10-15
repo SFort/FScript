@@ -10,7 +10,6 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
@@ -86,12 +85,13 @@ public class ScriptingScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        matrices.push();
-        if (client.world == null) this.renderBackground(matrices);
-        if (renderHelp) drawHelp(matrices);
-        else drawForeground(matrices, mouseX, mouseY, delta);
-        matrices.pop();
+    public void render(MatrixStack matrix, int mouseX, int mouseY, float delta) {
+        matrix.push();
+        if (client.world == null) this.renderBackground(matrix);
+        else fill(matrix, 0, 0, width, height, 0x44000000);
+        if (renderHelp) drawHelp(matrix);
+        else drawForeground(matrix, mouseX, mouseY, delta);
+        matrix.pop();
     }
 
     private void clearTip(){
@@ -202,6 +202,7 @@ public class ScriptingScreen extends Screen {
 
     private void drawForeground(MatrixStack matrix, int mouseX, int mouseY, float delta) {
         fill(matrix, width-12, 10, width-10, (ticks>>3)%8+2, -1);
+        fill(matrix, 0, 16, 130, height, 0x44000000);
         if (drawToggleButton(matrix, width-16, 1, 10, 10, null, "Switch through alternative names", mouseX, mouseY, tick)){
             ticks = 0;
             tick = !tick;
@@ -209,12 +210,11 @@ public class ScriptingScreen extends Screen {
         if (drawToggleButton(matrix, width-28, 1, 10, 10, "?", "Show descriptions as tooltips", mouseX, mouseY, renderTips)){
             renderTips = !renderTips;
         }
-        if (drawToggleButton(matrix, width-46, 1, 16, 10, "F1", "Show Help", mouseX, mouseY, renderTips)){
+        if (drawButton(matrix, width-46, 1, 16, 10, "F1", "Show Help", mouseX, mouseY)){
             renderHelp = !renderHelp;
             return;
         }
         textRenderer.drawWithShadow(matrix, script.name, 136, 4, -1);
-        fill(matrix, 0, 16, 130, height, 0x44000000);
         float scroll = sidebarHeight < height ? 0 : sidebarScroll;
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
@@ -416,13 +416,22 @@ public class ScriptingScreen extends Screen {
 
     private void drawHelp(MatrixStack matrices) {
         String hlp = """
-        F1 - Toggles Help
-        F5 - Load Script
-        F6 - Apply Script
-        F7 - Save Script
-        Ctrl-F - Selects Search field
-        RMB - Clears Search / Removes elements
-        ESC - Closes the UI
+        Keybinds:
+            F1 - Toggles Help
+            F5 - Load Script
+            F6 - Apply Script
+            F7 - Save Script
+            Ctrl-F - Selects Search field
+            RMB - Clears Search / Removes elements
+            ESC - Closes the UI
+        
+        Buttons:
+            ! - Negates selected condition
+            [] - AND on conditions inside
+            () - OR on conditions inside
+            {} - XOR on conditions inside
+        
+        Note that some suggestions like BiomeID can only be obtained while in a world
         """;
         int y = 16;
         for (String h : hlp.lines().collect(Collectors.toList())) {
