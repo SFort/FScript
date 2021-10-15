@@ -212,7 +212,6 @@ public class ScriptingScreen extends Screen {
         }
         if (drawButton(matrix, width-46, 1, 16, 10, "F1", "Show Help", mouseX, mouseY)){
             renderHelp = !renderHelp;
-            return;
         }
         textRenderer.drawWithShadow(matrix, script.name, 136, 4, -1);
         float scroll = sidebarHeight < height ? 0 : sidebarScroll;
