@@ -509,33 +509,33 @@ public class ScriptingScreen extends Screen {
         return to;
     }
     private boolean drawButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY) {
-        if (text != null)
-            textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2), y + ((h - 8) / 2), -1);
-        if (mouseIn(x, y, w, h, mouseX, mouseY)) {
+        boolean hovering = mouseIn(x, y, w, h, mouseX, mouseY);
+        if (hovering) {
+            if (didClick) {
+                client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
+            }
             drawOutlineBox(matrix, x, y, w, h, -1);
             if (desc != null && renderTips)
                 renderTooltip(matrix, new LiteralText(desc), mouseX, mouseY);
-            if (didClick) {
-                client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
-                return true;
-            }
         }
-        return false;
-    }
-    private boolean drawToggleButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY, boolean toggled) {
         if (text != null)
             textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2), y + ((h - 8) / 2), -1);
+        return hovering && didClick;
+    }
+    private boolean drawToggleButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY, boolean toggled) {
         boolean hovering = mouseIn(x, y, w, h, mouseX, mouseY);
-        if (hovering^toggled) drawOutlineBox(matrix, x, y, w, h, -1);
         if (hovering) {
-            if (desc != null && renderTips)
-                renderTooltip(matrix, new LiteralText(desc), mouseX, mouseY);
             if (didClick) {
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
-                return true;
             }
+            if (desc != null && renderTips)
+                renderTooltip(matrix, new LiteralText(desc), mouseX, mouseY);
         }
-        return false;
+        if (text != null)
+            textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2), y + ((h - 8) / 2), -1);
+        if (hovering^toggled) drawOutlineBox(matrix, x, y, w, h, -1);
+
+        return hovering && didClick;
     }
     private boolean mouseIn(int x, int y, int w, int h, float mouseX, float mouseY){
         return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
