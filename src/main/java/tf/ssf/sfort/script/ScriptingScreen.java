@@ -589,7 +589,7 @@ public class ScriptingScreen extends Screen {
         if (sidebar2Height > height) {
             sidebar2Scroll += (sidebar2ScrollTarget-sidebar2Scroll)/2;
             if (sidebar2ScrollTarget < 0) sidebar2ScrollTarget /= 2;
-            float h = sidebarHeight-height;
+            float h = sidebar2Height-height;
             if (sidebar2ScrollTarget > h) sidebar2ScrollTarget = h+((sidebar2ScrollTarget-h)/2);
         }
 
