@@ -449,9 +449,6 @@ public class ScriptingScreen extends Screen {
         }
         return out.toString();
     }
-    public static void main(String[] args){
-        new ScriptingScreen(new LiteralText("wop"), null, new Script("  ", new ServerPlayerEntityScript<>(), null, null, null, default_embed)).loadScript("true");
-    }
     public void loadScript(String in){
         lines.clear();
         cursor = 0;
@@ -487,7 +484,8 @@ public class ScriptingScreen extends Screen {
                     int colon = findChr(in, ':', i, scolon);
                     if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
                     if (prev_help != null) bracketLine('[', ']', prev_help, negate);
-                    lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colon == -1 ? scolon : colon), "", new ArrayList<>(), null), getCursorHelp(), colon == -1 ? null : in.substring(colon, scolon), negate));
+                    if (i != (colon == -1 ? scolon : colon))
+                        lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colon == -1 ? scolon : colon), "", new ArrayList<>(), null), getCursorHelp(), colon == -1 ? null : in.substring(colon, scolon), negate));
                     negate = false;
                     i = scolon;
                     if (lines.size()>1) cursor++;
@@ -739,21 +737,18 @@ public class ScriptingScreen extends Screen {
         }
     }
     private void bracketLine(char c1, char c2, Help h2){
-        if (isBracket()) return;
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
         lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
         lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), h2, null));
     }
     private void bracketLine(char c1, char c2){
-        if (isBracket()) return;
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
         lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
         lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), help, null));
     }
     private void bracketLine(char c1, char c2, Help h2, boolean negate){
-        if (isBracket()) return;
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
         lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null, negate));

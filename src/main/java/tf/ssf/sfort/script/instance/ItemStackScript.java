@@ -157,6 +157,6 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 		help.put("has_enchants","Require item to have enchantments");
 		help.put("in_frame","Require item to be in a item frame");
 
-		extend_help.add(new ItemStackScript());
+		extend_help.add(new ItemScript());
 	}
 }
