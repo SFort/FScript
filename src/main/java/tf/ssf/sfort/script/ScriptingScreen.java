@@ -372,6 +372,20 @@ public class ScriptingScreen extends Screen {
         if (drawButton(matrix, width-50, height-20, 50, 20, "Done", null, mouseX, mouseY)) {
             onClose();
         }
+        int x = 130;
+        if (drawButton(matrix, x, height - 20, 20, 20, "!", "Negate selected", mouseX, mouseY))
+            negateVal();
+        x += 20;
+        if (drawButton(matrix, x, height - 20, 20, 20, "[]", "AND", mouseX, mouseY))
+            bracketLine('[', ']');
+        x += 20;
+        if (drawButton(matrix, x, height - 20, 20, 20, "()", "OR", mouseX, mouseY))
+            bracketLine('(', ')');
+        x += 20;
+        if (drawButton(matrix, x, height - 20, 20, 20, "{}", "XOR", mouseX, mouseY))
+            bracketLine('{', '}');
+    }
+    protected void drawScriptButtons(MatrixStack matrix, int mouseX, int mouseY, float delta){
         int x = width-100;
         if (script.save != null) {
             if (drawButton(matrix, x, height - 20, 50, 20, "Save", null, mouseX, mouseY))
@@ -387,18 +401,6 @@ public class ScriptingScreen extends Screen {
             if (drawButton(matrix, x, height - 20, 50, 20, "Load", null, mouseX, mouseY))
                 loadScript(script.load.get());
         }
-        x = 130;
-        if (drawButton(matrix, x, height - 20, 20, 20, "!", "Negate selected", mouseX, mouseY))
-            negateVal();
-        x += 20;
-        if (drawButton(matrix, x, height - 20, 20, 20, "[]", "AND", mouseX, mouseY))
-            bracketLine('[', ']');
-        x += 20;
-        if (drawButton(matrix, x, height - 20, 20, 20, "()", "OR", mouseX, mouseY))
-            bracketLine('(', ')');
-        x += 20;
-        if (drawButton(matrix, x, height - 20, 20, 20, "{}", "XOR", mouseX, mouseY))
-            bracketLine('{', '}');
     }
     protected void drawForeground(MatrixStack matrix, int mouseX, int mouseY, float delta) {
         drawOptionButtons(matrix, mouseX, mouseY, delta);
@@ -413,6 +415,7 @@ public class ScriptingScreen extends Screen {
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
         drawButtons(matrix, mouseX, mouseY, delta);
+        drawScriptButtons(matrix, mouseX, mouseY, delta);
         super.render(matrix, mouseX, mouseY, delta);
 
         didClick = false;
