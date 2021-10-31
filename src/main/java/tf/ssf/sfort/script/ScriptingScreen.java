@@ -4,6 +4,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.mappings.model.CommentEntry;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.Tessellator;
@@ -18,6 +19,7 @@ import oshi.util.tuples.Pair;
 import oshi.util.tuples.Triplet;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -28,7 +30,6 @@ public class ScriptingScreen extends Screen {
     protected static final Map<String, Help> default_embed = new HashMap<>();
     protected final Screen parent;
     protected final Script script;
-    protected final Map<String, Pair<String, String>> embed_help = new HashMap<>();
 
     protected Line valMake;
     protected String last_par = "";
@@ -61,21 +62,9 @@ public class ScriptingScreen extends Screen {
         super(title);
         this.parent = parent;
         this.script = script;
-        Set<String> existing = new HashSet<>();
-        Help.recurseAcceptor(script.help, new HashSet<>(),
-                s -> {
-                    final Triplet<String, List<String>, String> triple = Help.dismantle(s.getKey());
-                    if (!triple.getA().startsWith("~")) return;
-                    List<String> names = triple.getB();
-                    names.removeIf(n -> !existing.add(n));
-                    String sc = triple.getC();
-                    int si = sc.indexOf('~');
-                    for (String name : names)
-                        embed_help.put(si ==-1 ? name : name+"~", new Pair<>(si == -1? sc : sc.substring(si), s.getValue()));
-                }
-        );
         setTip();
     }
+
     @Override
     public void init(){
         super.init();
@@ -469,6 +458,7 @@ public class ScriptingScreen extends Screen {
         }
         return out.toString();
     }
+    //TODO this should have probably used pushValMake
     public void loadScript(String in){
         lines.clear();
         cursor = 0;
@@ -479,17 +469,29 @@ public class ScriptingScreen extends Screen {
             switch (chr){
                 case '!' -> negate = !negate;
                 case '~' -> {
+                    if (prev_help != null) bracketLine('[', ']', prev_help, negate);
                     int colon = in.indexOf(':', i);
                     int tilde = findChr(in, '~', i+1, colon);
-                    Pair<String, String> shlp = embed_help.get(in.substring(i+1, tilde == -1 ? colon : (tilde+1))+":");
-                    Help hlp = script.embedable.get(shlp.getA());
+                    boolean noTilde = tilde == -1;
+                    String name = in.substring(i + 1, noTilde ? colon : tilde);
+                    String searchFor = name + (noTilde? ":": "");
+                    AtomicReference<Help> hlp = new AtomicReference<>();
+                    Help.recurseAcceptor(getCursorHelp(), new HashSet<>(),
+                            s -> {
+                                final Triplet<String, List<String>, String> triple = Help.dismantle(s.getKey());
+                                if (hlp.get() != null || !triple.getA().startsWith("~") || !triple.getB().contains(searchFor)) return;
+                                String sc = triple.getC();
+                                int si = sc.indexOf(':');
+                                hlp.set(script.embedable.get(si == -1 ? sc : sc.substring(si+1)));
+                    });
+
                     prev_help = getCursorHelp();
                     if(!lines.isEmpty())cursor++;
                     lines.add(cursor,
                             new Line(
-                                    new Tip(in.substring(i+1, colon), "", new ArrayList<>(), hlp),
-                                    hlp,
-                                    tilde == -1 ? null : in.substring(tilde+1, colon),
+                                    new Tip(name, "", noTilde ? Collections.emptyList() : Collections.singletonList(null), hlp.get()),
+                                    hlp.get(),
+                                    noTilde ? null : in.substring(tilde+1, colon),
                                     negate
                             )
                     );
@@ -502,8 +504,8 @@ public class ScriptingScreen extends Screen {
                 default -> {
                     int scolon = findEndChr(in, i, in.length());
                     int colon = findChr(in, ':', i, scolon);
-                    if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
                     if (prev_help != null) bracketLine('[', ']', prev_help, negate);
+                    else if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
                     if (i != (colon == -1 ? scolon : colon))
                         lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colon == -1 ? scolon : colon), "", new ArrayList<>(), null), getCursorHelp(), colon == -1 ? null : in.substring(colon, scolon), negate));
                     negate = false;
