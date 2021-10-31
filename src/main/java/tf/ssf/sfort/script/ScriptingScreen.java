@@ -516,6 +516,7 @@ public class ScriptingScreen extends Screen {
             if(chr != '!') negate = false;
             if(chr != '!' && chr != '~') prev_help = null;
         }
+        setTip();
     }
     protected int findChr(String str, int chr, int from, int to){
         for(int i = from; i < to; ++i)
