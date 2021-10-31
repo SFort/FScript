@@ -87,13 +87,17 @@ public class ScriptingScreen extends Screen {
     public void render(MatrixStack matrix, int mouseX, int mouseY, float delta) {
         matrix.push();
         if (client.world == null) this.renderBackground(matrix);
-        else fill(matrix, 0, 0, width, height, 0x44000000);
+        else renderWorldBackground(matrix);
         if (renderHelp) drawHelp(matrix);
         else {
             drawBackgroundShade(matrix, mouseX, mouseY, delta);
             drawForeground(matrix, mouseX, mouseY, delta);
         }
         matrix.pop();
+    }
+    
+    protected void renderWorldBackground(MatrixStack matrix){
+        fill(matrix, 0, 0, width, height, 0x44000000);
     }
 
     protected void clearTip(){
