@@ -89,7 +89,10 @@ public class ScriptingScreen extends Screen {
         if (client.world == null) this.renderBackground(matrix);
         else fill(matrix, 0, 0, width, height, 0x44000000);
         if (renderHelp) drawHelp(matrix);
-        else drawForeground(matrix, mouseX, mouseY, delta);
+        else {
+            drawBackgroundShade(matrix, mouseX, mouseY, delta);
+            drawForeground(matrix, mouseX, mouseY, delta);
+        }
         matrix.pop();
     }
 
@@ -198,10 +201,11 @@ public class ScriptingScreen extends Screen {
         }
         return script.help;
     }
-
-    protected void drawForeground(MatrixStack matrix, int mouseX, int mouseY, float delta) {
+    protected void drawBackgroundShade(MatrixStack matrix, int mouseX, int mouseY, float delta) {
         fill(matrix, width-12, 10, width-10, (ticks>>3)%8+2, -1);
         fill(matrix, 0, 16, 130, height, 0x44000000);
+    }
+    protected void drawOptionButtons(MatrixStack matrix, int mouseX, int mouseY, float delta) {
         if (drawToggleButton(matrix, width-16, 1, 10, 10, null, "Switch through alternative names", mouseX, mouseY, tick)){
             ticks = 0;
             tick = !tick;
@@ -212,7 +216,8 @@ public class ScriptingScreen extends Screen {
         if (drawButton(matrix, width-46, 1, 16, 10, "F1", "Show Help", mouseX, mouseY)){
             renderHelp = !renderHelp;
         }
-        textRenderer.drawWithShadow(matrix, script.name, 136, 4, -1);
+    }
+    protected void drawTips(MatrixStack matrix, int mouseX, int mouseY, float delta){
         float scroll = sidebarHeight < height ? 0 : sidebarScroll;
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
@@ -278,11 +283,12 @@ public class ScriptingScreen extends Screen {
             textRenderer.draw(matrix, "^", 0, 17, -1);
             textRenderer.draw(matrix, "^", 124, 17, -1);
         }
-
-        scroll = sidebar2Height < height ? 0 : sidebar2Scroll;
+    }
+    protected void drawScript(MatrixStack matrix, int mouseX, int mouseY, float delta){
+        float scroll = sidebar2Height < height ? 0 : sidebar2Scroll;
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
-        y = 22-scroll;
-        newHeight = 8;
+        float y = 22-scroll;
+        int newHeight = 8;
         int x = 140;
         if(valMake != null && lines.isEmpty()){
             textRenderer.drawWithShadow(matrix, valMake + " §7"+last_par, x, y, -2000);
@@ -361,44 +367,52 @@ public class ScriptingScreen extends Screen {
             textRenderer.draw(matrix, "^", width-8, 17, -1);
         }
 
+    }
+    protected void drawButtons(MatrixStack matrix, int mouseX, int mouseY, float delta){
+        if (drawButton(matrix, width-50, height-20, 50, 20, "Done", null, mouseX, mouseY)) {
+            onClose();
+        }
+        int x = width-100;
+        if (script.save != null) {
+            if (drawButton(matrix, x, height - 20, 50, 20, "Save", null, mouseX, mouseY))
+                script.save.accept(unloadScript());
+            x -= 50;
+        }
+        if (script.apply != null) {
+            if (drawButton(matrix, x, height - 20, 50, 20, "Apply", null, mouseX, mouseY))
+                script.apply.accept(unloadScript());
+            x -= 50;
+        }
+        if (script.load != null) {
+            if (drawButton(matrix, x, height - 20, 50, 20, "Load", null, mouseX, mouseY))
+                loadScript(script.load.get());
+        }
+        x = 130;
+        if (drawButton(matrix, x, height - 20, 20, 20, "!", "Negate selected", mouseX, mouseY))
+            negateVal();
+        x += 20;
+        if (drawButton(matrix, x, height - 20, 20, 20, "[]", "AND", mouseX, mouseY))
+            bracketLine('[', ']');
+        x += 20;
+        if (drawButton(matrix, x, height - 20, 20, 20, "()", "OR", mouseX, mouseY))
+            bracketLine('(', ')');
+        x += 20;
+        if (drawButton(matrix, x, height - 20, 20, 20, "{}", "XOR", mouseX, mouseY))
+            bracketLine('{', '}');
+    }
+    protected void drawForeground(MatrixStack matrix, int mouseX, int mouseY, float delta) {
+        drawOptionButtons(matrix, mouseX, mouseY, delta);
+        textRenderer.drawWithShadow(matrix, script.name, 136, 4, -1);
+        drawTips(matrix, mouseX, mouseY, delta);
+        drawScript(matrix, mouseX, mouseY, delta);
+
         bufferTooltips = true;
 
         RenderSystem.setShaderColor(1, 1, 1, 0.2f);
         searchField.render(matrix, mouseX, mouseY, delta);
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
-        if (drawButton(matrix, width-50, height-20, 50, 20, "Done", null, mouseX, mouseY)) {
-            onClose();
-        }
-        {
-            x = width-100;
-            if (script.save != null) {
-                if (drawButton(matrix, x, height - 20, 50, 20, "Save", null, mouseX, mouseY))
-                    script.save.accept(unloadScript());
-                x -= 50;
-            }
-            if (script.apply != null){
-                if (drawButton(matrix, x, height - 20, 50, 20, "Apply", null, mouseX, mouseY))
-                    script.apply.accept(unloadScript());
-                x -= 50;
-                }
-            if (script.load != null){
-                if (drawButton(matrix, x, height - 20, 50, 20, "Load", null, mouseX, mouseY))
-                    loadScript(script.load.get());
-            }
-            x = 130;
-            if (drawButton(matrix, x, height - 20, 20, 20, "!", "Negate selected", mouseX, mouseY))
-                negateVal();
-            x += 20;
-            if (drawButton(matrix, x, height - 20, 20, 20, "[]", "AND", mouseX, mouseY))
-                bracketLine('[', ']');
-            x += 20;
-            if (drawButton(matrix, x, height - 20, 20, 20, "()", "OR", mouseX, mouseY))
-                bracketLine('(', ')');
-            x += 20;
-            if (drawButton(matrix, x, height - 20, 20, 20, "{}", "XOR", mouseX, mouseY))
-                bracketLine('{', '}');
-        }
+        drawButtons(matrix, mouseX, mouseY, delta);
         super.render(matrix, mouseX, mouseY, delta);
 
         didClick = false;
