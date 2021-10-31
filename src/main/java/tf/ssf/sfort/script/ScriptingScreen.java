@@ -16,7 +16,6 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import oshi.util.tuples.Pair;
 import oshi.util.tuples.Triplet;
-import tf.ssf.sfort.script.instance.ServerPlayerEntityScript;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,37 +25,37 @@ import java.util.stream.Collectors;
 //A good chunk of this class was copied from github.com/unascribed/fabrication
 
 public class ScriptingScreen extends Screen {
-    private static final Map<String, Help> default_embed = new HashMap<>();
-    private final Screen parent;
-    private final Script script;
-    private final Map<String, Pair<String, String>> embed_help = new HashMap<>();
+    protected static final Map<String, Help> default_embed = new HashMap<>();
+    protected final Screen parent;
+    protected final Script script;
+    protected final Map<String, Pair<String, String>> embed_help = new HashMap<>();
 
-    private Line valMake;
-    private String last_par = "";
-    private List<Line> lines = new ArrayList<>();
-    private int cursor = 0;
-    private float sidebarScrollTarget;
-    private float sidebarScroll;
-    private float sidebarHeight;
-    private float sidebar2ScrollTarget;
-    private float sidebar2Scroll;
-    private float sidebar2Height;
-    private boolean tick = false;
-    private int ticks;
+    protected Line valMake;
+    protected String last_par = "";
+    protected List<Line> lines = new ArrayList<>();
+    protected int cursor = 0;
+    protected float sidebarScrollTarget;
+    protected float sidebarScroll;
+    protected float sidebarHeight;
+    protected float sidebar2ScrollTarget;
+    protected float sidebar2Scroll;
+    protected float sidebar2Height;
+    protected boolean tick = false;
+    protected int ticks;
 
-    private boolean didClick;
-    private boolean didRightClick;
-    private boolean renderHelp = false;
-    private boolean renderTips = false;
+    protected boolean didClick;
+    protected boolean didRightClick;
+    protected boolean renderHelp = false;
+    protected boolean renderTips = false;
 
-    private int tooltipBlinkTicks = 0;
+    protected int tooltipBlinkTicks = 0;
 
-    private List<Tip> tip = new ArrayList<>();
+    protected List<Tip> tip = new ArrayList<>();
 
-    private boolean bufferTooltips = false;
-    private final List<Runnable> bufferedTooltips = Lists.newArrayList();
+    protected boolean bufferTooltips = false;
+    protected final List<Runnable> bufferedTooltips = Lists.newArrayList();
 
-    private TextFieldWidget searchField;
+    protected TextFieldWidget searchField;
 
     public ScriptingScreen(Text title, Screen parent, Script script) {
         super(title);
@@ -94,12 +93,12 @@ public class ScriptingScreen extends Screen {
         matrix.pop();
     }
 
-    private void clearTip(){
+    protected void clearTip(){
         sidebarScrollTarget = -20;
         tip = new ArrayList<>();
         last_par = "";
     }
-    private void setTip(List<Help.Parameter> par){
+    protected void setTip(List<Help.Parameter> par){
         clearTip();
         for (Help.Parameter pa : par) {
             last_par += pa.name;
@@ -107,13 +106,13 @@ public class ScriptingScreen extends Screen {
         }
     }
 
-    private void setTip(){
+    protected void setTip(){
         setTip(getCursorHelp());
     }
-    private void setTip(Help help){
+    protected void setTip(Help help){
         setTip(Help.recurseImported(help, new HashSet<>()));
     }
-    private void setTip(Map<String, String> help){
+    protected void setTip(Map<String, String> help){
         clearTip();
         for (Map.Entry<String, String> as : help.entrySet()) {
             String os = as.getKey();
@@ -144,12 +143,12 @@ public class ScriptingScreen extends Screen {
         }
     }
 
-    private void negateVal(){
+    protected void negateVal(){
         if (!lines.isEmpty() && !isCloseBracket(lines.get(cursor))) {
             lines.get(cursor).negate();
         }
     }
-    private void pushValMake(Tip os){
+    protected void pushValMake(Tip os){
         if (valMake == null) {
             if (os.par.size() > 0) {
                 setTip(os.par);
@@ -169,7 +168,7 @@ public class ScriptingScreen extends Screen {
            pushValMake(os.name[0]);
         }
     }
-    private void pushValMake(String os){
+    protected void pushValMake(String os){
         if (valMake == null) {
             if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
             lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(os, "", new ArrayList<>(), null), getCursorHelp()));
@@ -187,20 +186,20 @@ public class ScriptingScreen extends Screen {
         }
         searchField.setText("");
     }
-    private Help getCursorHelp(Tip os) {
+    protected Help getCursorHelp(Tip os) {
         return getCursorHelp(os.embed);
     }
-    private Help getCursorHelp(Help embed) {
+    protected Help getCursorHelp(Help embed) {
         return embed == null ? getCursorHelp() : embed;
     }
-    private Help getCursorHelp() {
+    protected Help getCursorHelp() {
         if (!lines.isEmpty()){
             return lines.get(cursor).help;
         }
         return script.help;
     }
 
-    private void drawForeground(MatrixStack matrix, int mouseX, int mouseY, float delta) {
+    protected void drawForeground(MatrixStack matrix, int mouseX, int mouseY, float delta) {
         fill(matrix, width-12, 10, width-10, (ticks>>3)%8+2, -1);
         fill(matrix, 0, 16, 130, height, 0x44000000);
         if (drawToggleButton(matrix, width-16, 1, 10, 10, null, "Switch through alternative names", mouseX, mouseY, tick)){
@@ -414,7 +413,7 @@ public class ScriptingScreen extends Screen {
     }
 
     //TODO might to be visible in all resolutions
-    private void drawHelp(MatrixStack matrices) {
+    protected void drawHelp(MatrixStack matrices) {
         String hlp = """
         Keybinds:
             F1 - Toggles Help
@@ -439,7 +438,7 @@ public class ScriptingScreen extends Screen {
             y+=16;
         }
     }
-    private String unloadScript(){
+    protected String unloadScript(){
         StringBuilder out = new StringBuilder();
         for (int i = 0; i< lines.size(); i++) {
             Line s = lines.get(i);
@@ -495,19 +494,19 @@ public class ScriptingScreen extends Screen {
             if(chr != '!' && chr != '~') prev_help = null;
         }
     }
-    private int findChr(String str, int chr, int from, int to){
+    protected int findChr(String str, int chr, int from, int to){
         for(int i = from; i < to; ++i)
             if (str.charAt(i) == chr) return i;
         return -1;
     }
-    private int findEndChr(String str, int from, int to){
+    protected int findEndChr(String str, int from, int to){
         for(int i = from; i < to; ++i) {
             char chr = str.charAt(i);
             if (chr == ';' || isCloseBracket(chr)) return i;
         }
         return to;
     }
-    private boolean drawButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY) {
+    protected boolean drawButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY) {
         boolean hovering = mouseIn(x, y, w, h, mouseX, mouseY);
         if (hovering) {
             if (didClick) {
@@ -525,7 +524,7 @@ public class ScriptingScreen extends Screen {
             textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2), y + ((h - 8) / 2), -1);
         return hovering && didClick;
     }
-    private boolean drawToggleButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY, boolean toggled) {
+    protected boolean drawToggleButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY, boolean toggled) {
         boolean hovering = mouseIn(x, y, w, h, mouseX, mouseY);
         if (hovering) {
             if (didClick) {
@@ -544,10 +543,10 @@ public class ScriptingScreen extends Screen {
 
         return hovering && didClick;
     }
-    private boolean mouseIn(int x, int y, int w, int h, float mouseX, float mouseY){
+    protected boolean mouseIn(int x, int y, int w, int h, float mouseX, float mouseY){
         return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
     }
-    private void drawOutlineBox(MatrixStack matrix, int x, int y, int w, int h, int color){
+    protected void drawOutlineBox(MatrixStack matrix, int x, int y, int w, int h, int color){
         fill(matrix, x, y, x+w, y+1, color);
         fill(matrix, x, y, x+1, y+h, color);
         fill(matrix, x, y+h-1, x+w, y+h, color);
@@ -736,61 +735,61 @@ public class ScriptingScreen extends Screen {
             matrices.pop();
         }
     }
-    private void bracketLine(char c1, char c2, Help h2){
+    protected void bracketLine(char c1, char c2, Help h2){
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
         lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
         lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), h2, null));
     }
-    private void bracketLine(char c1, char c2){
+    protected void bracketLine(char c1, char c2){
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
         lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
         lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), help, null));
     }
-    private void bracketLine(char c1, char c2, Help h2, boolean negate){
+    protected void bracketLine(char c1, char c2, Help h2, boolean negate){
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
         lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null, negate));
         lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), h2 == null? help : h2, null));
     }
-    private boolean isBracket(){
+    protected boolean isBracket(){
         return isBracket(cursor);
     }
-    private boolean isBracket(int in){
+    protected boolean isBracket(int in){
         return !lines.isEmpty() && isBracket(lines.get(in));
     }
-    private boolean isBracket(Line in){
+    protected boolean isBracket(Line in){
         return isBracket(in.tip.name[0]);
     }
-    private boolean isBracket(String in){
+    protected boolean isBracket(String in){
         return isBracket(in.charAt(0));
     }
-    private boolean isBracket(char in){
+    protected boolean isBracket(char in){
         return isOpenBracket(in) || isCloseBracket(in);
     }
-    private boolean isOpenBracket(int in){
+    protected boolean isOpenBracket(int in){
         return !lines.isEmpty() && isOpenBracket(lines.get(in));
     }
-    private boolean isOpenBracket(Line in){
+    protected boolean isOpenBracket(Line in){
         return isOpenBracket(in.tip.name[0]);
     }
-    private boolean isOpenBracket(String in){
+    protected boolean isOpenBracket(String in){
         return isOpenBracket(in.charAt(0));
     }
-    private boolean isOpenBracket(char in){
+    protected boolean isOpenBracket(char in){
         return in == '[' || in == '(' || in == '{';
     }
-    private boolean isCloseBracket(int in){
+    protected boolean isCloseBracket(int in){
         return !lines.isEmpty() && isCloseBracket(lines.get(in));
     }
-    private boolean isCloseBracket(Line in){
+    protected boolean isCloseBracket(Line in){
         return isCloseBracket(in.tip.name[0]);
     }
-    private boolean isCloseBracket(String in){
+    protected boolean isCloseBracket(String in){
         return isCloseBracket(in.charAt(0));
     }
-    private boolean isCloseBracket(char in){
+    protected boolean isCloseBracket(char in){
         return in == ']' || in == ')' || in == '}';
     }
     public static record Script(
@@ -802,7 +801,7 @@ public class ScriptingScreen extends Screen {
             Map<String, Help> embedable
     ) { }
 
-    private static record Tip(
+    protected static record Tip(
             String[] name,
             String desc,
             List<Help.Parameter> par,
@@ -819,7 +818,7 @@ public class ScriptingScreen extends Screen {
                     (par.size()>0 ? embed == null ? ":" : "~" : embed == null ? "" : ":");
         }
     }
-    private static class Line {
+    protected static class Line {
         final Tip tip;
         final Help help;
         String val;
