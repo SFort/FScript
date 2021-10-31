@@ -31,13 +31,21 @@ public class ScriptParser<T> {
                     i = indx;
                 }
                 case '~' -> {
-                    int ii = i;
+                    int ii = i+1;
                     int c = 0;
                     char end = ';';
                     char start = ';';
+                    boolean eIndexed = false;
                     while (ii<in.length()) {
                         char cur = in.charAt(ii);
-                        if (c == 0){
+                        if (eIndexed){
+                            if (cur == ':') eIndexed = false;
+                        }else if (c == 0){
+                            if (cur == '~'){
+                                eIndexed = true;
+                                ii++;
+                                continue;
+                            }
                             if (cur == ';') break;
                             if (cur == '(' || cur == '[' || cur == '{') {
                                 c++;
