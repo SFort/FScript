@@ -464,12 +464,16 @@ public class ScriptingScreen extends Screen {
         cursor = 0;
         boolean negate = false;
         Help prev_help = null;
+        int seCount = 0;
         for (int i = 0; i<in.length(); i++) {
             char chr = in.charAt(i);
             switch (chr){
                 case '!' -> negate = !negate;
                 case '~' -> {
-                    if (prev_help != null) bracketLine('[', ']', prev_help, negate);
+                    if (prev_help != null){
+                        bracketLine('[', ']', prev_help, negate);
+                        seCount++;
+                    }
                     int colon = in.indexOf(':', i);
                     int tilde = findChr(in, '~', i+1, colon);
                     boolean noTilde = tilde == -1;
@@ -504,7 +508,10 @@ public class ScriptingScreen extends Screen {
                 default -> {
                     int scolon = findEndChr(in, i, in.length());
                     int colon = findChr(in, ':', i, scolon);
-                    if (prev_help != null) bracketLine('[', ']', prev_help, negate);
+                    if (prev_help != null){
+                        bracketLine('[', ']', prev_help, negate);
+                        seCount++;
+                    }
                     else if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
                     if (i != (colon == -1 ? scolon : colon))
                         lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colon == -1 ? scolon : colon), "", new ArrayList<>(), null), getCursorHelp(), colon == -1 ? null : in.substring(colon, scolon), negate));
@@ -513,8 +520,17 @@ public class ScriptingScreen extends Screen {
                     if (lines.size()>1) cursor++;
                 }
             }
-            if(chr != '!') negate = false;
-            if(chr != '!' && chr != '~') prev_help = null;
+            if(chr != '!'){
+                negate = false;
+                if (chr != '~' && prev_help != null) {
+                    if (seCount != 0){
+                        cursor+=seCount;
+                        seCount=0;
+                    }
+                    prev_help = null;
+                }
+            }
+
         }
         setTip();
     }
