@@ -10,7 +10,7 @@ Maven:
 ```
 repositories {
 	maven {
-		url = 'https://sfort.ssf.tf/fscript-mvn/'
+		url = 'https://maven.ssf.tf/fscript-mvn/'
 	}
 }
 dependencies {
