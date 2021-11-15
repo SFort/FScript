@@ -214,6 +214,7 @@ public class ScriptingScreen extends Screen {
         }
     }
     protected void drawTips(MatrixStack matrix, int mouseX, int mouseY, float delta){
+        boolean shortened = 400>width;
         float scroll = sidebarHeight < height ? 0 : sidebarScroll;
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
@@ -245,7 +246,7 @@ public class ScriptingScreen extends Screen {
                         newHeight += 12;
                         line = 1;
                     }
-                    if(y<22) continue;
+                    if(y<22 || (shortened && y>height-30)) continue;
                     x = textRenderer.drawWithShadow(matrix, word+" ", x, y, -1);
                 }
                 if(line == 0 && Arrays.stream(os.name).anyMatch(st -> textRenderer.getWidth(st)>115)){
@@ -255,7 +256,7 @@ public class ScriptingScreen extends Screen {
                 y += 12;
                 thisHeight += 12;
             }
-            if (mouseX >= 0 && mouseX <= 130 && mouseY > startY-4 && mouseY < y && mouseY > 22) {
+            if (mouseX >= 0 && mouseX <= 130 && mouseY > startY-4 && mouseY < y && mouseY > 22 && (!shortened || y < height - 20)) {
                 if (didClick) {
                     client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
                     pushValMake(os);
@@ -269,8 +270,9 @@ public class ScriptingScreen extends Screen {
             y += 8;
             newHeight += thisHeight;
             if(y>height){
-                textRenderer.draw(matrix, "v", 0, height-7, -1);
-                textRenderer.draw(matrix, "v", 124, height-7, -1);
+                int xOffset = shortened && y>width-20 ? 27 : 7;
+                textRenderer.draw(matrix, "v", 0, height-xOffset, -1);
+                textRenderer.draw(matrix, "v", 124, height-xOffset, -1);
                 break;
             }
         }
@@ -369,6 +371,9 @@ public class ScriptingScreen extends Screen {
             onClose();
         }
         int x = 130;
+        if (400>width){
+            x=0;
+        }
         if (drawButton(matrix, x, height - 20, 20, 20, "!", "Negate selected", mouseX, mouseY))
             negateVal();
         x += 20;
