@@ -2,7 +2,6 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -67,11 +66,6 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 						rez=predicate.test(i.next());
 					return rez;
 				};
-			}
-			case "holder" -> {
-				final Predicate<Entity> predicate = Default.ENTITY_PARSER.parse(script);
-				if (predicate == null) yield null;
-				yield item -> item.getHolder() != null && predicate.test(item.getHolder());
 			}
 			default -> null;
 		};
@@ -156,7 +150,6 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 		help.put("has_glint","Require Item to have a glint");
 		help.put("has_nbt","Require item to have nbt data stored");
 		help.put("has_enchants","Require item to have enchantments");
-		help.put("~holder:ENTITY","Execute script on entity holding item");
 		help.put("in_frame","Require item to be in a item frame");
 
 		extend_help.add(Default.ITEM);
