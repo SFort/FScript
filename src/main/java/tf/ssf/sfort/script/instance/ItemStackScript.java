@@ -11,14 +11,12 @@ import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
-import tf.ssf.sfort.script.ScriptParser;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
-	public ScriptParser<Map.Entry<Enchantment, Integer>> ENCHANTMENT_PARSER = new ScriptParser<>(Default.ENCHANTMENT_LEVEL_ENTRY);
-	public ScriptParser<Entity> ENTITY_PARSER = new ScriptParser<>(Default.ENTITY);
+
 
 	public Predicate<ItemStack> getLP(String in, String val){
 		return switch (in){
@@ -60,7 +58,7 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 	public Predicate<ItemStack> getLE(String in, String script){
 		return switch (in) {
 			case "enchant" -> {
-				final Predicate<Map.Entry<Enchantment, Integer>> predicate = ENCHANTMENT_PARSER.parse(script);
+				final Predicate<Map.Entry<Enchantment, Integer>> predicate = Default.ENCHANTMENT_PARSER.parse(script);
 				if (predicate == null) yield null;
 				yield item -> {
 					boolean rez = false;
@@ -71,7 +69,7 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 				};
 			}
 			case "holder" -> {
-				final Predicate<Entity> predicate = ENTITY_PARSER.parse(script);
+				final Predicate<Entity> predicate = Default.ENTITY_PARSER.parse(script);
 				if (predicate == null) yield null;
 				yield item -> item.getHolder() != null && predicate.test(item.getHolder());
 			}
@@ -81,7 +79,7 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 	public Predicate<ItemStack> getLE(String in, String val, String script){
 		return switch (in) {
 			case "enchant" ->{
-				final Predicate<Map.Entry<Enchantment, Integer>> predicate = ENCHANTMENT_PARSER.parse(script);
+				final Predicate<Map.Entry<Enchantment, Integer>> predicate = Default.ENCHANTMENT_PARSER.parse(script);
 				if (predicate == null) yield null;
 				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
 				if (arg == null) yield null;

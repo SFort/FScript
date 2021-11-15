@@ -5,7 +5,6 @@ import net.minecraft.item.ItemStack;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
-import tf.ssf.sfort.script.ScriptParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +12,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class InventoryScript<T extends Inventory> implements PredicateProvider<T>, Help {
-	public ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(Default.ITEM_STACK);
 
 	public Predicate<T> getLE(String in, String script){
 		return switch (in) {
 			case "slot" -> {
-				final Predicate<ItemStack> predicate = ITEM_STACK_PARSER.parse(script);
+				final Predicate<ItemStack> predicate = Default.ITEM_STACK_PARSER.parse(script);
 				if (predicate == null) yield null;
 				yield inventory -> {
 					boolean rez = false;
@@ -33,7 +31,7 @@ public class InventoryScript<T extends Inventory> implements PredicateProvider<T
 	public Predicate<T> getLE(String in, String val, String script){
 		return switch (in) {
 			case "slot" ->{
-				final Predicate<ItemStack> predicate = ITEM_STACK_PARSER.parse(script);
+				final Predicate<ItemStack> predicate = Default.ITEM_STACK_PARSER.parse(script);
 				if (predicate == null) yield null;
 				final int arg = Integer.parseInt(val);
 				yield inventory -> predicate.test(inventory.getStack(arg));

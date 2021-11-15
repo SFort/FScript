@@ -1,9 +1,12 @@
 package tf.ssf.sfort.script;
 
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.instance.*;
 import tf.ssf.sfort.script.instance.InventoryScript;
@@ -28,6 +31,15 @@ public class Default {
     public static EnchantmentLevelEntryScript ENCHANTMENT_LEVEL_ENTRY = new EnchantmentLevelEntryScript();
     public static GameModeScript GAME_MODE = new GameModeScript();
     public static FishingBobberEntityScript FISHING_BOBBER_ENTITY = new FishingBobberEntityScript();
+
+    public static ScriptParser<LivingEntity> LIVING_ENTITY_PARSER = new ScriptParser<>(Default.LIVING_ENTITY);
+    public static ScriptParser<PlayerEntity> PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.PLAYER_ENTITY);
+    public static ScriptParser<ServerPlayerEntity> SERVER_PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.SERVER_PLAYER_ENTITY);
+    public static ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(Default.ITEM_STACK);
+    public static ScriptParser<Map.Entry<Enchantment, Integer>> ENCHANTMENT_PARSER = new ScriptParser<>(Default.ENCHANTMENT_LEVEL_ENTRY);
+    public static ScriptParser<Entity> ENTITY_PARSER = new ScriptParser<>(Default.ENTITY);
+    public static ScriptParser<PlayerInventory> PLAYER_INVENTORY_PARSER = new ScriptParser<>(Default.PLAYER_INVENTORY);
+
 
     protected static final Map<String, PredicateProvider<?>> defaults = new HashMap<>();
     public static Map<String, PredicateProvider<?>> getDefaultMap(){

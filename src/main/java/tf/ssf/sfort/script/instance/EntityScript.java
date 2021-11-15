@@ -14,15 +14,11 @@ import net.minecraft.world.chunk.Chunk;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
-import tf.ssf.sfort.script.ScriptParser;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 public class EntityScript<T extends Entity> implements PredicateProvider<T>, Help {
-	public ScriptParser<LivingEntity> LIVING_ENTITY_PARSER = new ScriptParser<>(Default.LIVING_ENTITY);
-	public ScriptParser<PlayerEntity> PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.PLAYER_ENTITY);
-	public ScriptParser<ServerPlayerEntity> SERVER_PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.SERVER_PLAYER_ENTITY);
 
 	public Predicate<T> getLP(String in, String val){
 		return switch (in){
@@ -111,7 +107,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 	public Predicate<T> getLE(String in, String script){
 		return switch (in){
 			case "living" -> {
-				final Predicate<LivingEntity> predicate = LIVING_ENTITY_PARSER.parse(script);
+				final Predicate<LivingEntity> predicate = Default.LIVING_ENTITY_PARSER.parse(script);
 				if (predicate == null) yield null;
 				yield entity -> {
 					if (entity instanceof LivingEntity)
@@ -120,7 +116,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 				};
 			}
 			case "player" -> {
-				final Predicate<PlayerEntity> predicate = PLAYER_ENTITY_PARSER.parse(script);
+				final Predicate<PlayerEntity> predicate = Default.PLAYER_ENTITY_PARSER.parse(script);
 				if (predicate == null) yield null;
 				yield entity -> {
 					if (entity instanceof PlayerEntity)
@@ -129,7 +125,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 				};
 			}
 			case "server_player" -> {
-				final Predicate<ServerPlayerEntity> predicate = SERVER_PLAYER_ENTITY_PARSER.parse(script);
+				final Predicate<ServerPlayerEntity> predicate = Default.SERVER_PLAYER_ENTITY_PARSER.parse(script);
 				if (predicate == null) yield null;
 				yield entity -> {
 					if (entity instanceof ServerPlayerEntity)

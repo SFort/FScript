@@ -7,15 +7,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
-import tf.ssf.sfort.script.ScriptParser;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProvider<T>, Help {
-    public ScriptParser<PlayerInventory> PLAYER_INVENTORY_PARSER = new ScriptParser<>(Default.PLAYER_INVENTORY);
     public LivingEntityScript<T> LIVING_ENTITY = new LivingEntityScript<>();
-    public ScriptParser<ServerPlayerEntity> SERVER_PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.SERVER_PLAYER_ENTITY);
     public Predicate<T> getLP(String in, String val){
         return switch (in){
             case "level" -> {
@@ -32,12 +29,12 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
     public Predicate<T> getLE(String in, String script){
         return switch (in) {
             case "inventory" -> {
-                final Predicate<PlayerInventory> predicate = PLAYER_INVENTORY_PARSER.parse(script);
+                final Predicate<PlayerInventory> predicate = Default.PLAYER_INVENTORY_PARSER.parse(script);
                 if (predicate == null) yield null;
                 yield player -> predicate.test(player.getInventory());
             }
             case "server_player" -> {
-                final Predicate<ServerPlayerEntity> predicate = SERVER_PLAYER_ENTITY_PARSER.parse(script);
+                final Predicate<ServerPlayerEntity> predicate = Default.SERVER_PLAYER_ENTITY_PARSER.parse(script);
                 if (predicate == null) yield null;
                 yield entity -> {
                     if (entity instanceof ServerPlayerEntity)
