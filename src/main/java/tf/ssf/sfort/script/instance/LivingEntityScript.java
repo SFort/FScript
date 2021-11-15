@@ -3,10 +3,12 @@ package tf.ssf.sfort.script.instance;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.SimpleRegistry;
+import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.ScriptParser;
@@ -17,7 +19,9 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class LivingEntityScript<T extends LivingEntity> implements PredicateProvider<T>, Help {
-    public ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(new ItemStackScript());
+    public ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(Default.ITEM_STACK);
+    public ScriptParser<PlayerEntity> PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.PLAYER_ENTITY);
+    public ScriptParser<ServerPlayerEntity> SERVER_PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.SERVER_PLAYER_ENTITY);
     public EntityScript<T> ENTITY = new EntityScript<>();
 
     public Predicate<T> getLP(String in, String val){
@@ -101,6 +105,24 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
                     default -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.FEET));
                 };
             }
+            case "player" -> {
+                final Predicate<PlayerEntity> predicate = PLAYER_ENTITY_PARSER.parse(script);
+                if (predicate == null) yield null;
+                yield entity -> {
+                    if (entity instanceof PlayerEntity)
+                        return predicate.test(((PlayerEntity) entity));
+                    return false;
+                };
+            }
+            case "server_player" -> {
+                final Predicate<ServerPlayerEntity> predicate = SERVER_PLAYER_ENTITY_PARSER.parse(script);
+                if (predicate == null) yield null;
+                yield entity -> {
+                    if (entity instanceof ServerPlayerEntity)
+                        return predicate.test(((ServerPlayerEntity) entity));
+                    return false;
+                };
+            }
             default -> null;
         };
     }
@@ -144,7 +166,15 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     }
     @Override
     public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
-        return getLE(in, script);
+        {
+            final Predicate<T> out = getLE(in, script);
+            if (out !=null) return out;
+        }
+        if (dejavu.add(ENTITY.getClass())){
+            final Predicate<T> out = ENTITY.getEmbed(in, script, dejavu);
+            if (out !=null) return out;
+        }
+        return null;
     }
     @Override
     public Predicate<T> getEmbed(String key, String arg, String script, Set<Class<?>> dejavu){
@@ -195,6 +225,8 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         help.put("using is_using","Require using items");
         help.put("fall_flying is_fall_flying","Require flying with elytra");
         if (Config.extended) help.put("sleeping_in_bed is_sleeping_in_bed","Require sleeping in a bed");
+        help.put("~player:PLAYER_ENTITY", "Require a player entity");
+        help.put("~server_player:SERVER_PLAYER_ENTITY", "Require a server player entity");
 
         extend_help.add(new EntityScript<LivingEntity>());
     }

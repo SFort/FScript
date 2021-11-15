@@ -1,11 +1,9 @@
 package tf.ssf.sfort.script.instance;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
@@ -15,8 +13,9 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProvider<T>, Help {
-    public ScriptParser<PlayerInventory> PLAYER_INVENTORY_PARSER = new ScriptParser<>(new PlayerInventoryScript());
+    public ScriptParser<PlayerInventory> PLAYER_INVENTORY_PARSER = new ScriptParser<>(Default.PLAYER_INVENTORY);
     public LivingEntityScript<T> LIVING_ENTITY = new LivingEntityScript<>();
+    public ScriptParser<ServerPlayerEntity> SERVER_PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.SERVER_PLAYER_ENTITY);
     public Predicate<T> getLP(String in, String val){
         return switch (in){
             case "level" -> {
@@ -37,6 +36,15 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
                 if (predicate == null) yield null;
                 yield player -> predicate.test(player.getInventory());
             }
+            case "server_player" -> {
+                final Predicate<ServerPlayerEntity> predicate = SERVER_PLAYER_ENTITY_PARSER.parse(script);
+                if (predicate == null) yield null;
+                yield entity -> {
+                    if (entity instanceof ServerPlayerEntity)
+                        return predicate.test(((ServerPlayerEntity) entity));
+                    return false;
+                };
+            }
             default -> null;
         };
     }
@@ -48,7 +56,7 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
             final Predicate<T> out = getLP(in, val);
             if (out != null) return out;
         }
-        if (dejavu.add(LivingEntityScript.class)){
+        if (dejavu.add(LIVING_ENTITY.getClass())){
             final Predicate<T> out = LIVING_ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
         }
@@ -60,7 +68,7 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
     }
     @Override
     public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
-        if (dejavu.add(LivingEntityScript.class)){
+        if (dejavu.add(LIVING_ENTITY.getClass())){
             final Predicate<T> out = LIVING_ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
         }
@@ -107,8 +115,9 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
         help.put("level:int","Minimum required player level");
         help.put("food:float","Minimum required food");
         help.put("~inventory:PLAYER_INVENTORY", "Require matching inventory");
+        help.put("~server_player:SERVER_PLAYER_ENTITY", "Require a server player entity");
 
         extend_help.add(new LivingEntityScript<PlayerEntity>());
-        extend_help.add(new FishingBobberEntityScript());
+        extend_help.add(Default.FISHING_BOBBER_ENTITY);
     }
 }

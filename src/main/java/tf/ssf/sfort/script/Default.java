@@ -3,8 +3,10 @@ package tf.ssf.sfort.script;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.instance.*;
+import tf.ssf.sfort.script.instance.InventoryScript;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +21,7 @@ public class Default {
     public static WorldScript WORLD = new WorldScript();
     public static BiomeScript BIOME = new BiomeScript();
     public static ItemScript ITEM = new ItemScript();
+    public static InventoryScript<Inventory> INVENTORY = new InventoryScript<>();
     public static PlayerInventoryScript PLAYER_INVENTORY = new PlayerInventoryScript();
     public static ItemStackScript ITEM_STACK = new ItemStackScript();
     public static EnchantmentScript ENCHANTMENT = new EnchantmentScript();
@@ -40,6 +43,7 @@ public class Default {
         defaults.put("WORLD", Default.WORLD);
         defaults.put("BIOME", Default.BIOME);
         defaults.put("ITEM", Default.ITEM);
+        defaults.put("INVENTORY", Default.INVENTORY);
         defaults.put("PLAYER_INVENTORY", Default.PLAYER_INVENTORY);
         defaults.put("ITEM_STACK", Default.ITEM_STACK);
         defaults.put("ENCHANTMENT", Default.ENCHANTMENT);

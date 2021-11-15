@@ -3,6 +3,9 @@ package tf.ssf.sfort.script.instance;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -11,11 +14,16 @@ import net.minecraft.world.chunk.Chunk;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.ScriptParser;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 public class EntityScript<T extends Entity> implements PredicateProvider<T>, Help {
+	public ScriptParser<LivingEntity> LIVING_ENTITY_PARSER = new ScriptParser<>(Default.LIVING_ENTITY);
+	public ScriptParser<PlayerEntity> PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.PLAYER_ENTITY);
+	public ScriptParser<ServerPlayerEntity> SERVER_PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.SERVER_PLAYER_ENTITY);
+
 	public Predicate<T> getLP(String in, String val){
 		return switch (in){
 			case "x" -> {
@@ -100,7 +108,38 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			default -> null;
 		};
 	}
-
+	public Predicate<T> getLE(String in, String script){
+		return switch (in){
+			case "living" -> {
+				final Predicate<LivingEntity> predicate = LIVING_ENTITY_PARSER.parse(script);
+				if (predicate == null) yield null;
+				yield entity -> {
+					if (entity instanceof LivingEntity)
+						return predicate.test(((LivingEntity) entity));
+					return false;
+				};
+			}
+			case "player" -> {
+				final Predicate<PlayerEntity> predicate = PLAYER_ENTITY_PARSER.parse(script);
+				if (predicate == null) yield null;
+				yield entity -> {
+					if (entity instanceof PlayerEntity)
+						return predicate.test(((PlayerEntity) entity));
+					return false;
+				};
+			}
+			case "server_player" -> {
+				final Predicate<ServerPlayerEntity> predicate = SERVER_PLAYER_ENTITY_PARSER.parse(script);
+				if (predicate == null) yield null;
+				yield entity -> {
+					if (entity instanceof ServerPlayerEntity)
+						return predicate.test(((ServerPlayerEntity) entity));
+					return false;
+				};
+			}
+			default -> null;
+		};
+	}
 	//==================================================================================================================
 
 	@Override
@@ -143,7 +182,14 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		}
 		return null;
 	}
-
+	@Override
+	public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
+		{
+			final Predicate<T> out = getLE(in, script);
+			if (out !=null) return out;
+		}
+		return null;
+	}
 	//==================================================================================================================
 
 	@Override
@@ -193,6 +239,9 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		help.put("sneaky is_sneaking sneaking is_sneaky", "Require sneaking");
 		help.put("swimming is_swimming", "Require swimming");
 		help.put("full_air max_air", "Require having full air");
+		help.put("~living:LIVING_ENTITY", "Require a living entity");
+		help.put("~player:PLAYER_ENTITY", "Require a player entity");
+		help.put("~server_player:SERVER_PLAYER_ENTITY", "Require a server player entity");
 
 		extend_help.add(new WorldScript());
 		extend_help.add(new BiomeScript());

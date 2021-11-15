@@ -1,7 +1,6 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.mixin_extended.Config;

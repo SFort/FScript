@@ -74,6 +74,6 @@ public class WorldScript implements PredicateProvider<World>, Help {
         help.put("raining is_raining","Require rain");
         help.put("day is_day","Require daytime");
 
-        extend_help.add(new DimensionTypeScript());
+        extend_help.add(Default.DIMENSION_TYPE);
     }
 }

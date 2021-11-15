@@ -2,6 +2,7 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -16,7 +17,8 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
-	public ScriptParser<Map.Entry<Enchantment, Integer>> ENCHANTMENT_PARSER = new ScriptParser<>(new EnchantmentLevelEntryScript());
+	public ScriptParser<Map.Entry<Enchantment, Integer>> ENCHANTMENT_PARSER = new ScriptParser<>(Default.ENCHANTMENT_LEVEL_ENTRY);
+	public ScriptParser<Entity> ENTITY_PARSER = new ScriptParser<>(Default.ENTITY);
 
 	public Predicate<ItemStack> getLP(String in, String val){
 		return switch (in){
@@ -67,6 +69,11 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 						rez=predicate.test(i.next());
 					return rez;
 				};
+			}
+			case "holder" -> {
+				final Predicate<Entity> predicate = ENTITY_PARSER.parse(script);
+				if (predicate == null) yield null;
+				yield item -> item.getHolder() != null && predicate.test(item.getHolder());
 			}
 			default -> null;
 		};
@@ -151,8 +158,9 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 		help.put("has_glint","Require Item to have a glint");
 		help.put("has_nbt","Require item to have nbt data stored");
 		help.put("has_enchants","Require item to have enchantments");
+		help.put("~holder:ENTITY","Execute script on entity holding item");
 		help.put("in_frame","Require item to be in a item frame");
 
-		extend_help.add(new ItemScript());
+		extend_help.add(Default.ITEM);
 	}
 }

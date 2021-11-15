@@ -1,6 +1,5 @@
 package tf.ssf.sfort.script.instance;
 
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -59,7 +58,7 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
             final Predicate<T> out = getLP(in, val);
             if (out != null) return out;
         }
-        if (dejavu.add(PlayerEntityScript.class)){
+        if (dejavu.add(PLAYER_ENTITY.getClass())){
             final Predicate<T> out = PLAYER_ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
         }
@@ -123,6 +122,6 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
         if (Config.extended) help.put("seen_credits", "Require player to have seen the end credits");
 
         extend_help.add(new PlayerEntityScript<ServerPlayerEntity>());
-        extend_help.add(new GameModeScript());
+        extend_help.add(Default.GAME_MODE);
     }
 }

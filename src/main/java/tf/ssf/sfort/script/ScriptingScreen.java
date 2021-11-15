@@ -921,6 +921,7 @@ public class ScriptingScreen extends Screen {
         default_embed.put("WORLD", Default.WORLD);
         default_embed.put("BIOME", Default.BIOME);
         default_embed.put("ITEM", Default.ITEM);
+        default_embed.put("INVENTORY", Default.INVENTORY);
         default_embed.put("PLAYER_INVENTORY", Default.PLAYER_INVENTORY);
         default_embed.put("ITEM_STACK", Default.ITEM_STACK);
         default_embed.put("ENCHANTMENT", Default.ENCHANTMENT);

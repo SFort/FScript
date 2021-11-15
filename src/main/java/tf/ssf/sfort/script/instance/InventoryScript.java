@@ -1,19 +1,19 @@
-package tf.ssf.sfort.script.instance.abstractions;
+package tf.ssf.sfort.script.instance;
 
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.ScriptParser;
-import tf.ssf.sfort.script.instance.ItemStackScript;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class InventoryScript<T extends Inventory> implements PredicateProvider<T>, Help {
-	public ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(new ItemStackScript());
+public class InventoryScript<T extends Inventory> implements PredicateProvider<T>, Help {
+	public ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(Default.ITEM_STACK);
 
 	public Predicate<T> getLE(String in, String script){
 		return switch (in) {
