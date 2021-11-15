@@ -1,5 +1,6 @@
 package tf.ssf.sfort.script.instance;
 
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -88,17 +89,19 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
 
     @Override
     public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
-        //TODO
-        if (dejavu.add(PLAYER_ENTITY.getClass()))
-            return PLAYER_ENTITY.getEmbed(in, script);
+        if (dejavu.add(PLAYER_ENTITY.getClass())){
+            final Predicate<T> out = PLAYER_ENTITY.getEmbed(in, script, dejavu);
+            if (out !=null) return out;
+        }
         return null;
     }
 
     @Override
     public Predicate<T> getEmbed(String in, String val, String script, Set<Class<?>> dejavu){
-        //TODO
-        if (dejavu.add(PLAYER_ENTITY.getClass()))
-            return PLAYER_ENTITY.getEmbed(in, val, script);
+        if (dejavu.add(PLAYER_ENTITY.getClass())){
+            final Predicate<T> out = PLAYER_ENTITY.getEmbed(in, val, script, dejavu);
+            if (out !=null) return out;
+        }
         return null;
     }
 

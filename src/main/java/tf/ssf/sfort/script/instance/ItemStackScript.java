@@ -42,7 +42,7 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 
 	public Predicate<ItemStack> getLP(String in){
 		return switch (in){
-			case "damageable" -> ItemStack::isDamageable;
+			case "damageable", "is_damageable" -> ItemStack::isDamageable;
 			case "empty" -> ItemStack::isEmpty;
 			case "damaged" -> ItemStack::isDamaged;
 			case "stackable" -> ItemStack::isStackable;
@@ -117,16 +117,12 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 
 	@Override
 	public Predicate<ItemStack> getEmbed(String in, String script, Set<Class<?>> dejavu){
-		if (dejavu.add(ENCHANTMENT_PARSER.make.getClass()))
-			return getLE(in, script);
-		return null;
+		return getLE(in, script);
 	}
 
 	@Override
 	public Predicate<ItemStack> getEmbed(String in, String val, String script, Set<Class<?>> dejavu){
-		if (dejavu.add(ENCHANTMENT_PARSER.make.getClass()))
-			return getLE(in, val, script);
-		return null;
+		return getLE(in, val, script);
 	}
 
 	//==================================================================================================================
@@ -147,7 +143,7 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 		help.put("~enchant:ENCHANTMENT_LEVEL_ENTRY","Execute script on all enchantments");
 		help.put("~enchant~EnchantID:ENCHANTMENT_LEVEL_ENTRY","Execute script on a specific enchantment");
 		help.put("rarity:RarityID", "Item has specified rarity");
-		help.put("damageable","Require Item to be damageable");
+		help.put("damageable is_damageable","Require Item to be damageable");
 		help.put("empty","Require there to be no item");
 		help.put("damaged","Require Item to be damaged");
 		help.put("stackable","Require Item to be stackable");

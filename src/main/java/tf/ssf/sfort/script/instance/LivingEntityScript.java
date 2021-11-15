@@ -3,10 +3,10 @@ package tf.ssf.sfort.script.instance;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.SimpleRegistry;
-import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.ScriptParser;
@@ -144,8 +144,10 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     }
     @Override
     public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
-        if (dejavu.add(ITEM_STACK_PARSER.make.getClass()))
-            return getLE(in, script);
+        return getLE(in, script);
+    }
+    @Override
+    public Predicate<T> getEmbed(String key, String arg, String script, Set<Class<?>> dejavu){
         return null;
     }
 

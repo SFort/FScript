@@ -19,6 +19,7 @@ public class Default {
     public static WorldScript WORLD = new WorldScript();
     public static BiomeScript BIOME = new BiomeScript();
     public static ItemScript ITEM = new ItemScript();
+    public static PlayerInventoryScript PLAYER_INVENTORY = new PlayerInventoryScript();
     public static ItemStackScript ITEM_STACK = new ItemStackScript();
     public static EnchantmentScript ENCHANTMENT = new EnchantmentScript();
     public static EnchantmentLevelEntryScript ENCHANTMENT_LEVEL_ENTRY = new EnchantmentLevelEntryScript();
@@ -39,6 +40,7 @@ public class Default {
         defaults.put("WORLD", Default.WORLD);
         defaults.put("BIOME", Default.BIOME);
         defaults.put("ITEM", Default.ITEM);
+        defaults.put("PLAYER_INVENTORY", Default.PLAYER_INVENTORY);
         defaults.put("ITEM_STACK", Default.ITEM_STACK);
         defaults.put("ENCHANTMENT", Default.ENCHANTMENT);
         defaults.put("ENCHANTMENT_LEVEL_ENTRY", Default.ENCHANTMENT_LEVEL_ENTRY);

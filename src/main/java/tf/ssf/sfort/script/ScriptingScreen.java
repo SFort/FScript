@@ -4,7 +4,6 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.mappings.model.CommentEntry;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.Tessellator;
@@ -15,7 +14,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import oshi.util.tuples.Pair;
 import oshi.util.tuples.Triplet;
 
 import java.util.*;
@@ -936,6 +934,7 @@ public class ScriptingScreen extends Screen {
         default_embed.put("WORLD", Default.WORLD);
         default_embed.put("BIOME", Default.BIOME);
         default_embed.put("ITEM", Default.ITEM);
+        default_embed.put("PLAYER_INVENTORY", Default.PLAYER_INVENTORY);
         default_embed.put("ITEM_STACK", Default.ITEM_STACK);
         default_embed.put("ENCHANTMENT", Default.ENCHANTMENT);
         default_embed.put("ENCHANTMENT_LEVEL_ENTRY", Default.ENCHANTMENT_LEVEL_ENTRY);
