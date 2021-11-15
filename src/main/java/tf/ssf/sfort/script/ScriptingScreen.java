@@ -41,6 +41,9 @@ public class ScriptingScreen extends Screen {
     protected float sidebar2ScrollTarget;
     protected float sidebar2Scroll;
     protected float sidebar2Height;
+    protected float sidebar3ScrollTarget;
+    protected float sidebar3Scroll;
+    protected float sidebar3Height;
     protected boolean tick = false;
     protected int ticks;
 
@@ -442,11 +445,25 @@ public class ScriptingScreen extends Screen {
         
         Note that some suggestions like BiomeID can only be obtained while in a world
         """;
-        int y = 16;
+        float scroll = sidebar3Height < height ? 0 : sidebar3Scroll;
+        sidebar3Height = 20;
+        scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
+        float y = 22-scroll;
         for (String h : hlp.lines().collect(Collectors.toList())) {
-            textRenderer.drawWithShadow(matrices, h, 16, y, -1);
-            y+=16;
+            int x = 16;
+            for (String word : Splitter.on(CharMatcher.whitespace()).split(h)) {
+                if (textRenderer.getWidth(word) + x > width) {
+                    x = 16;
+                    y += 12;
+                    sidebar3Height += 12;
+                }
+                if (y < 4) continue;
+                x = textRenderer.drawWithShadow(matrices, word + " ", x, y, -1);
+            }
+            sidebar3Height+=20;
+            y+=20;
         }
+        textRenderer.drawWithShadow(matrices, "|", 6, (scroll/(sidebar3Height-height))*(height-20)+5, -1);
     }
     protected String unloadScript(){
         StringBuilder out = new StringBuilder();
@@ -631,6 +648,12 @@ public class ScriptingScreen extends Screen {
             float h = sidebar2Height-height;
             if (sidebar2ScrollTarget > h) sidebar2ScrollTarget = h+((sidebar2ScrollTarget-h)/2);
         }
+        if (sidebar3Height > height) {
+            sidebar3Scroll += (sidebar3ScrollTarget-sidebar3Scroll)/2;
+            if (sidebar3ScrollTarget < 0) sidebar3ScrollTarget /= 2;
+            float h = sidebar3Height-height;
+            if (sidebar3ScrollTarget > h) sidebar3ScrollTarget = h+((sidebar3ScrollTarget-h)/2);
+        }
 
         if (tooltipBlinkTicks > 0) {
             tooltipBlinkTicks--;
@@ -640,7 +663,10 @@ public class ScriptingScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if(renderHelp) return super.mouseScrolled(mouseX, mouseY, amount);
+        if(renderHelp){
+            sidebar3ScrollTarget -= amount*20;
+            return super.mouseScrolled(mouseX, mouseY, amount);
+        }
         if (mouseX <= 120) {
             sidebarScrollTarget -= amount*20;
         }else if (mouseY > 22){
