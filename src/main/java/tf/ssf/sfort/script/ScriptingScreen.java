@@ -782,7 +782,7 @@ public class ScriptingScreen extends Screen {
 
             for (OrderedText line : lines) {
                 if (line != null) {
-                    textRenderer.draw(line, innerX, innerY, -1, false, matrices.peek().getModel(), vcp, false, 0, 0xF000F0);
+                    textRenderer.draw(line, innerX, innerY, -1, false, matrices.peek().getPositionMatrix(), vcp, false, 0, 0xF000F0);
                 }
                 innerY += 10;
             }

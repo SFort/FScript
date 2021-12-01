@@ -25,7 +25,7 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> implements P
                 final double arg = Double.parseDouble(val);
                 yield player -> {
                     final BlockPos pos = player.getSpawnPointPosition();
-                    final ServerWorld world = player.getServerWorld();
+                    final ServerWorld world = player.getWorld();
                     final RegistryKey<World> dim = player.getSpawnPointDimension();
                     if (pos == null || world == null) return false;
                     return dim.equals(world.getRegistryKey()) && pos.isWithinDistance(player.getPos(), arg);
