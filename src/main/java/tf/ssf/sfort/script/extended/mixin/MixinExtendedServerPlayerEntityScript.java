@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 public class MixinExtendedServerPlayerEntityScript implements PredicateProvider<ServerPlayerEntity>, Help {
     @Override
-    public Predicate<ServerPlayerEntity> getPredicate(String in, Set<Class<?>> dejavu){
+    public Predicate<ServerPlayerEntity> getPredicate(String in, Set<String> dejavu){
         return switch (in){
             case "seen_credits" -> p -> ((ServerPlayerEntityExtended)p).fscript$seenCredits();
             default -> null;

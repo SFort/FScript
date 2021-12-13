@@ -5,16 +5,16 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public interface PredicateProvider<T> {
-    default Predicate<T> getPredicate(String key, Set<Class<?>> dejavu){
+    default Predicate<T> getPredicate(String key, Set<String> dejavu){
         return null;
     }
-    default Predicate<T> getPredicate(String key, String arg, Set<Class<?>> dejavu){
+    default Predicate<T> getPredicate(String key, String arg, Set<String> dejavu){
         return null;
     }
-    default Predicate<T> getEmbed(String key, String script, Set<Class<?>> dejavu){
+    default Predicate<T> getEmbed(String key, String script, Set<String> dejavu){
         return null;
     }
-    default Predicate<T> getEmbed(String key, String arg, String script, Set<Class<?>> dejavu){
+    default Predicate<T> getEmbed(String key, String arg, String script, Set<String> dejavu){
         return null;
     }
     default Predicate<T> getPredicate(String key){

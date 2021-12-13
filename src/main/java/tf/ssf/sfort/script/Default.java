@@ -1,12 +1,9 @@
 package tf.ssf.sfort.script;
 
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.instance.*;
 import tf.ssf.sfort.script.instance.InventoryScript;
@@ -15,52 +12,56 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Default {
-    public static EntityScript<Entity> ENTITY = new EntityScript<>();
-    public static LivingEntityScript<LivingEntity> LIVING_ENTITY = new LivingEntityScript<>();
-    public static PlayerEntityScript<PlayerEntity> PLAYER_ENTITY = new PlayerEntityScript<>();
-    public static ServerPlayerEntityScript<ServerPlayerEntity> SERVER_PLAYER_ENTITY = new ServerPlayerEntityScript<>();
-    public static DimensionTypeScript DIMENSION_TYPE = new DimensionTypeScript();
-    public static ChunkScript CHUNK = new ChunkScript();
-    public static WorldScript WORLD = new WorldScript();
-    public static BiomeScript BIOME = new BiomeScript();
-    public static ItemScript ITEM = new ItemScript();
-    public static InventoryScript<Inventory> INVENTORY = new InventoryScript<>();
-    public static PlayerInventoryScript PLAYER_INVENTORY = new PlayerInventoryScript();
-    public static ItemStackScript ITEM_STACK = new ItemStackScript();
-    public static EnchantmentScript ENCHANTMENT = new EnchantmentScript();
-    public static EnchantmentLevelEntryScript ENCHANTMENT_LEVEL_ENTRY = new EnchantmentLevelEntryScript();
-    public static GameModeScript GAME_MODE = new GameModeScript();
-    public static FishingBobberEntityScript FISHING_BOBBER_ENTITY = new FishingBobberEntityScript();
-
-    public static ScriptParser<LivingEntity> LIVING_ENTITY_PARSER = new ScriptParser<>(Default.LIVING_ENTITY);
-    public static ScriptParser<PlayerEntity> PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.PLAYER_ENTITY);
-    public static ScriptParser<ServerPlayerEntity> SERVER_PLAYER_ENTITY_PARSER = new ScriptParser<>(Default.SERVER_PLAYER_ENTITY);
-    public static ScriptParser<ItemStack> ITEM_STACK_PARSER = new ScriptParser<>(Default.ITEM_STACK);
-    public static ScriptParser<Map.Entry<Enchantment, Integer>> ENCHANTMENT_PARSER = new ScriptParser<>(Default.ENCHANTMENT_LEVEL_ENTRY);
-    public static ScriptParser<Entity> ENTITY_PARSER = new ScriptParser<>(Default.ENTITY);
-    public static ScriptParser<PlayerInventory> PLAYER_INVENTORY_PARSER = new ScriptParser<>(Default.PLAYER_INVENTORY);
-
+    public static final EntityScript<Entity> ENTITY = new EntityScript<>();
+    public static final LivingEntityScript<LivingEntity> LIVING_ENTITY = new LivingEntityScript<>();
+    public static final PlayerEntityScript<PlayerEntity> PLAYER_ENTITY = new PlayerEntityScript<>();
+    public static final ServerPlayerEntityScript<ServerPlayerEntity> SERVER_PLAYER_ENTITY = new ServerPlayerEntityScript<>();
+    public static final DimensionTypeScript DIMENSION_TYPE = new DimensionTypeScript();
+    public static final ChunkScript CHUNK = new ChunkScript();
+    public static final WorldScript WORLD = new WorldScript();
+    public static final BiomeScript BIOME = new BiomeScript();
+    public static final ItemScript ITEM = new ItemScript();
+    public static final InventoryScript<Inventory> INVENTORY = new InventoryScript<>();
+    public static final PlayerInventoryScript PLAYER_INVENTORY = new PlayerInventoryScript();
+    public static final ItemStackScript ITEM_STACK = new ItemStackScript();
+    public static final EnchantmentScript ENCHANTMENT = new EnchantmentScript();
+    public static final EnchantmentLevelEntryScript ENCHANTMENT_LEVEL_ENTRY = new EnchantmentLevelEntryScript();
+    public static final GameModeScript GAME_MODE = new GameModeScript();
+    public static final FishingBobberEntityScript FISHING_BOBBER_ENTITY = new FishingBobberEntityScript();
 
     protected static final Map<String, PredicateProvider<?>> defaults = new HashMap<>();
     public static Map<String, PredicateProvider<?>> getDefaultMap(){
         return defaults;
     }
     static {
-        defaults.put("ENTITY", Default.ENTITY);
-        defaults.put("LIVING_ENTITY", Default.LIVING_ENTITY);
-        defaults.put("PLAYER_ENTITY", Default.PLAYER_ENTITY);
-        defaults.put("SERVER_PLAYER_ENTITY", Default.SERVER_PLAYER_ENTITY);
-        defaults.put("DIMENSION_TYPE", Default.DIMENSION_TYPE);
-        defaults.put("CHUNK", Default.CHUNK);
-        defaults.put("WORLD", Default.WORLD);
-        defaults.put("BIOME", Default.BIOME);
-        defaults.put("ITEM", Default.ITEM);
-        defaults.put("INVENTORY", Default.INVENTORY);
-        defaults.put("PLAYER_INVENTORY", Default.PLAYER_INVENTORY);
-        defaults.put("ITEM_STACK", Default.ITEM_STACK);
-        defaults.put("ENCHANTMENT", Default.ENCHANTMENT);
-        defaults.put("ENCHANTMENT_LEVEL_ENTRY", Default.ENCHANTMENT_LEVEL_ENTRY);
-        defaults.put("GAME_MODE", Default.GAME_MODE);
-        defaults.put("FISHING_BOBBER_ENTITY", Default.FISHING_BOBBER_ENTITY);
+        ENCHANTMENT_LEVEL_ENTRY.addProvider(ENCHANTMENT, enchant -> set -> enchant.test(set.getKey()), 3000);
+        ENTITY.addProvider(WORLD, world -> entity -> world.test(entity.world), 3002);
+        ENTITY.addProvider(BIOME, biom -> entity -> biom.test(entity.world.getBiome(entity.getBlockPos())), 3001);
+        ENTITY.addProvider(CHUNK, chunk -> entity -> chunk.test(entity.world.getWorldChunk(entity.getBlockPos())), 3000);
+        FISHING_BOBBER_ENTITY.addProvider(ENTITY, entity -> entity::test, 3000);
+        ITEM_STACK.addProvider(ITEM, item -> stack -> item.test(stack.getItem()), 3000);
+        LIVING_ENTITY.addProvider(ENTITY, entity -> entity::test, 3000);
+        PLAYER_ENTITY.addProvider(LIVING_ENTITY, entity -> entity::test, 3001);
+        PLAYER_ENTITY.addProvider(FISHING_BOBBER_ENTITY, fis -> player -> fis.test(player.fishHook), 3000);
+        SERVER_PLAYER_ENTITY.addProvider(PLAYER_ENTITY, entity -> entity::test, 3001);
+        SERVER_PLAYER_ENTITY.addProvider(GAME_MODE, mode -> player -> mode.test(player.interactionManager.getGameMode()), 3000);
+        WORLD.addProvider(DIMENSION_TYPE, dim -> world -> dim.test(world.getDimension()), 3000);
+
+        defaults.put("ENTITY", ENTITY);
+        defaults.put("LIVING_ENTITY", LIVING_ENTITY);
+        defaults.put("PLAYER_ENTITY", PLAYER_ENTITY);
+        defaults.put("SERVER_PLAYER_ENTITY", SERVER_PLAYER_ENTITY);
+        defaults.put("DIMENSION_TYPE", DIMENSION_TYPE);
+        defaults.put("CHUNK", CHUNK);
+        defaults.put("WORLD", WORLD);
+        defaults.put("BIOME", BIOME);
+        defaults.put("ITEM", ITEM);
+        defaults.put("INVENTORY", INVENTORY);
+        defaults.put("PLAYER_INVENTORY", PLAYER_INVENTORY);
+        defaults.put("ITEM_STACK", ITEM_STACK);
+        defaults.put("ENCHANTMENT", ENCHANTMENT);
+        defaults.put("ENCHANTMENT_LEVEL_ENTRY", ENCHANTMENT_LEVEL_ENTRY);
+        defaults.put("GAME_MODE", GAME_MODE);
+        defaults.put("FISHING_BOBBER_ENTITY", FISHING_BOBBER_ENTITY);
     }
 }

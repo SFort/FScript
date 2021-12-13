@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 public class MixinExtendedLivingEntityScript implements PredicateProvider<LivingEntity>, Help {
     @Override
-    public Predicate<LivingEntity> getPredicate(String in, Set<Class<?>> dejavu){
+    public Predicate<LivingEntity> getPredicate(String in, Set<String> dejavu){
         return switch (in){
             case "sleeping_in_bed", "is_sleeping_in_bed" -> entity -> ((LivingEntityExtended)entity).fscript$isSleepingInBed();
             default -> null;

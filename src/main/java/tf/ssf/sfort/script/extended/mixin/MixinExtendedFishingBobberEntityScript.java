@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 public class MixinExtendedFishingBobberEntityScript implements PredicateProvider<FishingBobberEntity>, Help {
     @Override
-    public Predicate<FishingBobberEntity> getPredicate(String in, String val, Set<Class<?>> dejavu){
+    public Predicate<FishingBobberEntity> getPredicate(String in, String val, Set<String> dejavu){
         return switch (in){
             case "caught_fish", "has_caught_fish" -> fis -> ((FishingBobberEntityExtended)fis).fscript$caughtFish();
             default -> null;
