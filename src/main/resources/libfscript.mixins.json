@@ -1,8 +1,8 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "tf.ssf.sfort.script.mixin_extended",
-  "plugin": "tf.ssf.sfort.script.mixin_extended.Config",
+  "package": "tf.ssf.sfort.script.mixin",
+  "plugin": "tf.ssf.sfort.script.mixin.Config",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "FishingBobberEntityExtended",

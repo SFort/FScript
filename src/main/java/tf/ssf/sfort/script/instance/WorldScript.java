@@ -1,16 +1,19 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public class WorldScript implements PredicateProvider<World>, Help {
+public class WorldScript implements PredicateProviderExtendable<World>, Help {
+
     public Predicate<World> getLP(String in){
         return switch (in){
             case "day", "is_day" -> World::isDay;
@@ -41,7 +44,7 @@ public class WorldScript implements PredicateProvider<World>, Help {
             final Predicate<DimensionType> out = Default.DIMENSION_TYPE.getPredicate(in, val, dejavu);
             if (out !=null) return world -> out.test(world.getDimension());
         }
-        return null;
+        return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
     }
     @Override
     public Predicate<World> getPredicate(String in, Set<Class<?>> dejavu){
@@ -53,7 +56,7 @@ public class WorldScript implements PredicateProvider<World>, Help {
             final Predicate<DimensionType> out = Default.DIMENSION_TYPE.getPredicate(in, dejavu);
             if (out !=null) return world -> out.test(world.getDimension());
         }
-        return null;
+        return PredicateProviderExtendable.super.getPredicate(in, dejavu);
     }
 
     //==================================================================================================================
@@ -66,14 +69,28 @@ public class WorldScript implements PredicateProvider<World>, Help {
     public List<Help> getImported(){
         return extend_help;
     }
-    public static final Map<String, String> help = new HashMap<String, String>();
-    public static final List<Help> extend_help = new ArrayList<>();
-    static {
+    public final Map<String, String> help = new HashMap<>();
+    public final List<Help> extend_help = new ArrayList<>();
+    public WorldScript() {
         help.put("dimension:DimensionID","Require being in dimension");
         help.put("thundering is_thundering","Require thunder");
         help.put("raining is_raining","Require rain");
         help.put("day is_day","Require daytime");
 
         extend_help.add(Default.DIMENSION_TYPE);
+    }
+    //==================================================================================================================
+
+    public final TreeSet<Pair<Integer, PredicateProvider<World>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+    @Override
+    public void addProvider(PredicateProvider<World> predicateProvider, int priority) {
+        if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+        EXTEND.add(new Pair<>(priority, predicateProvider));
+    }
+
+    @Override
+    public List<PredicateProvider<World>> getProviders() {
+        return EXTEND.stream().map(Pair::getRight).toList();
     }
 }

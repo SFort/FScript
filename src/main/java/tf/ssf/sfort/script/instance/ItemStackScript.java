@@ -5,16 +5,18 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
+public class ItemStackScript implements PredicateProviderExtendable<ItemStack>, Help {
 
 
 	public Predicate<ItemStack> getLP(String in, String val){
@@ -98,7 +100,7 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 			final Predicate<Item> out = Default.ITEM.getPredicate(in, val, dejavu);
 			if (out !=null) return stack -> out.test(stack.getItem());
 		}
-		return null;
+		return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
 	}
 
 	@Override
@@ -111,17 +113,25 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 			final Predicate<Item> out = Default.ITEM.getPredicate(in, dejavu);
 			if (out !=null) return stack -> out.test(stack.getItem());
 		}
-		return null;
+		return PredicateProviderExtendable.super.getPredicate(in, dejavu);
 	}
 
 	@Override
 	public Predicate<ItemStack> getEmbed(String in, String script, Set<Class<?>> dejavu){
-		return getLE(in, script);
+		{
+			final Predicate<ItemStack> out = getLE(in, script);
+			if (out !=null) return out;
+		}
+		return PredicateProviderExtendable.super.getEmbed(in, script, dejavu);
 	}
 
 	@Override
 	public Predicate<ItemStack> getEmbed(String in, String val, String script, Set<Class<?>> dejavu){
-		return getLE(in, val, script);
+		{
+			final Predicate<ItemStack> out = getLE(in, val, script);
+			if (out !=null) return out;
+		}
+		return PredicateProviderExtendable.super.getEmbed(in, val, script, dejavu);
 	}
 
 	//==================================================================================================================
@@ -134,9 +144,9 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 	public List<Help> getImported(){
 		return extend_help;
 	}
-	public static final Map<String, String> help = new HashMap<String, String>();
-	public static final List<Help> extend_help = new ArrayList<>();
-	static {
+	public final Map<String, String> help = new HashMap<>();
+	public final List<Help> extend_help = new ArrayList<>();
+	public ItemStackScript() {
 		help.put("item .:ItemID", "Has to be the specified item");
 		help.put("enchant:EnchantID","Item has to have specified enchantment");
 		help.put("~enchant:ENCHANTMENT_LEVEL_ENTRY","Execute script on all enchantments");
@@ -154,4 +164,19 @@ public class ItemStackScript implements PredicateProvider<ItemStack>, Help {
 
 		extend_help.add(Default.ITEM);
 	}
+	//==================================================================================================================
+
+	public final TreeSet<Pair<Integer, PredicateProvider<ItemStack>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+	@Override
+	public void addProvider(PredicateProvider<ItemStack> predicateProvider, int priority) {
+		if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+		EXTEND.add(new Pair<>(priority, predicateProvider));
+	}
+
+	@Override
+	public List<PredicateProvider<ItemStack>> getProviders() {
+		return EXTEND.stream().map(Pair::getRight).toList();
+	}
+
 }

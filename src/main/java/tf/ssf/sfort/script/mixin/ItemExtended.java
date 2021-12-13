@@ -1,4 +1,4 @@
-package tf.ssf.sfort.script.mixin_extended;
+package tf.ssf.sfort.script.mixin;
 
 import net.minecraft.item.Item;
 import net.minecraft.util.Rarity;

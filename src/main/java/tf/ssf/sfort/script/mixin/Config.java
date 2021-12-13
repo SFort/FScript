@@ -1,9 +1,14 @@
-package tf.ssf.sfort.script.mixin_extended;
+package tf.ssf.sfort.script.mixin;
 
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import tf.ssf.sfort.script.Default;
+import tf.ssf.sfort.script.extended.mixin.MixinExtendedFishingBobberEntityScript;
+import tf.ssf.sfort.script.extended.mixin.MixinExtendedItemScript;
+import tf.ssf.sfort.script.extended.mixin.MixinExtendedLivingEntityScript;
+import tf.ssf.sfort.script.extended.mixin.MixinExtendedServerPlayerEntityScript;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,6 +43,13 @@ public class Config implements IMixinConfigPlugin {
             }catch (Exception ignored){}
             ls[i]=String.valueOf(extended);
         }catch (Exception ignored){}
+
+        if (extended){
+            Default.SERVER_PLAYER_ENTITY.addProvider(new MixinExtendedServerPlayerEntityScript(), 1000);
+            Default.LIVING_ENTITY.addProvider(new MixinExtendedLivingEntityScript(), 1000);
+            Default.ITEM.addProvider(new MixinExtendedItemScript(), 1000);
+            Default.FISHING_BOBBER_ENTITY.addProvider(new MixinExtendedFishingBobberEntityScript(), 1000);
+        }
 
         if (hash != Arrays.hashCode(ls)) {
             try {

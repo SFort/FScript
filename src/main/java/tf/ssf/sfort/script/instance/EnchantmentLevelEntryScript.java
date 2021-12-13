@@ -1,28 +1,38 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.util.Pair;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public class EnchantmentLevelEntryScript implements PredicateProvider<Map.Entry<Enchantment, Integer>>, Help {
+public class EnchantmentLevelEntryScript implements PredicateProviderExtendable<Map.Entry<Enchantment, Integer>>, Help {
     @Override
     public Predicate<Map.Entry<Enchantment, Integer>> getPredicate(String in, String val, Set<Class<?>> dejavu) {
-        return switch (in) {
+        switch (in) {
             case "level", "enchant_level" -> {
                 final int arg = Integer.parseInt(val);
-                yield entry -> entry.getValue()>=arg;
+                return entry -> entry.getValue()>=arg;
             }
-            default -> entry -> Default.ENCHANTMENT.getPredicate(in, val, dejavu).test(entry.getKey());
-        };
+        }
+        if (dejavu.add(Default.ENCHANTMENT.getClass())){
+            Predicate<Enchantment> out = Default.ENCHANTMENT.getPredicate(in, val, dejavu);
+            if (out != null) return entry -> out.test(entry.getKey());
+        }
+        return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
     }
 
     @Override
     public Predicate<Map.Entry<Enchantment, Integer>> getPredicate(String in, Set<Class<?>> dejavu) {
-        return entry -> Default.ENCHANTMENT.getPredicate(in, dejavu).test(entry.getKey());
+        if (dejavu.add(Default.ENCHANTMENT.getClass())){
+            Predicate<Enchantment> out = Default.ENCHANTMENT.getPredicate(in, dejavu);
+            if (out != null) return entry -> out.test(entry.getKey());
+        }
+        return PredicateProviderExtendable.super.getPredicate(in, dejavu);
     }
 
     //==================================================================================================================
@@ -35,13 +45,27 @@ public class EnchantmentLevelEntryScript implements PredicateProvider<Map.Entry<
         return extend_help;
     }
 
-    public static final Map<String, String> help = new HashMap<String, String>();
-    public static final List<Help> extend_help = new ArrayList<>();
+    public final Map<String, String> help = new HashMap<>();
+    public final List<Help> extend_help = new ArrayList<>();
 
-    static {
+    public EnchantmentLevelEntryScript() {
         help.put("enchant_level level:int","Minimum enchantment level");
 
         extend_help.add(new EnchantmentScript());
+    }
+    //==================================================================================================================
+
+    public final TreeSet<Pair<Integer, PredicateProvider<Map.Entry<Enchantment, Integer>>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+    @Override
+    public void addProvider(PredicateProvider<Map.Entry<Enchantment, Integer>> predicateProvider, int priority) {
+        if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+        EXTEND.add(new Pair<>(priority, predicateProvider));
+    }
+
+    @Override
+    public List<PredicateProvider<Map.Entry<Enchantment, Integer>>> getProviders() {
+        return EXTEND.stream().map(Pair::getRight).toList();
     }
 
 }

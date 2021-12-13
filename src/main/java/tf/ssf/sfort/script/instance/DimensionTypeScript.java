@@ -1,15 +1,15 @@
 package tf.ssf.sfort.script.instance;
 
+import net.minecraft.util.Pair;
 import net.minecraft.world.dimension.DimensionType;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
-public class DimensionTypeScript implements PredicateProvider<DimensionType>, Help {
+public class DimensionTypeScript implements PredicateProviderExtendable<DimensionType>, Help {
 
     public Predicate<DimensionType> getLP(String in){
         return switch (in){
@@ -39,13 +39,21 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
 
     @Override
     public Predicate<DimensionType> getPredicate(String in, Set<Class<?>> dejavu){
-        return getLP(in);
-    }
-    @Override
-    public Predicate<DimensionType> getPredicate(String in, String val, Set<Class<?>> dejavu){
-        return getLP(in, val);
+        {
+            final Predicate<DimensionType> out = getLP(in);
+            if (out != null) return out;
+        }
+        return PredicateProviderExtendable.super.getPredicate(in, dejavu);
     }
 
+    @Override
+    public Predicate<DimensionType> getPredicate(String in, String val, Set<Class<?>> dejavu){
+        {
+            final Predicate<DimensionType> out = getLP(in, val);
+            if (out != null) return out;
+        }
+        return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
+    }
 
     //==================================================================================================================
 
@@ -53,9 +61,14 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
     public Map<String, String> getHelp(){
         return help;
     }
+    @Override
+    public List<Help> getImported(){
+        return extend_help;
+    }
+    public final Map<String, String> help = new HashMap<>();
+    public final List<Help> extend_help = new ArrayList<>();
 
-    public static final Map<String, String> help = new HashMap<>();
-    static {
+    public DimensionTypeScript() {
         help.put("natural is_natural","Require natural dimension");
         help.put("ultrawarn is_ultrawarm","Require ultra warm dimension");
         help.put("piglin_safe is_piglin_safe","Require piglin safe dimension");
@@ -68,4 +81,19 @@ public class DimensionTypeScript implements PredicateProvider<DimensionType>, He
         help.put("fixed_time has_fixed_time", "Require dimension to have fixed time");
         help.put("coordinate_scale:double", "Minimum dimension coordinate scale");
     }
+    //==================================================================================================================
+
+    public final TreeSet<Pair<Integer, PredicateProvider<DimensionType>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+    @Override
+    public void addProvider(PredicateProvider<DimensionType> predicateProvider, int priority) {
+        if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+        EXTEND.add(new Pair<>(priority, predicateProvider));
+    }
+
+    @Override
+    public List<PredicateProvider<DimensionType>> getProviders() {
+        return EXTEND.stream().map(Pair::getRight).toList();
+    }
+
 }

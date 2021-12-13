@@ -7,6 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -14,11 +15,12 @@ import net.minecraft.world.chunk.Chunk;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public class EntityScript<T extends Entity> implements PredicateProvider<T>, Help {
+public class EntityScript<T extends Entity> implements PredicateProviderExtendable<T>, Help {
 
 	public Predicate<T> getLP(String in, String val){
 		return switch (in){
@@ -67,7 +69,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 				yield entity -> entity.getWidth()>arg;
 			}
 			case "in_block" -> {
-				final Block arg = Registry.BLOCK.get(new Identifier(val));;
+				final Block arg = Registry.BLOCK.get(new Identifier(val));
 				yield entity -> entity.world.getBlockState(entity.getBlockPos()).isOf(arg);
 			}
 			case "type" -> {
@@ -156,7 +158,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			final Predicate<Chunk> out = Default.CHUNK.getPredicate(in, val, dejavu);
 			if (out !=null) return entity -> out.test(entity.world.getWorldChunk(entity.getBlockPos()));
 		}
-		return null;
+		return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
 	}
 	@Override
 	public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
@@ -176,7 +178,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			final Predicate<Chunk> out = Default.CHUNK.getPredicate(in, dejavu);
 			if (out !=null) return entity -> out.test(entity.world.getWorldChunk(entity.getBlockPos()));
 		}
-		return null;
+		return PredicateProviderExtendable.super.getPredicate(in, dejavu);
 	}
 	@Override
 	public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
@@ -184,7 +186,7 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 			final Predicate<T> out = getLE(in, script);
 			if (out !=null) return out;
 		}
-		return null;
+		return PredicateProviderExtendable.super.getEmbed(in, script, dejavu);
 	}
 	//==================================================================================================================
 
@@ -197,9 +199,9 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		return extend_help;
 	}
 
-	public static final Map<String, String> help = new HashMap<String, String>();
-	public static final List<Help> extend_help = new ArrayList<>();
-	static {
+	public final Map<String, String> help = new HashMap<>();
+	public final List<Help> extend_help = new ArrayList<>();
+	public EntityScript() {
 		help.put("air:int", "Minimum required air");
 		help.put("max_air:int", "Minimum required max air");
 		help.put("frozen_ticks:int", "Minimum ticks the entity must have been freezing for");
@@ -243,4 +245,19 @@ public class EntityScript<T extends Entity> implements PredicateProvider<T>, Hel
 		extend_help.add(new BiomeScript());
 		extend_help.add(new ChunkScript());
 	}
+	//==================================================================================================================
+
+	public final TreeSet<Pair<Integer, PredicateProvider<T>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+	@Override
+	public void addProvider(PredicateProvider<T> predicateProvider, int priority) {
+		if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+		EXTEND.add(new Pair<>(priority, predicateProvider));
+	}
+
+	@Override
+	public List<PredicateProvider<T>> getProviders() {
+		return EXTEND.stream().map(Pair::getRight).toList();
+	}
+
 }

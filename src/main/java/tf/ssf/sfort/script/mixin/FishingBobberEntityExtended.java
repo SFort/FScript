@@ -1,4 +1,4 @@
-package tf.ssf.sfort.script.mixin_extended;
+package tf.ssf.sfort.script.mixin;
 
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import org.spongepowered.asm.mixin.Mixin;

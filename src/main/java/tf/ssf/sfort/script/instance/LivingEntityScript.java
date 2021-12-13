@@ -7,17 +7,18 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.SimpleRegistry;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
-import tf.ssf.sfort.script.mixin_extended.Config;
-import tf.ssf.sfort.script.mixin_extended.LivingEntityExtended;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public class LivingEntityScript<T extends LivingEntity> implements PredicateProvider<T>, Help {
+public class LivingEntityScript<T extends LivingEntity> implements PredicateProviderExtendable<T>, Help {
+
     public EntityScript<T> ENTITY = new EntityScript<>();
 
     public Predicate<T> getLP(String in, String val){
@@ -123,13 +124,6 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         };
     }
 
-    public Predicate<LivingEntityExtended> getEP(String in){
-        return switch (in){
-            case "sleeping_in_bed", "is_sleeping_in_bed" -> LivingEntityExtended::fscript$isSleepingInBed;
-            default -> null;
-        };
-    }
-
     //==================================================================================================================
 
     @Override
@@ -142,7 +136,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
             final Predicate<T> out = ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return out;
         }
-        return null;
+        return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
     }
     @Override
     public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
@@ -150,15 +144,11 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
             final Predicate<T> out = getLP(in);
             if (out != null) return out;
         }
-        if (Config.extended){
-            final Predicate<LivingEntityExtended> out = getEP(in);
-            if (out != null) return item -> out.test((LivingEntityExtended) item);
-        }
         if (dejavu.add(EntityScript.class)){
             final Predicate<T> out = ENTITY.getPredicate(in, dejavu);
             if (out !=null) return out;
         }
-        return null;
+        return PredicateProviderExtendable.super.getPredicate(in, dejavu);
     }
     @Override
     public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
@@ -170,11 +160,7 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
             final Predicate<T> out = ENTITY.getEmbed(in, script, dejavu);
             if (out !=null) return out;
         }
-        return null;
-    }
-    @Override
-    public Predicate<T> getEmbed(String key, String arg, String script, Set<Class<?>> dejavu){
-        return null;
+        return PredicateProviderExtendable.super.getEmbed(in, script, dejavu);
     }
 
     //==================================================================================================================
@@ -187,10 +173,10 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
     public List<Help> getImported(){
         return extend_help;
     }
-    public static final Map<String, String> help = new HashMap<String, String>();
-    public static final List<Help> extend_help = new ArrayList<>();
-    static {
-        //TODO add ~ embed, max_hp
+    public final Map<String, String> help = new HashMap<>();
+    public final List<Help> extend_help = new ArrayList<>();
+
+    public LivingEntityScript() {
         help.put("hand:ItemID","Require item in main hand");
         help.put("offhand:ItemID","Require item in off hand");
         help.put("helm:ItemID","Require item as helmet");
@@ -220,10 +206,23 @@ public class LivingEntityScript<T extends LivingEntity> implements PredicateProv
         help.put("climbing is_climbing","Require Climbing");
         help.put("using is_using","Require using items");
         help.put("fall_flying is_fall_flying","Require flying with elytra");
-        if (Config.extended) help.put("sleeping_in_bed is_sleeping_in_bed","Require sleeping in a bed");
         help.put("~player:PLAYER_ENTITY", "Require a player entity");
         help.put("~server_player:SERVER_PLAYER_ENTITY", "Require a server player entity");
 
         extend_help.add(new EntityScript<LivingEntity>());
+    }
+    //==================================================================================================================
+
+    public final TreeSet<Pair<Integer, PredicateProvider<T>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+    @Override
+    public void addProvider(PredicateProvider<T> predicateProvider, int priority) {
+        if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+        EXTEND.add(new Pair<>(priority, predicateProvider));
+    }
+
+    @Override
+    public List<PredicateProvider<T>> getProviders() {
+        return EXTEND.stream().map(Pair::getRight).toList();
     }
 }

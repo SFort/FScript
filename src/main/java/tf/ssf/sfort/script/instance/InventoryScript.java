@@ -2,16 +2,16 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Pair;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
-public class InventoryScript<T extends Inventory> implements PredicateProvider<T>, Help {
+public class InventoryScript<T extends Inventory> implements PredicateProviderExtendable<T>, Help {
 
 	public Predicate<T> getLE(String in, String script){
 		return switch (in) {
@@ -44,12 +44,20 @@ public class InventoryScript<T extends Inventory> implements PredicateProvider<T
 
 	@Override
 	public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
-		return getLE(in, script);
+		{
+			final Predicate<T> out = getLE(in, script);
+			if (out !=null) return out;
+		}
+		return PredicateProviderExtendable.super.getEmbed(in, script, dejavu);
 	}
 
 	@Override
 	public Predicate<T> getEmbed(String in, String val, String script, Set<Class<?>> dejavu){
-		return getLE(in, val, script);
+		{
+			final Predicate<T> out = getLE(in, val, script);
+			if (out !=null) return out;
+		}
+		return PredicateProviderExtendable.super.getEmbed(in, val, script, dejavu);
 	}
 
 	//==================================================================================================================
@@ -58,9 +66,29 @@ public class InventoryScript<T extends Inventory> implements PredicateProvider<T
 	public Map<String, String> getHelp(){
 		return help;
 	}
-	public static final Map<String, String> help = new HashMap<String, String>();
-	static {
+	@Override
+	public List<Help> getImported(){
+		return extend_help;
+	}
+	public final Map<String, String> help = new HashMap<>();
+	public final List<Help> extend_help = new ArrayList<>();
+	public InventoryScript() {
 		help.put("~slot:ITEM_STACK", "Inventory has to contain matching item");
 		help.put("~slot~int:ITEM_STACK","Inventory slot has to contain matching item");
 	}
+	//==================================================================================================================
+
+	public final TreeSet<Pair<Integer, PredicateProvider<T>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+	@Override
+	public void addProvider(PredicateProvider<T> predicateProvider, int priority) {
+		if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+		EXTEND.add(new Pair<>(priority, predicateProvider));
+	}
+
+	@Override
+	public List<PredicateProvider<T>> getProviders() {
+		return EXTEND.stream().map(Pair::getRight).toList();
+	}
+
 }

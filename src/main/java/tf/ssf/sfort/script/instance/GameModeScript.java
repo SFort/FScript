@@ -1,16 +1,15 @@
 package tf.ssf.sfort.script.instance;
 
+import net.minecraft.util.Pair;
 import net.minecraft.world.GameMode;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
-public class GameModeScript implements PredicateProvider<GameMode>, Help {
+public class GameModeScript implements PredicateProviderExtendable<GameMode>, Help {
     public Predicate<GameMode> getLP(String in){
         return switch (in){
             case "block_breaking_restricted", "is_block_breaking_restricted" -> GameMode::isBlockBreakingRestricted;
@@ -44,19 +43,36 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
 
     @Override
     public Predicate<GameMode> getPredicate(String in, Set<Class<?>> dejavu){
-        return getLP(in);
+        {
+            final Predicate<GameMode> out = getLP(in);
+            if (out != null) return out;
+        }
+        return PredicateProviderExtendable.super.getPredicate(in, dejavu);
     }
 
     @Override
     public Predicate<GameMode> getPredicate(String in, String val, Set<Class<?>> dejavu){
-        return getLP(in, val);
+        {
+            final Predicate<GameMode> out = getLP(in, val);
+            if (out != null) return out;
+        }
+        return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
     }
 
 
     //==================================================================================================================
 
-    public static final Map<String, String> help = new HashMap<>();
-    static {
+    @Override
+    public Map<String, String> getHelp(){
+        return help;
+    }
+    @Override
+    public List<Help> getImported(){
+        return extend_help;
+    }
+    public final Map<String, String> help = new HashMap<>();
+    public final List<Help> extend_help = new ArrayList<>();
+    public GameModeScript() {
         help.put("block_breaking_restricted is_block_breaking_restricted","Require player gamemode to prevent breaking blocks");
         help.put("creative is_creative","Require player gamemode to be creative");
         help.put("survival_like is_survival_like","Require player gamemode to be survival or adventure");
@@ -66,9 +82,20 @@ public class GameModeScript implements PredicateProvider<GameMode>, Help {
         help.put("game_mode_id id:int","Require specified gamemode");
 
     }
+
+    //==================================================================================================================
+
+    public final TreeSet<Pair<Integer, PredicateProvider<GameMode>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
     @Override
-    public Map<String, String> getHelp(){
-        return help;
+    public void addProvider(PredicateProvider<GameMode> predicateProvider, int priority) {
+        if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+        EXTEND.add(new Pair<>(priority, predicateProvider));
+    }
+
+    @Override
+    public List<PredicateProvider<GameMode>> getProviders() {
+        return EXTEND.stream().map(Pair::getRight).toList();
     }
 
 }

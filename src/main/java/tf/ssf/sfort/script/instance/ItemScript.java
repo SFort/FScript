@@ -4,19 +4,16 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Rarity;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
-import tf.ssf.sfort.script.mixin_extended.Config;
-import tf.ssf.sfort.script.mixin_extended.ItemExtended;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
-public class ItemScript implements PredicateProvider<Item>, Help {
+public class ItemScript implements PredicateProviderExtendable<Item>, Help {
 	public Predicate<Item> getLP(String in, String val){
 		return switch (in){
 			case ".", "item" -> {
@@ -41,16 +38,6 @@ public class ItemScript implements PredicateProvider<Item>, Help {
 		};
 	}
 
-	public Predicate<ItemExtended> getEP(String in, String val){
-		return switch (in){
-			case "rarity" ->{
-				Rarity arg = Rarity.valueOf(val);
-				yield item -> item.fscript$rarity().equals(arg);
-			}
-			default -> null;
-		};
-	}
-
 	//==================================================================================================================
 
 	@Override
@@ -59,34 +46,53 @@ public class ItemScript implements PredicateProvider<Item>, Help {
 			final Predicate<Item> out = getLP(in, val);
 			if (out != null) return out;
 		}
-		if (Config.extended){
-			final Predicate<ItemExtended> out = getEP(in, val);
-			if (out != null) return item -> out.test((ItemExtended) item);
-		}
-		return null;
+		return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
 	}
 
 	@Override
 	public Predicate<Item> getPredicate(String in, Set<Class<?>> dejavu){
-		return getLP(in);
+		{
+			final Predicate<Item> out = getLP(in);
+			if (out != null) return out;
+		}
+		return PredicateProviderExtendable.super.getPredicate(in, dejavu);
 	}
 
 
 	//==================================================================================================================
 
-	public static final Map<String, String> help = new HashMap<>();
-	static {
+	@Override
+	public Map<String, String> getHelp(){
+		return help;
+	}
+	@Override
+	public List<Help> getImported(){
+		return extend_help;
+	}
+	public final Map<String, String> help = new HashMap<>();
+	public final List<Help> extend_help = new ArrayList<>();
+	public ItemScript() {
 		help.put("damageable is_damageable","Item has to be damageable");
 		help.put("food is_food","Item is food");
 		help.put("fireproof is_fireproof","Item is fireproof");
 		help.put("block_item is_block_item","Item is a block");
-		if (Config.extended) help.put("rarity:RarityID", "Item has specified rarity");
 		help.put("item .:ItemID", "Has to be the specified item");
 		help.put("group:ItemGroupID", "Item has specified item group");
 	}
+
+	//==================================================================================================================
+
+	public final TreeSet<Pair<Integer, PredicateProvider<Item>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
 	@Override
-	public Map<String, String> getHelp(){
-		return help;
+	public void addProvider(PredicateProvider<Item> predicateProvider, int priority) {
+		if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+		EXTEND.add(new Pair<>(priority, predicateProvider));
+	}
+
+	@Override
+	public List<PredicateProvider<Item>> getProviders() {
+		return EXTEND.stream().map(Pair::getRight).toList();
 	}
 
 }

@@ -4,16 +4,16 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
-public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
+public class EnchantmentScript implements PredicateProviderExtendable<Enchantment>, Help {
 
 	public Predicate<Enchantment> getLP(String in){
 		return switch (in){
@@ -62,12 +62,20 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 
 	@Override
 	public Predicate<Enchantment> getPredicate(String in, Set<Class<?>> dejavu){
-		return getLP(in);
+		{
+			final Predicate<Enchantment> out = getLP(in);
+			if (out != null) return out;
+		}
+		return PredicateProviderExtendable.super.getPredicate(in, dejavu);
 	}
 
 	@Override
 	public Predicate<Enchantment> getPredicate(String in, String val, Set<Class<?>> dejavu){
-		return getLP(in,val);
+		{
+			final Predicate<Enchantment> out = getLP(in, val);
+			if (out != null) return out;
+		}
+		return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
 	}
 
 	//==================================================================================================================
@@ -76,9 +84,13 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 	public Map<String, String> getHelp(){
 		return help;
 	}
-
-	public static final Map<String, String> help = new HashMap<>();
-	static {
+	@Override
+	public List<Help> getImported(){
+		return extend_help;
+	}
+	public final Map<String, String> help = new HashMap<>();
+	public final List<Help> extend_help = new ArrayList<>();
+	public EnchantmentScript() {
 		help.put("enchant .:EnchantID","Require specified enchant");
 		help.put("min_level:int","Minimum min enchantment level");
 		help.put("max_level:int","Minimum max enchantment level");
@@ -92,4 +104,19 @@ public class EnchantmentScript implements PredicateProvider<Enchantment>, Help {
 		help.put("loot is_loot available_for_random_selection","Require enchantment to be obtainable as a random chest loot");
 
 	}
+	//==================================================================================================================
+
+	public final TreeSet<Pair<Integer, PredicateProvider<Enchantment>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+	@Override
+	public void addProvider(PredicateProvider<Enchantment> predicateProvider, int priority) {
+		if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+		EXTEND.add(new Pair<>(priority, predicateProvider));
+	}
+
+	@Override
+	public List<PredicateProvider<Enchantment>> getProviders() {
+		return EXTEND.stream().map(Pair::getRight).toList();
+	}
+
 }

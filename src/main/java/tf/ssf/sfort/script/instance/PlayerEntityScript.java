@@ -4,15 +4,19 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Pair;
 import tf.ssf.sfort.script.Default;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
+import tf.ssf.sfort.script.PredicateProviderExtendable;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProvider<T>, Help {
+public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProviderExtendable<T>, Help {
+
     public LivingEntityScript<T> LIVING_ENTITY = new LivingEntityScript<>();
+
     public Predicate<T> getLP(String in, String val){
         return switch (in){
             case "level" -> {
@@ -61,7 +65,7 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
             final Predicate<FishingBobberEntity> out = Default.FISHING_BOBBER_ENTITY.getPredicate(in, val, dejavu);
             if (out !=null) return player -> out.test(player.fishHook);
         }
-        return null;
+        return PredicateProviderExtendable.super.getPredicate(in, val, dejavu);
     }
     @Override
     public Predicate<T> getPredicate(String in, Set<Class<?>> dejavu){
@@ -73,7 +77,7 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
             final Predicate<FishingBobberEntity> out = Default.FISHING_BOBBER_ENTITY.getPredicate(in, dejavu);
             if (out !=null) return player -> out.test(player.fishHook);
         }
-        return null;
+        return PredicateProviderExtendable.super.getPredicate(in, dejavu);
     }
     @Override
     public Predicate<T> getEmbed(String in, String script, Set<Class<?>> dejavu){
@@ -85,7 +89,7 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
             final Predicate<T> out = LIVING_ENTITY.getEmbed(in, script, dejavu);
             if (out !=null) return out;
         }
-        return null;
+        return PredicateProviderExtendable.super.getEmbed(in, script, dejavu);
     }
     @Override
     public Predicate<T> getEmbed(String in, String val, String script, Set<Class<?>> dejavu){
@@ -93,7 +97,7 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
             final Predicate<T> out = LIVING_ENTITY.getEmbed(in, val, script, dejavu);
             if (out !=null) return out;
         }
-        return null;
+        return PredicateProviderExtendable.super.getEmbed(in, val, script, dejavu);
     }
 
     //==================================================================================================================
@@ -106,9 +110,9 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
     public List<Help> getImported(){
         return extend_help;
     }
-    public static final Map<String, String> help = new HashMap<String, String>();
-    public static final List<Help> extend_help = new ArrayList<>();
-    static {
+    public final Map<String, String> help = new HashMap<>();
+    public final List<Help> extend_help = new ArrayList<>();
+    public PlayerEntityScript() {
         help.put("level:int","Minimum required player level");
         help.put("food:float","Minimum required food");
         help.put("~inventory:PLAYER_INVENTORY", "Require matching inventory");
@@ -116,5 +120,19 @@ public class PlayerEntityScript<T extends PlayerEntity> implements PredicateProv
 
         extend_help.add(new LivingEntityScript<PlayerEntity>());
         extend_help.add(Default.FISHING_BOBBER_ENTITY);
+    }
+    //==================================================================================================================
+
+    public final TreeSet<Pair<Integer, PredicateProvider<T>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+
+    @Override
+    public void addProvider(PredicateProvider<T> predicateProvider, int priority) {
+        if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
+        EXTEND.add(new Pair<>(priority, predicateProvider));
+    }
+
+    @Override
+    public List<PredicateProvider<T>> getProviders() {
+        return EXTEND.stream().map(Pair::getRight).toList();
     }
 }
