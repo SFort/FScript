@@ -7,8 +7,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
-import tf.ssf.sfort.script.instance.support.AbstractExtendablePredicateProvider;
-import tf.ssf.sfort.script.instance.support.DefaultParsers;
+import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.DefaultParsers;
 
 import java.util.Iterator;
 import java.util.Map;

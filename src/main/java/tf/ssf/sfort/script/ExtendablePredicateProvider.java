@@ -1,7 +1,7 @@
 package tf.ssf.sfort.script;
 
-import tf.ssf.sfort.script.instance.support.AdaptableHelpPredicateProvider;
-import tf.ssf.sfort.script.instance.support.AdaptablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.AdaptableHelpPredicateProvider;
+import tf.ssf.sfort.script.instance.util.AdaptablePredicateProvider;
 
 import java.util.List;
 import java.util.Set;

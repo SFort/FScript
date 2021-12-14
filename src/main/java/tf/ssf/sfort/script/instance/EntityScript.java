@@ -8,8 +8,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import tf.ssf.sfort.script.instance.support.AbstractExtendablePredicateProvider;
-import tf.ssf.sfort.script.instance.support.DefaultParsers;
+import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.DefaultParsers;
 
 import java.util.function.Predicate;
 

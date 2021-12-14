@@ -1,7 +1,7 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import tf.ssf.sfort.script.instance.support.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 

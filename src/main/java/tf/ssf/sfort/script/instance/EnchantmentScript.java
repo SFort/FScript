@@ -5,7 +5,7 @@ import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import tf.ssf.sfort.script.instance.support.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 

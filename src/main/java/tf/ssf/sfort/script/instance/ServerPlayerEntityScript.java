@@ -7,8 +7,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import tf.ssf.sfort.script.Default;
-import tf.ssf.sfort.script.instance.support.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 

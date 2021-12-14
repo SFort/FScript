@@ -3,8 +3,8 @@ package tf.ssf.sfort.script.instance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.server.network.ServerPlayerEntity;
-import tf.ssf.sfort.script.instance.support.AbstractExtendablePredicateProvider;
-import tf.ssf.sfort.script.instance.support.DefaultParsers;
+import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.DefaultParsers;
 
 import java.util.function.Predicate;
 

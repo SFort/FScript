@@ -2,8 +2,8 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import tf.ssf.sfort.script.instance.support.AbstractExtendablePredicateProvider;
-import tf.ssf.sfort.script.instance.support.DefaultParsers;
+import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.DefaultParsers;
 
 import java.util.function.Predicate;
 

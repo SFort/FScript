@@ -2,8 +2,7 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
-import tf.ssf.sfort.script.Default;
-import tf.ssf.sfort.script.instance.support.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 

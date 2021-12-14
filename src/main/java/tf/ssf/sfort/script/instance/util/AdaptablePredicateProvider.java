@@ -1,4 +1,4 @@
-package tf.ssf.sfort.script.instance.support;
+package tf.ssf.sfort.script.instance.util;
 
 import tf.ssf.sfort.script.PredicateProvider;
 

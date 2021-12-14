@@ -1,4 +1,4 @@
-package tf.ssf.sfort.script.instance.support;
+package tf.ssf.sfort.script.instance.util;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;

@@ -1,4 +1,4 @@
-package tf.ssf.sfort.script.instance.support;
+package tf.ssf.sfort.script.instance.util;
 
 import net.minecraft.util.Pair;
 import tf.ssf.sfort.script.Help;
@@ -68,7 +68,7 @@ public abstract class AbstractExtendablePredicateProvider<T> implements Extendab
 
     //==================================================================================================================
 
-    public final TreeSet<Pair<Integer, PredicateProvider<T>>> EXTEND = new TreeSet<>(Comparator.comparingInt(Pair::getLeft));
+    public final TreeSet<Pair<Integer, PredicateProvider<T>>> EXTEND = new TreeSet<>(Comparator.<Pair<Integer, PredicateProvider<T>>>comparingInt(Pair::getLeft).reversed());
 
     @Override
     public void addProvider(PredicateProvider<T> predicateProvider, int priority) {
