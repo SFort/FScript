@@ -1,7 +1,5 @@
 package tf.ssf.sfort.script;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -79,7 +77,7 @@ public class ScriptParser<T> {
             return negate ? predicateCheck(in, make).negate() : predicateCheck(in, make);
         }
     }
-    @ApiStatus.Internal
+    //Internal
     public Predicate<T> getPredicates(String in){
         Predicate<T> out = null;
         char firstchar = in.charAt(0);
@@ -94,7 +92,7 @@ public class ScriptParser<T> {
         }
         return out;
     }
-    @ApiStatus.Internal
+    //Internal
     public static<T> Predicate<T> predicateCheck(String in, PredicateProvider<T> make){
         final int colon = in.indexOf(':');
         //TODO if uppercase_to_underscore do "D" to "_d" only on key
@@ -106,8 +104,7 @@ public class ScriptParser<T> {
         }
         return make.getPredicate(in.substring(0, colon), in.substring(colon + 1));
     }
-
-    @ApiStatus.Internal
+    //Internal
     public static<T> Predicate<T> BracketMerge(char in, Predicate<T> p1, Predicate<T> p2){
         if(p1 == null) return p2;
         return switch (in){

@@ -17,6 +17,8 @@ public interface PredicateProvider<T> {
     default Predicate<T> getEmbed(String key, String arg, String script, Set<String> dejavu){
         return null;
     }
+
+    //These are all purely for ease of use
     default Predicate<T> getPredicate(String key){
         return getPredicate(key, new HashSet<>());
     }
@@ -28,5 +30,8 @@ public interface PredicateProvider<T> {
     }
     default Predicate<T> getEmbed(String key, String arg, String script){
         return getEmbed(key, arg, script, new HashSet<>());
+    }
+    default Predicate<T> parse(String script){
+        return new ScriptParser<T>(this).parse(script);
     }
 }
