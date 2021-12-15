@@ -95,11 +95,11 @@ public class ScriptingScreen extends Screen {
         tip = new ArrayList<>();
         last_par = "";
     }
-    protected void setTip(List<Help.Parameter> par){
+    protected void setTip(String name, List<Supplier<Set<String>>> par){
         clearTip();
-        for (Help.Parameter pa : par) {
-            last_par += pa.name;
-            tip.addAll(pa.getParameters().stream().map(p -> new Tip(p, "", new ArrayList<>(), null)).collect(Collectors.toSet()));
+        for (Supplier<Set<String>> pa : par) {
+            last_par += name;
+            tip.addAll(pa.get().stream().map(p -> new Tip(p, "", new ArrayList<>(), "", null)).collect(Collectors.toSet()));
         }
     }
 
@@ -114,7 +114,8 @@ public class ScriptingScreen extends Screen {
         for (Map.Entry<String, String> as : help.entrySet()) {
             String os = as.getKey();
             int colon = os.indexOf(':');
-            List<Help.Parameter> val = new ArrayList<>();
+            List<Supplier<Set<String>>> val = new ArrayList<>();
+            StringBuilder valName = new StringBuilder();
             Help embed = null;
             if (colon != -1) {
                 String arg = os.substring(colon+1);
@@ -126,17 +127,17 @@ public class ScriptingScreen extends Screen {
                     int i = os.indexOf('~');
                     if (i != -1){
                         for (String s :os.substring(i+1).split(" ")){
-                            Help.Parameter p = Help.Parameter.byName(s);
-                            if (p != null) val.add(p);
+                            val.add(script.parameters.getSupplier(s));
+                            valName.append(s);
                         }
                         os = os.substring(0, i);
                     }
                 }else for (String s :arg.split(" ")){
-                    Help.Parameter p = Help.Parameter.byName(s);
-                    if (p != null) val.add(p);
+                    val.add(script.parameters.getSupplier(s));
+                    valName.append(s);
                 }
             }
-            tip.add(new Tip(os.split(" "), as.getValue(), val, embed));
+            tip.add(new Tip(os.split(" "), as.getValue(), val, valName.toString(), embed));
         }
     }
 
@@ -148,7 +149,7 @@ public class ScriptingScreen extends Screen {
     protected void pushValMake(Tip os){
         if (valMake == null) {
             if (os.par.size() > 0) {
-                setTip(os.par);
+                setTip(os.parName, os.par);
                 valMake = new Line(os, getCursorHelp(os));
                 searchField.setTextFieldFocused(true);
             } else {
@@ -168,7 +169,7 @@ public class ScriptingScreen extends Screen {
     protected void pushValMake(String os){
         if (valMake == null) {
             if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
-            lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(os, "", new ArrayList<>(), null), getCursorHelp()));
+            lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(os, "", new ArrayList<>(), "", null), getCursorHelp()));
             if (lines.size()>1) cursor++;
         }else {
             Help h2 = getCursorHelp();
@@ -508,7 +509,7 @@ public class ScriptingScreen extends Screen {
                     if(!lines.isEmpty())cursor++;
                     lines.add(cursor,
                             new Line(
-                                    new Tip(name, "", noTilde ? Collections.emptyList() : Collections.singletonList(null), hlp.get()),
+                                    new Tip(name, "", noTilde ? Collections.emptyList() : Collections.singletonList(null), "", hlp.get()),
                                     hlp.get(),
                                     noTilde ? null : in.substring(tilde+1, colon),
                                     negate
@@ -528,7 +529,7 @@ public class ScriptingScreen extends Screen {
                     int scolon = findEndChr(in, i, in.length());
                     int colon = findChr(in, ':', i, scolon);
                     if (i != (colon == -1 ? scolon : colon))
-                        lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colon == -1 ? scolon : colon), "", new ArrayList<>(), null), getCursorHelp(), colon == -1 ? null : in.substring(colon, scolon), negate));
+                        lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colon == -1 ? scolon : colon), "", new ArrayList<>(), "", null), getCursorHelp(), colon == -1 ? null : in.substring(colon, scolon), negate));
                     negate = false;
                     i = scolon;
                     if (lines.size()>1) cursor++;
@@ -794,20 +795,20 @@ public class ScriptingScreen extends Screen {
     protected void bracketLine(char c1, char c2, Help h2){
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
-        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
-        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), h2, null));
+        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), "", null), help, null));
+        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), "", null), h2, null));
     }
     protected void bracketLine(char c1, char c2){
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
-        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null));
-        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), help, null));
+        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), "", null), help, null));
+        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), "", null), help, null));
     }
     protected void bracketLine(char c1, char c2, Help h2, boolean negate){
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;
-        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), null), help, null, negate));
-        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), null), h2 == null? help : h2, null));
+        lines.add(cursor, new Line(new Tip(String.valueOf(c1), "", new ArrayList<>(), "", null), help, null, negate));
+        lines.add(cursor + 1, new Line(new Tip(String.valueOf(c2), "", new ArrayList<>(), "", null), h2 == null? help : h2, null));
     }
     protected boolean isBracket(){
         return isBracket(cursor);
@@ -854,17 +855,26 @@ public class ScriptingScreen extends Screen {
             Consumer<String> save,
             Consumer<String> apply,
             Supplier<String> load,
-            Map<String, Help> embedable
-    ) { }
+            Map<String, Help> embedable,
+            Parameters parameters
+    ) {
+        public Script(String name, Help help, Consumer<String> save, Consumer<String> apply, Supplier<String> load, Map<String, Help> embedable){
+            this(name, help, save, apply, load, embedable, Default.PARAMETERS);
+        }
+        public Script(String name, Help help){
+            this(name, help, null, null, null, getDefaultEmbed());
+        }
+    }
 
     protected static record Tip(
             String[] name,
             String desc,
-            List<Help.Parameter> par,
+            List<Supplier<Set<String>>> par,
+            String parName,
             Help embed
     ) {
-        Tip(String name, String desc, List<Help.Parameter> par, Help embed){
-            this(new String[]{name}, desc, par, embed);
+        Tip(String name, String desc, List<Supplier<Set<String>>> par, String parName, Help embed){
+            this(new String[]{name}, desc, par, parName, embed);
         }
 
         @Override

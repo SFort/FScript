@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Default {
+    public static final Parameters PARAMETERS = new Parameters();
+
     public static final EntityScript<Entity> ENTITY = new EntityScript<>();
     public static final LivingEntityScript<LivingEntity> LIVING_ENTITY = new LivingEntityScript<>();
     public static final PlayerEntityScript<PlayerEntity> PLAYER_ENTITY = new PlayerEntityScript<>();

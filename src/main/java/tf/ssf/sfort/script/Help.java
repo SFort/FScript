@@ -1,15 +1,5 @@
 package tf.ssf.sfort.script;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Rarity;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.GameMode;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import oshi.util.tuples.Triplet;
 
 import java.util.*;
@@ -75,92 +65,24 @@ public interface Help {
                         acceptor.accept(str);
         }
     }
+
+    @Deprecated(forRemoval = true)
     enum Parameter{
-        DIMENSION("DimensionID"){
-            public Set<String> getParameters(){
-                Set<String> out = new HashSet<>();
-                out.add(World.OVERWORLD.getValue().toString());
-                out.add(World.NETHER.getValue().toString());
-                out.add(World.END.getValue().toString());
-                return out;
-            }
-        },
-        ADVANCMENT("AdvancementID"){
-            public Set<String> getParameters(){
-                try {
-                    return MinecraftClient.getInstance().getServer().getAdvancementLoader().getAdvancements().stream().map(a -> a.getId().toString()).collect(Collectors.toSet());
-                }catch (Exception ignore){}
-                return super.getParameters();
-            }
-        },
-        ITEM("ItemID"){
-            public Set<String> getParameters(){
-                return Registry.ITEM.getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
-            }
-        },
-        ITEM_GROUP("ItemGroupID"){
-            public Set<String> getParameters(){
-                return Arrays.stream(ItemGroup.GROUPS).map(ItemGroup::getName).collect(Collectors.toSet());
-            }
-        },
-        RARITY("RarityID"){
-            public Set<String> getParameters(){
-                return Arrays.stream(Rarity.values()).map(Enum::name).collect(Collectors.toSet());
-            }
-        },
-        BLOCK("BlockID"){
-            public Set<String> getParameters(){
-                return Registry.BLOCK.getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
-            }
-        },
-        BIOME("BiomeID"){
-            public Set<String> getParameters(){
-                try {
-                    return MinecraftClient.getInstance().world.getRegistryManager().get(Registry.BIOME_KEY).getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
-                }catch (Exception ignore){}
-                return super.getParameters();
-            }
-        },
-        BIOME_CATAGORY_NAME("BiomeCatagoryID"){
-            public Set<String> getParameters(){
-                return Arrays.stream(Biome.Category.values()).map(Biome.Category::getName).collect(Collectors.toSet());
-            }
-        },
-        ENTITY_TYPE("EntityTypeID"){
-            public Set<String> getParameters(){
-                return Registry.ENTITY_TYPE.getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
-            }
-        },
-        ENCHANT("EnchantID"){
-            public Set<String> getParameters(){
-                return Registry.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
-            }
-        },
-        ENCHANT_RARITY("EnchantRarityID"){
-            public Set<String> getParameters(){
-                return Arrays.stream(Enchantment.Rarity.values()).map(Enum::name).collect(Collectors.toSet());
-            }
-        },
-        ENCHANT_TARGET("EnchantTargetID"){
-            public Set<String> getParameters(){
-                return Registry.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
-            }
-        },
-        PRECIPITATION("BiomePrecipitationID"){
-            public Set<String> getParameters(){
-                return Arrays.stream(Biome.Precipitation.values()).map(Biome.Precipitation::getName).collect(Collectors.toSet());
-            }
-        },
-        GAME_MODE("GameModeID"){
-            public Set<String> getParameters(){
-                return Arrays.stream(GameMode.values()).map(Enum::name).collect(Collectors.toSet());
-            }
-        },
-        GAME_MODE_NAME("GameModeID"){
-            public Set<String> getParameters(){
-                return Arrays.stream(EnchantmentTarget.values()).map(Enum::name).collect(Collectors.toSet());
-            }
-        },
+        DIMENSION("DimensionID"),
+        ADVANCMENT("AdvancementID"),
+        ITEM("ItemID"),
+        ITEM_GROUP("ItemGroupID"),
+        RARITY("RarityID"),
+        BLOCK("BlockID"),
+        BIOME("BiomeID"),
+        BIOME_CATAGORY_NAME("BiomeCatagoryID"),
+        ENTITY_TYPE("EntityTypeID"),
+        ENCHANT("EnchantID"),
+        ENCHANT_RARITY("EnchantRarityID"),
+        ENCHANT_TARGET("EnchantTargetID"),
+        PRECIPITATION("BiomePrecipitationID"),
+        GAME_MODE("GameModeID"),
+        GAME_MODE_NAME("GameModeID"),
         DOUBLE,
         FLOAT,
         INT,
@@ -175,11 +97,14 @@ public interface Help {
         Parameter(String name){
             this.name = name;
         }
+        @Deprecated(forRemoval = true)
         public static Parameter byName(String name){
             return Arrays.stream(values()).filter(p -> p.name.equals(name)).findAny().orElse(null);
         }
-        Set<String> getParameters(){return new HashSet<>();}
+        @Deprecated(forRemoval = true)
+        Set<String> getParameters(){return Default.PARAMETERS.getParameters(name);}
 
+        @Deprecated(forRemoval = true)
         public static String intoString(){
             StringBuilder out = new StringBuilder();
             for (Parameter h : Parameter.values()) {
