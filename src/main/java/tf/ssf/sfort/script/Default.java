@@ -1,5 +1,7 @@
 package tf.ssf.sfort.script;
 
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -65,5 +67,7 @@ public class Default {
         defaults.put("ENCHANTMENT_LEVEL_ENTRY", ENCHANTMENT_LEVEL_ENTRY);
         defaults.put("GAME_MODE", GAME_MODE);
         defaults.put("FISHING_BOBBER_ENTITY", FISHING_BOBBER_ENTITY);
+
+        FabricLoader.getInstance().getEntrypoints("fscript", ModInitializer.class).forEach(ModInitializer::onInitialize);
     }
 }
