@@ -19,6 +19,9 @@
       "badges": [ "library" ]
     }
   },
+  "entrypoints": {
+    "main": ["tf.ssf.sfort.script.FScriptInit"]
+  },
   "mixins": [
     "libfscript.mixins.json"
   ],

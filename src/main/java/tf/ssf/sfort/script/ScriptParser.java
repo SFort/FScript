@@ -1,5 +1,4 @@
 package tf.ssf.sfort.script;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
