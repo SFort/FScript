@@ -32,17 +32,12 @@ public class ScriptParser<T> {
                     int c = 0;
                     char end = ';';
                     char start = ';';
-                    boolean eIndexed = false;
+                    boolean eIndexed = true;
                     while (ii<in.length()) {
                         char cur = in.charAt(ii);
                         if (eIndexed){
                             if (cur == ':') eIndexed = false;
                         }else if (c == 0){
-                            if (cur == '~'){
-                                eIndexed = true;
-                                ii++;
-                                continue;
-                            }
                             if (cur == ';') break;
                             if (cur == '(' || cur == '[' || cur == '{') {
                                 c++;
