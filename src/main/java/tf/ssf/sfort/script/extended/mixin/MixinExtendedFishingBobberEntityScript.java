@@ -1,12 +1,9 @@
 package tf.ssf.sfort.script.extended.mixin;
 
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.item.Item;
-import net.minecraft.util.Rarity;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.mixin.FishingBobberEntityExtended;
-import tf.ssf.sfort.script.mixin.ItemExtended;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +14,7 @@ public class MixinExtendedFishingBobberEntityScript implements PredicateProvider
     @Override
     public Predicate<FishingBobberEntity> getPredicate(String in, String val, Set<String> dejavu){
         return switch (in){
-            case "caught_fish", "has_caught_fish" -> fis -> ((FishingBobberEntityExtended)fis).fscript$caughtFish();
+            case "caught_fish", "has_caught_fish" -> fis -> fis instanceof FishingBobberEntityExtended && ((FishingBobberEntityExtended)fis).fscript$caughtFish();
             default -> null;
         };
     }

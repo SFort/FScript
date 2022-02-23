@@ -36,7 +36,6 @@ public class LivingEntityScript<T extends LivingEntity> extends AbstractExtendab
         help.put("upward_speed:float","Require going up at this speed");
         help.put("forward_speed:float","Require going forward at this speed");
         help.put("attack:int","Minimum ticked passed since player attacked");
-        help.put("attacked:int","Minimum ticks passed since player was attacked");
         help.put("stuck_arrow_count:int", "Minimum amount of arrows stuck in entity");
         help.put("stinger_count:int", "Minimum amount of stingers");
         help.put("armor:int","Minimum required armor");
@@ -72,11 +71,10 @@ public class LivingEntityScript<T extends LivingEntity> extends AbstractExtendab
             }
             case "attack" -> {
                 final int arg = Integer.parseInt(val);
-                yield entity -> entity.age - entity.getLastAttackTime() > arg;
-            }
-            case "attacked" -> {
-                final int arg = Integer.parseInt(val);
-                yield entity -> entity.age - entity.getLastAttackedTime() > arg;
+                yield entity ->{
+                    int a = entity.getLastAttackTime();
+                    return entity.age - a > arg || a == 0;
+                };
             }
             case "stuck_arrow_count" -> {
                 final int arg = Integer.parseInt(val);

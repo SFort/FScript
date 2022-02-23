@@ -7,6 +7,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
+import tf.ssf.sfort.script.extended.mixin.MixinExtendedFishingBobberEntityScript;
+import tf.ssf.sfort.script.extended.mixin.MixinExtendedItemScript;
+import tf.ssf.sfort.script.extended.mixin.MixinExtendedLivingEntityScript;
+import tf.ssf.sfort.script.extended.mixin.MixinExtendedServerPlayerEntityScript;
 import tf.ssf.sfort.script.instance.*;
 import tf.ssf.sfort.script.instance.InventoryScript;
 
@@ -50,6 +54,12 @@ public class Default {
         SERVER_PLAYER_ENTITY.addProvider(PLAYER_ENTITY, entity -> entity::test, 3001);
         SERVER_PLAYER_ENTITY.addProvider(GAME_MODE, mode -> player -> mode.test(player.interactionManager.getGameMode()), 3000);
         WORLD.addProvider(DIMENSION_TYPE, dim -> world -> dim.test(world.getDimension()), 3000);
+
+        //Mixin
+        SERVER_PLAYER_ENTITY.addProvider(new MixinExtendedServerPlayerEntityScript(), 1000);
+        LIVING_ENTITY.addProvider(new MixinExtendedLivingEntityScript(), 1000);
+        ITEM.addProvider(new MixinExtendedItemScript(), 1000);
+        FISHING_BOBBER_ENTITY.addProvider(new MixinExtendedFishingBobberEntityScript(), 1000);
 
         defaults.put("ENTITY", ENTITY);
         defaults.put("LIVING_ENTITY", LIVING_ENTITY);

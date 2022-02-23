@@ -1,12 +1,10 @@
 package tf.ssf.sfort.script.extended.mixin;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.Rarity;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.mixin.ItemExtended;
-import tf.ssf.sfort.script.mixin.LivingEntityExtended;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +17,7 @@ public class MixinExtendedItemScript implements PredicateProvider<Item>, Help {
         return switch (in){
             case "rarity" ->{
                 Rarity arg = Rarity.valueOf(val);
-                yield item -> ((ItemExtended)item).fscript$rarity().equals(arg);
+                yield item -> item instanceof ItemExtended && ((ItemExtended)item).fscript$rarity().equals(arg);
             }
             default -> null;
         };

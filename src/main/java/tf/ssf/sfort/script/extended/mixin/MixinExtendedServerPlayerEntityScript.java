@@ -14,7 +14,7 @@ public class MixinExtendedServerPlayerEntityScript implements PredicateProvider<
     @Override
     public Predicate<ServerPlayerEntity> getPredicate(String in, Set<String> dejavu){
         return switch (in){
-            case "seen_credits" -> p -> ((ServerPlayerEntityExtended)p).fscript$seenCredits();
+            case "has_seen_credits", "seen_credits" -> p -> p instanceof ServerPlayerEntityExtended && ((ServerPlayerEntityExtended)p).fscript$seenCredits();
             default -> null;
         };
     }
@@ -26,6 +26,6 @@ public class MixinExtendedServerPlayerEntityScript implements PredicateProvider<
     }
     public final Map<String, String> help = new HashMap<>();
     public MixinExtendedServerPlayerEntityScript() {
-        help.put("seen_credits", "Require player to have seen the end credits");
+        help.put("seen_credits has_seen_credits", "Require player to have seen the end credits");
     }
 }
