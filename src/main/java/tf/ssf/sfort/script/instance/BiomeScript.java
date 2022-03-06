@@ -8,21 +8,16 @@ import java.util.function.Predicate;
 public class BiomeScript extends AbstractExtendablePredicateProvider<Biome> {
 
 	public BiomeScript() {
-		help.put("tempeture:float","Player must be in biome warmer then this");
+		help.put("temperature tempeture:float","Player must be in biome warmer then this");
 		help.put("precipitation:BiomePrecipitationID","Player must be in biome with this precipitation: rain | snow | none");
-		help.put("catagory:BiomeCatagoryID","Player must be in biome with this catagory");
 	}
 
 	@Override
 	public Predicate<Biome> getLocalPredicate(String in, String val){
 		return switch (in){
-			case "tempeture" -> {
+			case "temperature", "tempeture" -> {
 				final float arg = Float.parseFloat(val);
 				yield biome -> biome.getTemperature()>arg;
-			}
-			case "biome_catagory" -> {
-			    final Biome.Category arg = Biome.Category.byName(val);
-			    yield biome -> biome.getCategory() == arg;
 			}
             case "precipitation" -> {
                 final Biome.Precipitation arg = Biome.Precipitation.byName(val);

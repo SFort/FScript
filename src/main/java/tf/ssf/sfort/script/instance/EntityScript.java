@@ -81,7 +81,7 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 			}
 			case "biome" -> {
 				final Identifier arg = new Identifier(val);
-				yield entity -> entity.world.getBiomeKey(entity.getBlockPos()).map(x->x.getValue().equals(arg)).orElse(false);
+				yield entity -> entity.world.getBiome(entity.getBlockPos()).getKey().map(x->x.getValue().equals(arg)).orElse(false);
 			}
 			case "air" -> {
 				final int arg = Integer.parseInt(val);
@@ -123,7 +123,7 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 			case "on_fire", "is_on_fire" -> Entity::isOnFire;
 			case "wet", "is_wet" -> Entity::isWet;
 			case "fire_immune", "is_fire_immune" -> Entity::isFireImmune;
-			case "freezing", "is_freezing" -> Entity::isFreezing;
+			case "freezing", "is_freezing" -> Entity::isFrozen;
 			case "glowing", "is_glowing" -> Entity::isGlowing;
 			case "explosion_immune", "is_explosion_immune" -> Entity::isImmuneToExplosion;
 			case "invisible", "is_invisible" -> Entity::isInvisible;

@@ -4,6 +4,7 @@
   "package": "tf.ssf.sfort.script.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "BiomeExtended",
     "FishingBobberEntityExtended",
     "ItemExtended",
     "LivingEntityExtended",
@@ -11,8 +12,8 @@
     "ServerPlayerEntityExtended"
   ],
   "client": [
-    "MixinClientPlayerInteractionManager",
-    "MixinClientPlayerEntity"
+    "MixinClientPlayerEntity",
+    "MixinClientPlayerInteractionManager"
   ],
   "injectors": {
     "defaultRequire": 1
