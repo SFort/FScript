@@ -418,9 +418,7 @@ public class ScriptingScreen extends Screen {
 
         bufferTooltips = true;
 
-        RenderSystem.setShaderColor(1, 1, 1, 0.2f);
         searchField.render(matrix, mouseX, mouseY, delta);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
 
         drawButtons(matrix, mouseX, mouseY, delta);
         drawScriptButtons(matrix, mouseX, mouseY, delta);
@@ -638,7 +636,7 @@ public class ScriptingScreen extends Screen {
 
     @Override
     public void onClose() {
-        client.setScreen(parent);
+        client.openScreen(parent);
     }
 
     @Override
@@ -801,7 +799,7 @@ public class ScriptingScreen extends Screen {
 
             for (OrderedText line : lines) {
                 if (line != null) {
-                    textRenderer.draw(line, innerX, innerY, -1, false, matrices.peek().getPositionMatrix(), vcp, false, 0, 0xF000F0);
+                    textRenderer.draw(line, innerX, innerY, -1, false, matrices.peek().getModel(), vcp, false, 0, 0xF000F0);
                 }
                 innerY += 10;
             }

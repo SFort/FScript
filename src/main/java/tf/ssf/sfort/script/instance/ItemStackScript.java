@@ -39,7 +39,7 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 		switch (in){
 			case ".": case "item" : {
 				final Item arg = Registry.ITEM.get(new Identifier(val));
-				return item -> item.isOf(arg);
+				return item -> item.getItem() == arg;
 			}
 			case "enchant" : {
 				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
@@ -65,7 +65,7 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 			case "stackable" : return ItemStack::isStackable;
 			case "enchantable" : return ItemStack::isEnchantable;
 			case "has_glint" : return ItemStack::hasGlint;
-			case "has_nbt" : return ItemStack::hasNbt;
+			case "has_nbt" : return ItemStack::hasTag;
 			case "has_enchants" : return ItemStack::hasEnchantments;
 			case "in_frame" : return ItemStack::isInFrame;
 			default : return null;

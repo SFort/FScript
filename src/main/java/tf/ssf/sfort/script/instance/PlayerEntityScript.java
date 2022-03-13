@@ -37,7 +37,7 @@ public class PlayerEntityScript<T extends PlayerEntity> extends AbstractExtendab
             case "inventory" : {
                 final Predicate<PlayerInventory> predicate = DefaultParsers.PLAYER_INVENTORY_PARSER.parse(script);
                 if (predicate == null) return null;
-                return player -> predicate.test(player.getInventory());
+                return player -> predicate.test(player.inventory);
             }
             case "server_player" : {
                 final Predicate<ServerPlayerEntity> predicate = DefaultParsers.SERVER_PLAYER_ENTITY_PARSER.parse(script);

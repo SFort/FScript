@@ -91,10 +91,6 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 				final int arg = Integer.parseInt(val);
 				return entity -> entity.getMaxAir()>arg;
 			}
-			case "frozen_ticks" : {
-				final int arg = Integer.parseInt(val);
-				return entity -> entity.getFrozenTicks()>arg;
-			}
 			case "height" : {
 				final float arg = Float.parseFloat(val);
 				return entity -> entity.getHeight()>arg;
@@ -123,7 +119,6 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 			case "on_fire": case "is_on_fire" : return Entity::isOnFire;
 			case "wet": case "is_wet" : return Entity::isWet;
 			case "fire_immune": case "is_fire_immune" : return Entity::isFireImmune;
-			case "freezing": case "is_freezing" : return Entity::isFreezing;
 			case "glowing": case "is_glowing" : return Entity::isGlowing;
 			case "explosion_immune": case "is_explosion_immune" : return Entity::isImmuneToExplosion;
 			case "invisible": case "is_invisible" : return Entity::isInvisible;
