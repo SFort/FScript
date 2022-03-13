@@ -12,6 +12,7 @@ import tf.ssf.sfort.script.extended.mixin.MixinExtendedFishingBobberEntityScript
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedItemScript;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedLivingEntityScript;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedServerPlayerEntityScript;
+import tf.ssf.sfort.script.extended.trinkets.TrinketExtendedLivingEntityScript;
 import tf.ssf.sfort.script.instance.*;
 import tf.ssf.sfort.script.instance.InventoryScript;
 
@@ -62,6 +63,10 @@ public class Default {
         ITEM.addProvider(new MixinExtendedItemScript(), 1000);
         FISHING_BOBBER_ENTITY.addProvider(new MixinExtendedFishingBobberEntityScript(), 1000);
         BIOME.addProvider(new MixinExtendedBiome(), 1000);
+
+        //Mod Compat
+        if (FabricLoader.getInstance().isModLoaded("trinkets") && TrinketExtendedLivingEntityScript.success)
+            LIVING_ENTITY.addProvider(new TrinketExtendedLivingEntityScript());
 
         defaults.put("ENTITY", ENTITY);
         defaults.put("LIVING_ENTITY", LIVING_ENTITY);
