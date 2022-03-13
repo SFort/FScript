@@ -1,7 +1,7 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.world.biome.Biome;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 
@@ -14,17 +14,17 @@ public class BiomeScript extends AbstractExtendablePredicateProvider<Biome> {
 
 	@Override
 	public Predicate<Biome> getLocalPredicate(String in, String val){
-		return switch (in){
-			case "temperature", "tempeture" -> {
+		switch (in){
+			case "temperature": case  "tempeture" : {
 				final float arg = Float.parseFloat(val);
-				yield biome -> biome.getTemperature()>arg;
+				return biome -> biome.getTemperature()>arg;
 			}
-            case "precipitation" -> {
+			case "precipitation" : {
                 final Biome.Precipitation arg = Biome.Precipitation.byName(val);
-                yield biome -> biome.getPrecipitation() == arg;
+                return biome -> biome.getPrecipitation() == arg;
             }
-            default -> null;
-		};
+			default: return null;
+		}
 	}
 
 }

@@ -13,10 +13,10 @@ import java.util.function.Predicate;
 public class MixinExtendedServerPlayerEntityScript implements PredicateProvider<ServerPlayerEntity>, Help {
     @Override
     public Predicate<ServerPlayerEntity> getPredicate(String in, Set<String> dejavu){
-        return switch (in){
-            case "has_seen_credits", "seen_credits" -> p -> p instanceof ServerPlayerEntityExtended && ((ServerPlayerEntityExtended)p).fscript$seenCredits();
-            default -> null;
-        };
+        switch (in){
+            case "has_seen_credits": case "seen_credits": return p -> p instanceof ServerPlayerEntityExtended && ((ServerPlayerEntityExtended)p).fscript$seenCredits();
+            default: return null;
+        }
     }
     //==================================================================================================================
 

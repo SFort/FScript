@@ -1,7 +1,7 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.world.GameMode;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -20,32 +20,42 @@ public class GameModeScript extends AbstractExtendablePredicateProvider<GameMode
 
     @Override
     public Predicate<GameMode> getLocalPredicate(String in){
-        return switch (in){
-            case "block_breaking_restricted", "is_block_breaking_restricted" -> GameMode::isBlockBreakingRestricted;
-            case "creative", "is_creative" -> GameMode::isCreative;
-            case "survival_like", "is_survival_like" -> GameMode::isSurvivalLike;
-            default -> null;
-        };
+        switch (in){
+            case "block_breaking_restricted": case "is_block_breaking_restricted" : return GameMode::isBlockBreakingRestricted;
+            case "creative": case "is_creative" : return GameMode::isCreative;
+            case "survival_like": case "is_survival_like" : return GameMode::isSurvivalLike;
+            default : return null;
+        }
     }
     @Override
     public Predicate<GameMode> getLocalPredicate(String in, String val){
-        return switch (in){
-            case ".", "game_mode_any", "game_mode","game_mode_name", "game_mode_id", "name", "id"  ->{
-                final GameMode arg = switch (in) {
-                    case "game_mode"-> {
+        switch (in){
+            case ".": case "game_mode_any": case "game_mode": case "game_mode_name": case "game_mode_id": case "name": case "id" :{
+                GameMode arg;
+                switch (in) {
+                    case "game_mode": {
                         try {
-                            yield GameMode.valueOf(val);
-                        } catch (Exception ignore) { }
-                        yield null;
+                            arg = GameMode.valueOf(val);
+                        } catch (Exception ignore) {
+                            arg = null;
+                        }
+                        break;
                     }
-                    case "name"->GameMode.byName(val);
-                    case "id"->GameMode.byId(Integer.parseInt(val));
-                    default->Arrays.stream(GameMode.values()).filter(g -> g.name().equals(val) || g.getName().equals(val) || g.getId() == Integer.getInteger(val)).findAny().orElse(null);
+                    case "name":
+                        arg = GameMode.byName(val);
+                        break;
+                    case "id":
+                        arg = GameMode.byId(Integer.parseInt(val));
+                        break;
+                    default:
+                        arg = Arrays.stream(GameMode.values()).filter(g -> g.name().equals(val) || g.getName().equals(val) || g.getId() == Integer.getInteger(val)).findAny().orElse(null);
+                        break;
                 };
-                if (arg != null) yield mode -> mode.equals(arg);
-                yield null;
+                final GameMode farg = arg;
+                if (arg != null) return mode -> mode.equals(farg);
+                return null;
             }
-            default -> null;
-        };
+            default: return null;
+        }
     }
 }

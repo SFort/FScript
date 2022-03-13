@@ -1,4 +1,5 @@
 package tf.ssf.sfort.script;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -20,14 +21,16 @@ public class ScriptParser<T> {
         for (int i = 0; i<in.length(); i++) {
             char ch = in.charAt(i);
             switch (ch) {
-                case '{', '[', '(' -> deque.addFirst(i);
-                case '}', ']', ')' -> {
+                case '{': case'[': case '(':
+                    deque.addFirst(i);
+                    break;
+                case '}': case ']': case ')':
                     int indx = deque.removeFirst();
                     squish.add(getPredicates(in.substring(indx, i + 1)));
                     in = in.substring(0, indx) + "\u0007"+ (squish.size() - 1) + in.substring(i+1);
                     i = indx;
-                }
-                case '~' -> {
+                    break;
+                case '~':
                     int ii = i+1;
                     int c = 0;
                     char end = ';';
@@ -58,7 +61,7 @@ public class ScriptParser<T> {
                     }
                     squish.add(predicateCheck(in.substring(i, ii), make));
                     in = in.substring(0, i) + "\u0007" + (squish.size() - 1) + in.substring(ii);
-                }
+                    break;
             }
         }
         boolean negate = in.charAt(0) == '!';
@@ -101,12 +104,12 @@ public class ScriptParser<T> {
     //Internal
     public static<T> Predicate<T> BracketMerge(char in, Predicate<T> p1, Predicate<T> p2){
         if(p1 == null) return p2;
-        return switch (in){
-            case '[',']'->p1.and(p2);
-            case '{','}'->(player)->p1.test(player) ^ p2.test(player);
-            case '(',')'->p1.or(p2);
-            default -> throw new IllegalStateException("Unexpected value while flipping brackets: " + in);
-        };
+        switch (in){
+            case '[': case ']': return p1.and(p2);
+            case '{': case '}': return (player)->p1.test(player) ^ p2.test(player);
+            case '(': case ')': return p1.or(p2);
+            default: throw new IllegalStateException("Unexpected value while flipping brackets: " + in);
+        }
     }
 
     public static String getHelp(){

@@ -1,12 +1,12 @@
-package tf.ssf.sfort.script.instance.util;
+package tf.ssf.sfort.script.util;
 
-import net.minecraft.util.Pair;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.ExtendablePredicateProvider;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public abstract class AbstractExtendablePredicateProvider<T> implements ExtendablePredicateProvider<T>, Help {
 
@@ -68,17 +68,17 @@ public abstract class AbstractExtendablePredicateProvider<T> implements Extendab
 
     //==================================================================================================================
 
-    public final TreeSet<Pair<Integer, PredicateProvider<T>>> EXTEND = new TreeSet<>(Comparator.<Pair<Integer, PredicateProvider<T>>>comparingInt(Pair::getLeft).reversed());
+    public final TreeSet<Map.Entry<Integer, PredicateProvider<T>>> EXTEND = new TreeSet<>(Comparator.<Map.Entry<Integer, PredicateProvider<T>>>comparingInt(Map.Entry::getKey).reversed());
 
     @Override
     public void addProvider(PredicateProvider<T> predicateProvider, int priority) {
         if (predicateProvider instanceof Help) extend_help.add((Help) predicateProvider);
-        EXTEND.add(new Pair<>(priority, predicateProvider));
+        EXTEND.add(new AbstractMap.SimpleEntry<>(priority, predicateProvider));
     }
 
     @Override
     public List<PredicateProvider<T>> getProviders() {
-        return EXTEND.stream().map(Pair::getRight).toList();
+        return EXTEND.stream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
 
 }

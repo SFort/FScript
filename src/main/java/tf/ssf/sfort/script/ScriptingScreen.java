@@ -14,9 +14,17 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import oshi.util.tuples.Triplet;
+import org.lwjgl.glfw.GLFW;
+import tf.ssf.sfort.script.util.Triple;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -431,29 +439,29 @@ public class ScriptingScreen extends Screen {
 
     //TODO might to be visible in all resolutions
     protected void drawHelp(MatrixStack matrices) {
-        String hlp = """
-        Keybinds:
-            F1 - Toggles Help
-            F5 - Load Script
-            F6 - Apply Script
-            F7 - Save Script
-            Ctrl-F - Selects Search field
-            RMB - Clears Search / Removes elements
-            ESC - Closes the UI
-        
-        Buttons:
-            ! - Negates selected condition
-            [] - AND on conditions inside
-            () - OR on conditions inside
-            {} - XOR on conditions inside
-        
-        Note that some suggestions like BiomeID can only be obtained while in a world
-        """;
+        String[] hlp = new String[]{
+                "Keybinds:",
+                "\tF1 - Toggles Help",
+                "\tF5 - Load Script",
+                "\tF6 - Apply Script",
+                "\tF7 - Save Script",
+                "\tCtrl - F - Selects Search field",
+                "\tRMB - Clears Search / Removes elements",
+                "\tESC - Closes the UI",
+                "",
+                "Buttons:",
+                "\t! - Negates selected condition",
+                "\t[] - AND on conditions inside",
+                "\t() - OR on conditions inside",
+                "\t{} - XOR on conditions inside",
+                "",
+                "Note that some suggestions like BiomeID can only be obtained while in a world"
+        };
         float scroll = sidebar3Height < height ? 0 : sidebar3Scroll;
         sidebar3Height = 20;
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
-        for (String h : hlp.lines().collect(Collectors.toList())) {
+        for (String h : hlp) {
             int x = 16;
             for (String word : Splitter.on(CharMatcher.whitespace()).split(h)) {
                 if (textRenderer.getWidth(word) + x > width) {
@@ -488,8 +496,10 @@ public class ScriptingScreen extends Screen {
         for (int i = 0; i<in.length(); i++) {
             char chr = in.charAt(i);
             switch (chr){
-                case '!' -> negate = !negate;
-                case '~' -> {
+                case '!':
+                    negate = !negate;
+                    break;
+                case '~':
                     int colon = in.indexOf(':', i);
                     int tilde = findChr(in, '~', i+1, colon);
                     boolean noTilde = tilde == -1;
@@ -498,9 +508,9 @@ public class ScriptingScreen extends Screen {
                     AtomicReference<Help> hlp = new AtomicReference<>();
                     Help.recurseAcceptor(getCursorHelp(), new HashSet<>(),
                             s -> {
-                                final Triplet<String, List<String>, String> triple = Help.dismantle(s.getKey());
-                                if (hlp.get() != null || !triple.getA().startsWith("~") || !triple.getB().contains(searchFor)) return;
-                                String sc = triple.getC();
+                                final Triple<String, List<String>, String> triple = Help.dismantle(s.getKey());
+                                if (hlp.get() != null || !triple.a.startsWith("~") || !triple.b.contains(searchFor)) return;
+                                String sc = triple.c;
                                 int si = sc.indexOf(':');
                                 hlp.set(script.embedable.get(si == -1 ? sc : sc.substring(si+1)));
                     });
@@ -520,20 +530,28 @@ public class ScriptingScreen extends Screen {
                         bracketLine('[', ']', prev_help);
                         prev_help = null;
                     }
-                }
-                case '[' -> bracketLine('[', ']', prev_help, negate);
-                case '{' -> bracketLine('{', '}', prev_help, negate);
-                case '(' -> bracketLine('(', ')', prev_help, negate);
-                case ']','}',')' -> cursor++;
-                default -> {
+                    break;
+                case '[':
+                    bracketLine('[', ']', prev_help, negate);
+                    break;
+                case '{':
+                    bracketLine('{', '}', prev_help, negate);
+                    break;
+                case '(':
+                    bracketLine('(', ')', prev_help, negate);
+                    break;
+                case ']': case '}': case')':
+                    cursor++;
+                    break;
+                default:
                     int scolon = findEndChr(in, i, in.length());
-                    int colon = findChr(in, ':', i, scolon);
-                    if (i != (colon == -1 ? scolon : colon))
-                        lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colon == -1 ? scolon : colon), "", new ArrayList<>(), "", null), getCursorHelp(), colon == -1 ? null : in.substring(colon, scolon), negate));
+                    int colond = findChr(in, ':', i, scolon);
+                    if (i != (colond == -1 ? scolon : colond))
+                        lines.add(cursor+(lines.isEmpty()?0:1), new Line(new Tip(in.substring(i, colond == -1 ? scolon : colond), "", new ArrayList<>(), "", null), getCursorHelp(), colond == -1 ? null : in.substring(colond, scolon), negate));
                     negate = false;
                     i = scolon;
                     if (lines.size()>1) cursor++;
-                }
+                    break;
             }
             if(chr != '!'){
                 negate = false;
@@ -569,7 +587,7 @@ public class ScriptingScreen extends Screen {
                 renderTooltip(matrix, new LiteralText(desc), mouseX, mouseY);
         }
         if (text != null)
-            textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2), y + ((h - 8) / 2), -1);
+            textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2f), y + ((h - 8) / 2f), -1);
         return hovering && didClick;
     }
     protected boolean drawToggleButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY, boolean toggled) {
@@ -713,21 +731,21 @@ public class ScriptingScreen extends Screen {
         if (renderHelp) return super.keyPressed(keyCode, scanCode, modifiers);
 
         switch (keyCode){
-            case 257, 335 -> { //Enter
+            case GLFW.GLFW_KEY_ENTER: case GLFW.GLFW_KEY_KP_ENTER:
                 if (searchField.isActive()) pushValMake(searchField.getText());
-            }
-            case 89 -> { //F
+                break;
+            case GLFW.GLFW_KEY_F:
                 if (hasControlDown()) searchField.setTextFieldFocused(true);
-            }
-            case 294 -> { //F5
+                break;
+            case GLFW.GLFW_KEY_F5:
                 if (script.load != null) loadScript(script.load.get());
-            }
-            case 295 -> { //F6
+                break;
+            case GLFW.GLFW_KEY_F6:
                 if (script.apply != null) script.apply.accept(unloadScript());
-            }
-            case 296 -> { //F7
+                break;
+            case GLFW.GLFW_KEY_F7:
                 if (script.save != null) script.save.accept(unloadScript());
-            }
+                break;
         }
 
         searchField.keyPressed(keyCode, scanCode, modifiers);
@@ -849,30 +867,50 @@ public class ScriptingScreen extends Screen {
     protected boolean isCloseBracket(char in){
         return in == ']' || in == ')' || in == '}';
     }
-    public static record Script(
-            String name,
-            Help help,
-            Consumer<String> save,
-            Consumer<String> apply,
-            Supplier<String> load,
-            Map<String, Help> embedable,
-            Parameters parameters
-    ) {
-        public Script(String name, Help help, Consumer<String> save, Consumer<String> apply, Supplier<String> load, Map<String, Help> embedable){
-            this(name, help, save, apply, load, embedable, Default.PARAMETERS);
+
+    public static class Script {
+        public String name;
+        public Help help;
+        public Consumer<String> save;
+        public Consumer<String> apply;
+        public Supplier<String> load;
+        public Map<String, Help> embedable;
+        public Parameters parameters;
+
+        public Script(String name, Help help, Consumer<String> save, Consumer<String> apply, Supplier<String> load, Map<String, Help> embeddable, Parameters parameters){
+            this.name = name;
+            this.help = help;
+            this.save = save;
+            this.apply = apply;
+            this.load = load;
+            this.embedable = embeddable;
+            this.parameters = parameters;
         }
+
+        public Script(String name, Help help, Consumer<String> save, Consumer<String> apply, Supplier<String> load, Map<String, Help> embeddable){
+            this(name, help, save, apply, load, embeddable, Default.PARAMETERS);
+        }
+
         public Script(String name, Help help){
             this(name, help, null, null, null, getDefaultEmbed());
         }
     }
 
-    protected static record Tip(
-            String[] name,
-            String desc,
-            List<Supplier<Set<String>>> par,
-            String parName,
-            Help embed
-    ) {
+    protected static class Tip {
+        public String[] name;
+        public String desc;
+        public List<Supplier<Set<String>>> par;
+        public String parName;
+        public Help embed;
+
+        Tip(String[] name, String desc, List<Supplier<Set<String>>> par, String parName, Help embed){
+            this.name = name;
+            this.desc = desc;
+            this.par = par;
+            this.parName = parName;
+            this.embed = embed;
+        }
+
         Tip(String name, String desc, List<Supplier<Set<String>>> par, String parName, Help embed){
             this(new String[]{name}, desc, par, parName, embed);
         }

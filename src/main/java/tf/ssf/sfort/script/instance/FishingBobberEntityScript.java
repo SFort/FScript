@@ -1,7 +1,7 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 
@@ -13,10 +13,10 @@ public class FishingBobberEntityScript extends AbstractExtendablePredicateProvid
 
     @Override
     public Predicate<FishingBobberEntity> getLocalPredicate(String in){
-        return switch (in){
-            case "is_bobber_in_open_water", "bobber_in_open_water" -> FishingBobberEntity::isInOpenWater;
-            default -> null;
-        };
+        switch (in){
+            case "is_bobber_in_open_water": case  "bobber_in_open_water" : return FishingBobberEntity::isInOpenWater;
+            default : return null;
+        }
     }
 
 }

@@ -8,8 +8,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.SimpleRegistry;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
-import tf.ssf.sfort.script.instance.util.DefaultParsers;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.DefaultParsers;
 
 import java.util.function.Predicate;
 
@@ -50,107 +50,107 @@ public class LivingEntityScript<T extends LivingEntity> extends AbstractExtendab
 
     @Override
     public Predicate<T> getLocalPredicate(String in, String val){
-        return switch (in){
-            case "hand", "offhand", "helm", "chest", "legs", "boots" ->
-                    getLocalEmbed(in, ".:"+val);
-            case "health", "hp" -> {
+        switch (in){
+            case "hand": case "offhand": case "helm": case "chest": case "legs": case "boots" :
+                return getLocalEmbed(in, ".:"+val);
+            case "health": case "hp" : {
                 final float arg = Float.parseFloat(val);
-                yield entity -> entity.getHealth()>=arg;
+                return entity -> entity.getHealth()>=arg;
             }
-            case "max_health", "max_hp" -> {
+            case "max_health": case "max_hp" : {
                 final float arg = Float.parseFloat(val);
-                yield entity -> entity.getMaxHealth()>=arg;
+                return entity -> entity.getMaxHealth()>=arg;
             }
-            case "armor" -> {
+            case "armor" : {
                 final float arg = Integer.parseInt(val);
-                yield entity -> entity.getArmor()>=arg;
+                return entity -> entity.getArmor()>=arg;
             }
-            case "effect" -> {
+            case "effect" : {
                 final StatusEffect arg = SimpleRegistry.STATUS_EFFECT.get(new Identifier(val));
-                yield entity -> entity.hasStatusEffect(arg);
+                return entity -> entity.hasStatusEffect(arg);
             }
-            case "attack" -> {
+            case "attack" : {
                 final int arg = Integer.parseInt(val);
-                yield entity ->{
+                return entity ->{
                     int a = entity.getLastAttackTime();
                     return entity.age - a > arg || a == 0;
                 };
             }
-            case "stuck_arrow_count" -> {
+            case "stuck_arrow_count" : {
                 final int arg = Integer.parseInt(val);
-                yield entity -> entity.getStuckArrowCount() > arg;
+                return entity -> entity.getStuckArrowCount() > arg;
             }
-            case "stinger_count" -> {
+            case "stinger_count" : {
                 final int arg = Integer.parseInt(val);
-                yield entity -> entity.getStingerCount() > arg;
+                return entity -> entity.getStingerCount() > arg;
             }
-            case "sideways_speed" -> {
+            case "sideways_speed" : {
                 final float arg = Float.parseFloat(val);
-                yield entity -> entity.sidewaysSpeed>=arg;
+                return entity -> entity.sidewaysSpeed>=arg;
             }
-            case "upward_speed" -> {
+            case "upward_speed" : {
                 final float arg = Float.parseFloat(val);
-                yield entity -> entity.upwardSpeed>=arg;
+                return entity -> entity.upwardSpeed>=arg;
             }
-            case "forward_speed" -> {
+            case "forward_speed" : {
                 final float arg = Float.parseFloat(val);
-                yield entity -> entity.forwardSpeed>=arg;
+                return entity -> entity.forwardSpeed>=arg;
             }
-            case "movement_speed" -> {
+            case "movement_speed" : {
                 final float arg = Float.parseFloat(val);
-                yield entity -> entity.getMovementSpeed()>=arg;
+                return entity -> entity.getMovementSpeed()>=arg;
             }
-            default -> null;
-        };
+            default : return null;
+        }
     }
 
     @Override
     public Predicate<T> getLocalPredicate(String in){
-        return switch (in) {
-            case "full_hp", "max_hp", "full_health", "max_health", "is_full_hp", "is_max_hp", "is_full_health", "is_max_health"
-                    -> entity -> entity.getHealth() == entity.getMaxHealth();
-            case "blocking", "is_blocking" -> LivingEntity::isBlocking;
-            case "climbing", "is_climbing" -> LivingEntity::isClimbing;
-            case "using", "is_using" -> LivingEntity::isUsingItem;
-            case "fall_flying", "is_fall_flying" -> LivingEntity::isFallFlying;
-            default -> null;
-        };
+        switch (in) {
+            case "full_hp": case "max_hp": case "full_health": case "max_health": case "is_full_hp": case "is_max_hp": case "is_full_health": case "is_max_health"
+                    : return entity -> entity.getHealth() == entity.getMaxHealth();
+            case "blocking": case "is_blocking" : return LivingEntity::isBlocking;
+            case "climbing": case "is_climbing" : return LivingEntity::isClimbing;
+            case "using": case "is_using" : return LivingEntity::isUsingItem;
+            case "fall_flying": case "is_fall_flying" : return LivingEntity::isFallFlying;
+            default : return null;
+        }
     }
 
     @Override
     public Predicate<T> getLocalEmbed(String in, String script){
-        return switch (in) {
-            case "hand", "offhand", "helm", "chest", "legs", "boots" ->{
+        switch (in) {
+            case "hand": case "offhand": case "helm": case "chest": case "legs": case "boots" :{
                 final Predicate<ItemStack> predicate = DefaultParsers.ITEM_STACK_PARSER.parse(script);
-                if (predicate == null) yield null;
-                yield switch (in) {
-                    case "hand" -> entity -> predicate.test(entity.getMainHandStack());
-                    case "offhand" -> entity -> predicate.test(entity.getOffHandStack());
-                    case "helm" -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.HEAD));
-                    case "chest" -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.CHEST));
-                    case "legs" -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.LEGS));
-                    default -> entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.FEET));
-                };
+                if (predicate == null) return null;
+                switch (in) {
+                    case "hand" : return entity -> predicate.test(entity.getMainHandStack());
+                    case "offhand" : return entity -> predicate.test(entity.getOffHandStack());
+                    case "helm" : return entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.HEAD));
+                    case "chest" : return entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.CHEST));
+                    case "legs" : return entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.LEGS));
+                    default : return entity -> predicate.test(entity.getEquippedStack(EquipmentSlot.FEET));
+                }
             }
-            case "player" -> {
+            case "player" : {
                 final Predicate<PlayerEntity> predicate = DefaultParsers.PLAYER_ENTITY_PARSER.parse(script);
-                if (predicate == null) yield null;
-                yield entity -> {
+                if (predicate == null) return null;
+                return entity -> {
                     if (entity instanceof PlayerEntity)
                         return predicate.test(((PlayerEntity) entity));
                     return false;
                 };
             }
-            case "server_player" -> {
+            case "server_player" : {
                 final Predicate<ServerPlayerEntity> predicate = DefaultParsers.SERVER_PLAYER_ENTITY_PARSER.parse(script);
-                if (predicate == null) yield null;
-                yield entity -> {
+                if (predicate == null) return null;
+                return entity -> {
                     if (entity instanceof ServerPlayerEntity)
                         return predicate.test(((ServerPlayerEntity) entity));
                     return false;
                 };
             }
-            default -> null;
-        };
+            default : return null;
+        }
     }
 }

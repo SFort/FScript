@@ -14,13 +14,12 @@ import java.util.function.Predicate;
 public class MixinExtendedItemScript implements PredicateProvider<Item>, Help {
     @Override
     public Predicate<Item> getPredicate(String in, String val, Set<String> dejavu){
-        return switch (in){
-            case "rarity" ->{
+        switch (in){
+            case "rarity":
                 Rarity arg = Rarity.valueOf(val);
-                yield item -> item instanceof ItemExtended && ((ItemExtended)item).fscript$rarity().equals(arg);
-            }
-            default -> null;
-        };
+                return item -> item instanceof ItemExtended && ((ItemExtended)item).fscript$rarity().equals(arg);
+            default: return null;
+        }
     }
     //==================================================================================================================
 

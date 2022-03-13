@@ -7,9 +7,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
-import tf.ssf.sfort.script.instance.util.DefaultParsers;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.DefaultParsers;
 
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -35,49 +36,49 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 
 	@Override
 	public Predicate<ItemStack> getLocalPredicate(String in, String val){
-		return switch (in){
-			case ".", "item" -> {
+		switch (in){
+			case ".": case "item" : {
 				final Item arg = Registry.ITEM.get(new Identifier(val));
-				yield item -> item.isOf(arg);
+				return item -> item.isOf(arg);
 			}
-			case "enchant" -> {
+			case "enchant" : {
 				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
-				yield item -> EnchantmentHelper.get(item).containsKey(arg);
+				return item -> EnchantmentHelper.get(item).containsKey(arg);
 			}
-			case "count" -> {
+			case "count" : {
 				final int arg = Integer.parseInt(val);
-				yield item -> item.getCount()>=arg;
+				return item -> item.getCount()>=arg;
 			}
-			case "rarity" ->{
+			case "rarity" :{
 				Rarity arg = Rarity.valueOf(val);
-				yield item -> item.getRarity().equals(arg);
+				return item -> item.getRarity().equals(arg);
 			}
-			default -> null;
-		};
+			default : return null;
+		}
 	}
 	@Override
 	public Predicate<ItemStack> getLocalPredicate(String in){
-		return switch (in){
-			case "damageable", "is_damageable" -> ItemStack::isDamageable;
-			case "empty" -> ItemStack::isEmpty;
-			case "damaged" -> ItemStack::isDamaged;
-			case "stackable" -> ItemStack::isStackable;
-			case "enchantable" -> ItemStack::isEnchantable;
-			case "has_glint" -> ItemStack::hasGlint;
-			case "has_nbt" -> ItemStack::hasNbt;
-			case "has_enchants" -> ItemStack::hasEnchantments;
-			case "in_frame" -> ItemStack::isInFrame;
-			default -> null;
-		};
+		switch (in){
+			case "damageable": case "is_damageable" : return ItemStack::isDamageable;
+			case "empty" : return ItemStack::isEmpty;
+			case "damaged" : return ItemStack::isDamaged;
+			case "stackable" : return ItemStack::isStackable;
+			case "enchantable" : return ItemStack::isEnchantable;
+			case "has_glint" : return ItemStack::hasGlint;
+			case "has_nbt" : return ItemStack::hasNbt;
+			case "has_enchants" : return ItemStack::hasEnchantments;
+			case "in_frame" : return ItemStack::isInFrame;
+			default : return null;
+		}
 	}
 	//TODO allow embedding . item since rarity behaves diffrently
 	@Override
 	public Predicate<ItemStack> getLocalEmbed(String in, String script){
-		return switch (in) {
-			case "enchant" -> {
+		switch (in) {
+			case "enchant" : {
 				final Predicate<Map.Entry<Enchantment, Integer>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
-				if (predicate == null) yield null;
-				yield item -> {
+				if (predicate == null) return null;
+				return item -> {
 					boolean rez = false;
 					final Iterator<Map.Entry<Enchantment, Integer>> i = EnchantmentHelper.get(item).entrySet().iterator();
 					while(i.hasNext() && !rez)
@@ -85,24 +86,24 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 					return rez;
 				};
 			}
-			default -> null;
-		};
+			default : return null;
+		}
 	}
 	@Override
 	public Predicate<ItemStack> getLocalEmbed(String in, String val, String script){
-		return switch (in) {
-			case "enchant" ->{
+		switch (in) {
+			case "enchant" :{
 				final Predicate<Map.Entry<Enchantment, Integer>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
-				if (predicate == null) yield null;
+				if (predicate == null) return null;
 				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
-				if (arg == null) yield null;
-				yield item -> {
+				if (arg == null) return null;
+				return item -> {
 					final Integer lvl = EnchantmentHelper.get(item).get(arg);
-					return lvl != null && predicate.test(Map.entry(arg, lvl));
+					return lvl != null && predicate.test(new AbstractMap.SimpleEntry<>(arg, lvl));
 				};
 			}
-			default -> null;
-		};
+			default : return null;
+		}
 	}
 
 }

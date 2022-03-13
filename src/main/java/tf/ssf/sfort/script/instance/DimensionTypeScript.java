@@ -1,7 +1,7 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.world.dimension.DimensionType;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 
@@ -22,29 +22,29 @@ public class DimensionTypeScript extends AbstractExtendablePredicateProvider<Dim
     }
     @Override
     public Predicate<DimensionType> getLocalPredicate(String in){
-        return switch (in){
-            case "natural", "is_natural" -> DimensionType::isNatural;
-            case "ultrawarn", "is_ultrawarm" -> DimensionType::isUltrawarm;
-            case "piglin_safe", "is_piglin_safe" -> DimensionType::isPiglinSafe;
-            case "does_bed_work", "is_bed_working", "bed_working" -> DimensionType::isBedWorking;
-            case "does_anchor_work", "respawn_anchor_working", "is_respawn_anchor_working" -> DimensionType::isRespawnAnchorWorking;
-            case "skylight", "has_skylight" -> DimensionType::hasSkyLight;
-            case "ceiling", "has_ceiling" -> DimensionType::hasCeiling;
-            case "raids", "has_raids" -> DimensionType::hasRaids;
-            case "ender_dragon_fight", "has_ender_dragon_fight" -> DimensionType::hasEnderDragonFight;
-            case "fixed_time", "has_fixed_time" -> DimensionType::hasFixedTime;
-            default -> null;
-        };
+        switch (in){
+            case "natural": case "is_natural" : return DimensionType::isNatural;
+            case "ultrawarn": case "is_ultrawarm" : return DimensionType::isUltrawarm;
+            case "piglin_safe": case "is_piglin_safe" : return DimensionType::isPiglinSafe;
+            case "does_bed_work": case "is_bed_working": case "bed_working" : return DimensionType::isBedWorking;
+            case "does_anchor_work": case "respawn_anchor_working": case "is_respawn_anchor_working" : return DimensionType::isRespawnAnchorWorking;
+            case "skylight": case "has_skylight" : return DimensionType::hasSkyLight;
+            case "ceiling": case "has_ceiling" : return DimensionType::hasCeiling;
+            case "raids": case "has_raids" : return DimensionType::hasRaids;
+            case "ender_dragon_fight": case "has_ender_dragon_fight" : return DimensionType::hasEnderDragonFight;
+            case "fixed_time": case "has_fixed_time" : return DimensionType::hasFixedTime;
+            default : return null;
+        }
     }
     @Override
     public Predicate<DimensionType> getLocalPredicate(String in, String val){
-        return switch (in){
-            case "coordinate_scale" -> {
+        switch (in){
+            case "coordinate_scale" : {
                 final double arg = Double.parseDouble(val);
-                yield dim -> dim.getCoordinateScale() >= arg;
+                return dim -> dim.getCoordinateScale() >= arg;
             }
-            default -> null;
-        };
+            default : return null;
+        }
     }
 
 }

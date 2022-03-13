@@ -7,7 +7,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 
@@ -20,10 +20,10 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> extends Abst
 
     @Override
     public Predicate<T> getLocalPredicate(String in, String val){
-        return switch (in){
-            case "respawn_distance" ->{
+        switch (in){
+            case "respawn_distance" :{
                 final double arg = Double.parseDouble(val);
-                yield player -> {
+                return player -> {
                     final BlockPos pos = player.getSpawnPointPosition();
                     final ServerWorld world = player.getWorld();
                     final RegistryKey<World> dim = player.getSpawnPointDimension();
@@ -31,16 +31,16 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> extends Abst
                     return dim.equals(world.getRegistryKey()) && pos.isWithinDistance(player.getPos(), arg);
                 };
             }
-            case "advancement" -> {
+            case "advancement" : {
                 final Identifier arg = new Identifier(val);
-                yield player -> {
+                return player -> {
                     final MinecraftServer server = player.getServer();
                     if (server == null) return false;
                     return player.getAdvancementTracker().getProgress(server.getAdvancementLoader().get(arg)).isDone();
                 };
             }
-            default -> null;
-        };
+            default : return null;
+        }
     }
 
 }

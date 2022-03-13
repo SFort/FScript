@@ -8,8 +8,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
-import tf.ssf.sfort.script.instance.util.DefaultParsers;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.DefaultParsers;
 
 import java.util.function.Predicate;
 
@@ -58,122 +58,122 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 
 	@Override
 	public Predicate<T> getLocalPredicate(String in, String val){
-		return switch (in){
-			case "x" -> {
+		switch (in){
+			case "x": {
 				final double arg = Double.parseDouble(val);
-				yield entity -> entity.getX()>=arg;
+				return entity -> entity.getX() >= arg;
 			}
-			case "y" -> {
+			case "y": {
 				final double arg = Double.parseDouble(val);
-				yield entity -> entity.getY()>=arg;
+				return entity -> entity.getY() >= arg;
 			}
-			case "z" -> {
+			case "z" : {
 				final double arg = Double.parseDouble(val);
-				yield entity -> entity.getZ()>=arg;
+				return entity -> entity.getZ()>=arg;
 			}
-			case "age" -> {
+			case "age" : {
 				final int arg = Integer.parseInt(val);
-				yield entity -> entity.age>arg;
+				return entity -> entity.age>arg;
 			}
-			case "local_difficulty" -> {
+			case "local_difficulty" : {
 				final float arg = Float.parseFloat(val);
-				yield entity -> entity.world.getLocalDifficulty(entity.getBlockPos()).isHarderThan(arg);
+				return entity -> entity.world.getLocalDifficulty(entity.getBlockPos()).isHarderThan(arg);
 			}
-			case "biome" -> {
+			case "biome" : {
 				final Identifier arg = new Identifier(val);
-				yield entity -> entity.world.getBiome(entity.getBlockPos()).getKey().map(x->x.getValue().equals(arg)).orElse(false);
+				return entity -> entity.world.getBiome(entity.getBlockPos()).getKey().map(x->x.getValue().equals(arg)).orElse(false);
 			}
-			case "air" -> {
+			case "air" : {
 				final int arg = Integer.parseInt(val);
-				yield entity -> entity.getAir()>arg;
+				return entity -> entity.getAir()>arg;
 			}
-			case "max_air" -> {
+			case "max_air" : {
 				final int arg = Integer.parseInt(val);
-				yield entity -> entity.getMaxAir()>arg;
+				return entity -> entity.getMaxAir()>arg;
 			}
-			case "frozen_ticks" -> {
+			case "frozen_ticks" : {
 				final int arg = Integer.parseInt(val);
-				yield entity -> entity.getFrozenTicks()>arg;
+				return entity -> entity.getFrozenTicks()>arg;
 			}
-			case "height" -> {
+			case "height" : {
 				final float arg = Float.parseFloat(val);
-				yield entity -> entity.getHeight()>arg;
+				return entity -> entity.getHeight()>arg;
 			}
-			case "width" -> {
+			case "width" : {
 				final float arg = Float.parseFloat(val);
-				yield entity -> entity.getWidth()>arg;
+				return entity -> entity.getWidth()>arg;
 			}
-			case "in_block" -> {
+			case "in_block" : {
 				final Block arg = Registry.BLOCK.get(new Identifier(val));
-				yield entity -> entity.world.getBlockState(entity.getBlockPos()).isOf(arg);
+				return entity -> entity.world.getBlockState(entity.getBlockPos()).isOf(arg);
 			}
-			case "type" -> {
+			case "type" : {
 				final EntityType<?> arg = Registry.ENTITY_TYPE.get(new Identifier(val));
-				yield entity -> entity.getType().equals(arg);
+				return entity -> entity.getType().equals(arg);
 			}
-			default -> null;
-		};
+			default: return null;
+		}
 	}
 	@Override
 	public Predicate<T> getLocalPredicate(String in){
-		return switch (in) {
-			case "full_air", "max_air" -> entity -> entity.getAir() == entity.getMaxAir();
-			case "sprinting", "is_sprinting" -> Entity::isSprinting;
-			case "in_lava", "is_in_lava" -> Entity::isInLava;
-			case "on_fire", "is_on_fire" -> Entity::isOnFire;
-			case "wet", "is_wet" -> Entity::isWet;
-			case "fire_immune", "is_fire_immune" -> Entity::isFireImmune;
-			case "freezing", "is_freezing" -> Entity::isFrozen;
-			case "glowing", "is_glowing" -> Entity::isGlowing;
-			case "explosion_immune", "is_explosion_immune" -> Entity::isImmuneToExplosion;
-			case "invisible", "is_invisible" -> Entity::isInvisible;
-			case "on_ground", "is_on_ground" -> Entity::isOnGround;
-			case "silent", "is_silent" -> Entity::isSilent;
-			case "has_no_gravity" -> Entity::hasNoGravity;
-			case "inside_wall", "is_inside_wall" -> Entity::isInsideWall;
-			case "touching_water","is_touching_water" -> Entity::isTouchingWater;
-			case "touching_water_or_rain", "is_touching_water_or_rain" -> Entity::isTouchingWaterOrRain;
-			case "submerged_in_water", "is_submerged_in_water" -> Entity::isSubmergedInWater;
-			case "has_vehicle" -> Entity::hasVehicle;
-			case "has_passengers" ->Entity::hasPassengers;
-			case "has_player_rider" ->Entity::hasPlayerRider;
-			case "is_sneaking","sneaking","is_sneaky","sneaky" -> Entity::isSneaky;
-			case "swimming", "is_swimming" -> Entity::isSwimming;
-			default -> null;
-		};
+		switch (in) {
+			case "full_air": case "max_air" : return entity -> entity.getAir() == entity.getMaxAir();
+			case "sprinting": case "is_sprinting" : return Entity::isSprinting;
+			case "in_lava": case "is_in_lava" : return Entity::isInLava;
+			case "on_fire": case "is_on_fire" : return Entity::isOnFire;
+			case "wet": case "is_wet" : return Entity::isWet;
+			case "fire_immune": case "is_fire_immune" : return Entity::isFireImmune;
+			case "freezing": case "is_freezing" : return Entity::isFrozen;
+			case "glowing": case "is_glowing" : return Entity::isGlowing;
+			case "explosion_immune": case "is_explosion_immune" : return Entity::isImmuneToExplosion;
+			case "invisible": case "is_invisible" : return Entity::isInvisible;
+			case "on_ground": case "is_on_ground" : return Entity::isOnGround;
+			case "silent": case "is_silent" : return Entity::isSilent;
+			case "has_no_gravity" : return Entity::hasNoGravity;
+			case "inside_wall": case "is_inside_wall" : return Entity::isInsideWall;
+			case "touching_water": case "is_touching_water" : return Entity::isTouchingWater;
+			case "touching_water_or_rain": case "is_touching_water_or_rain" : return Entity::isTouchingWaterOrRain;
+			case "submerged_in_water": case "is_submerged_in_water" : return Entity::isSubmergedInWater;
+			case "has_vehicle" : return Entity::hasVehicle;
+			case "has_passengers" : return Entity::hasPassengers;
+			case "has_player_rider" : return Entity::hasPlayerRider;
+			case "is_sneaking": case "sneaking": case "is_sneaky": case "sneaky" : return Entity::isSneaky;
+			case "swimming": case "is_swimming" : return Entity::isSwimming;
+			default : return null;
+		}
 	}
 	@Override
 	public Predicate<T> getLocalEmbed(String in, String script){
-		return switch (in){
-			case "living" -> {
+		switch (in){
+			case "living" : {
 				final Predicate<LivingEntity> predicate = DefaultParsers.LIVING_ENTITY_PARSER.parse(script);
-				if (predicate == null) yield null;
-				yield entity -> {
+				if (predicate == null) return null;
+				return entity -> {
 					if (entity instanceof LivingEntity)
 						return predicate.test(((LivingEntity) entity));
 					return false;
 				};
 			}
-			case "player" -> {
+			case "player" : {
 				final Predicate<PlayerEntity> predicate = DefaultParsers.PLAYER_ENTITY_PARSER.parse(script);
-				if (predicate == null) yield null;
-				yield entity -> {
+				if (predicate == null) return null;
+				return entity -> {
 					if (entity instanceof PlayerEntity)
 						return predicate.test(((PlayerEntity) entity));
 					return false;
 				};
 			}
-			case "server_player" -> {
+			case "server_player" : {
 				final Predicate<ServerPlayerEntity> predicate = DefaultParsers.SERVER_PLAYER_ENTITY_PARSER.parse(script);
-				if (predicate == null) yield null;
-				yield entity -> {
+				if (predicate == null) return null;
+				return entity -> {
 					if (entity instanceof ServerPlayerEntity)
 						return predicate.test(((ServerPlayerEntity) entity));
 					return false;
 				};
 			}
-			default -> null;
-		};
+			default : return null;
+		}
 	}
 
 }

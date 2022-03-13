@@ -5,7 +5,7 @@ import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 
@@ -28,45 +28,45 @@ public class EnchantmentScript extends AbstractExtendablePredicateProvider<Encha
 
 	@Override
 	public Predicate<Enchantment> getLocalPredicate(String in){
-		return switch (in){
-			case "max_level", "is_max_level" -> enchant -> enchant.getMinLevel() == enchant.getMaxLevel();
-			case "treasure", "is_treasure" -> Enchantment::isTreasure;
-			case "cursed", "is_cursed" -> Enchantment::isCursed;
-			case "villager_traded", "is_villager_traded", "available_for_enchanted_book_offer" ->
-					Enchantment::isAvailableForEnchantedBookOffer;
-			case "loot", "is_loot", "available_for_random_selection" ->
-					Enchantment::isAvailableForRandomSelection;
-			default -> null;
-		};
+		switch (in){
+			case "max_level": case "is_max_level" : return enchant -> enchant.getMinLevel() == enchant.getMaxLevel();
+			case "treasure": case "is_treasure" : return Enchantment::isTreasure;
+			case "cursed": case "is_cursed" : return Enchantment::isCursed;
+			case "villager_traded": case "is_villager_traded": case "available_for_enchanted_book_offer" :
+				return Enchantment::isAvailableForEnchantedBookOffer;
+			case "loot": case "is_loot": case "available_for_random_selection" :
+					return Enchantment::isAvailableForRandomSelection;
+			default : return null;
+		}
 	}
 	@Override
 	public Predicate<Enchantment> getLocalPredicate(String in, String val){
-		return switch (in){
-			case ".", "enchant" -> {
+		switch (in){
+			case ".": case "enchant" : {
 				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
-				yield enchant -> enchant.equals(arg);
+				return enchant -> enchant.equals(arg);
 			}
-			case "min_level" -> {
+			case "min_level" : {
 				final int arg = Integer.parseInt(val);
-				yield enchant -> enchant.getMinLevel()>arg;
+				return enchant -> enchant.getMinLevel()>arg;
 			}
-			case "max_level" -> {
+			case "max_level" : {
 				final int arg = Integer.parseInt(val);
-				yield enchant -> enchant.getMaxLevel()>arg;
+				return enchant -> enchant.getMaxLevel()>arg;
 			}
-			case "acceptable_item" -> {
+			case "acceptable_item" : {
 				final Item arg = Registry.ITEM.get(new Identifier(val));
-				yield enchant -> enchant.type.isAcceptableItem(arg);
+				return enchant -> enchant.type.isAcceptableItem(arg);
 			}
-			case "rarity" ->{
+			case "rarity" :{
 				final Enchantment.Rarity arg = Enchantment.Rarity.valueOf(val);
-				yield enchant -> enchant.getRarity().equals(arg);
+				return enchant -> enchant.getRarity().equals(arg);
 			}
-			case "target" -> {
+			case "target" : {
 				final EnchantmentTarget arg = EnchantmentTarget.valueOf(val);
-				yield enchant -> enchant.type.equals(arg);
+				return enchant -> enchant.type.equals(arg);
 			}
-			default -> null;
-		};
+			default : return null;
+		}
 	}
 }

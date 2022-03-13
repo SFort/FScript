@@ -14,13 +14,12 @@ public class MixinExtendedBiome implements PredicateProvider<Biome>, Help {
 
     @Override
     public Predicate<Biome> getPredicate(String in, String val, Set<String> dejavu){
-        return switch (in){
-            case "biome_category" -> {
+         switch (in){
+             case "biome_category":
                 final Biome.Category arg = Biome.Category.byName(val);
-                yield biome -> ((Object)biome) instanceof BiomeExtended  && ((BiomeExtended)(Object)biome).fscript$getCategory() == arg;
-            }
-            default -> null;
-        };
+                return biome -> ((Object)biome) instanceof BiomeExtended  && ((BiomeExtended)(Object)biome).fscript$getCategory() == arg;
+             default: return null;
+        }
     }
     //==================================================================================================================
 

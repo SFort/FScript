@@ -1,7 +1,7 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.enchantment.Enchantment;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -14,13 +14,13 @@ public class EnchantmentLevelEntryScript extends AbstractExtendablePredicateProv
 
     @Override
     public Predicate<Map.Entry<Enchantment, Integer>> getLocalPredicate(String in, String val){
-        return switch (in) {
-            case "level", "enchant_level" -> {
+        switch (in) {
+            case "level": case "enchant_level" : {
                 final int arg = Integer.parseInt(val);
-                yield entry -> entry.getValue()>=arg;
+                return entry -> entry.getValue()>=arg;
             }
-            default -> null;
-        };
+            default : return null;
+        }
     }
 
 }

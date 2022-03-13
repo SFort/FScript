@@ -14,20 +14,19 @@ import java.util.function.Predicate;
 public class MixinExtendedLivingEntityScript implements PredicateProvider<LivingEntity>, Help {
     @Override
     public Predicate<LivingEntity> getPredicate(String in, Set<String> dejavu){
-        return switch (in){
-            case "sleeping_in_bed", "is_sleeping_in_bed" -> entity -> entity instanceof LivingEntityExtended && ((LivingEntityExtended)entity).fscript$isSleepingInBed();
-            default -> null;
-        };
+        switch (in){
+            case "sleeping_in_bed": case  "is_sleeping_in_bed": return entity -> entity instanceof LivingEntityExtended && ((LivingEntityExtended)entity).fscript$isSleepingInBed();
+            default: return null;
+        }
     }
     @Override
     public Predicate<LivingEntity> getPredicate(String in, String val, Set<String> dejavu){
-        return switch (in){
-            case "attacked" -> {
+        switch (in){
+            case "attacked":
                 final int arg = Integer.parseInt(val);
-                yield entity -> entity instanceof LivingEntityInjected && ((LivingEntityInjected)entity).fscript$attacked(arg);
-            }
-            default -> null;
-        };
+                return entity -> entity instanceof LivingEntityInjected && ((LivingEntityInjected)entity).fscript$attacked(arg);
+            default: return null;
+        }
     }
     //==================================================================================================================
 

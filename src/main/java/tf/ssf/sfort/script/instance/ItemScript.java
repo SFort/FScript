@@ -5,7 +5,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 
@@ -21,27 +21,27 @@ public class ItemScript extends AbstractExtendablePredicateProvider<Item> {
 	}
 	@Override
 	public Predicate<Item> getLocalPredicate(String in, String val){
-		return switch (in){
-			case ".", "item" -> {
+		switch (in){
+			case ".": case "item" : {
 				final Item arg = Registry.ITEM.get(new Identifier(val));
-				yield item -> item == arg;
+				return item -> item == arg;
 			}
-			case "group" -> item -> {
+			case "group" : return item -> {
 				final ItemGroup group = item.getGroup();
 				return group != null && group.getName().equals(val);
 			};
-			default -> null;
-		};
+			default : return null;
+		}
 	}
 	@Override
 	public Predicate<Item> getLocalPredicate(String in){
-		return switch (in){
-			case "damageable", "is_damageable" -> Item::isDamageable;
-			case "food", "is_food" -> Item::isFood;
-			case "block_item", "is_block_item" -> item -> item instanceof BlockItem;
-			case "fireproof", "is_fireproof" -> Item::isFireproof;
-			default -> null;
-		};
+		switch (in){
+			case "damageable": case "is_damageable" : return Item::isDamageable;
+			case "food": case "is_food" : return Item::isFood;
+			case "block_item": case "is_block_item" : return item -> item instanceof BlockItem;
+			case "fireproof": case "is_fireproof" : return Item::isFireproof;
+			default: return null;
+		}
 	}
 
 }

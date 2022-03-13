@@ -2,7 +2,7 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 
@@ -17,23 +17,23 @@ public class WorldScript extends AbstractExtendablePredicateProvider<World> {
 
     @Override
     public Predicate<World> getLocalPredicate(String in){
-        return switch (in){
-            case "day", "is_day" -> World::isDay;
-            case "raining", "is_raining" -> World::isRaining;
-            case "thundering", "is_thundering" -> World::isThundering;
-            default -> null;
-        };
+        switch (in){
+            case "day": case "is_day" : return World::isDay;
+            case "raining": case "is_raining" : return World::isRaining;
+            case "thundering": case "is_thundering" : return World::isThundering;
+            default : return null;
+        }
     }
 
     @Override
     public Predicate<World> getLocalPredicate(String in, String val){
-        return switch (in){
-            case "dimension" -> {
+        switch (in){
+            case "dimension" : {
                 final Identifier arg = new Identifier(val);
-                yield world -> world.getRegistryKey().getValue().equals(arg);
+                return world -> world.getRegistryKey().getValue().equals(arg);
             }
-            default -> null;
-        };
+            default : return null;
+        }
     }
 
 }

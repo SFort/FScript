@@ -1,7 +1,7 @@
 package tf.ssf.sfort.script.instance;
 
 import net.minecraft.world.chunk.Chunk;
-import tf.ssf.sfort.script.instance.util.AbstractExtendablePredicateProvider;
+import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
 
@@ -13,12 +13,11 @@ public class ChunkScript extends AbstractExtendablePredicateProvider<Chunk> {
 
 	@Override
 	public Predicate<Chunk> getLocalPredicate(String in, String val){
-		return switch (in){
-			case "inhabited" -> {
+		switch (in){
+			case "inhabited":
 				final long arg = Long.parseLong(val);
-				yield chunk -> chunk.getInhabitedTime()>arg;
-			}
-			default -> null;
-		};
+				return chunk -> chunk.getInhabitedTime()>arg;
+			default: return null;
+		}
 	}
 }
