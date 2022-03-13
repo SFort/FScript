@@ -23,6 +23,10 @@ dependencies {
 MC Version / Latest Available FScript:
 
 1.18.2          : `2.1.2`
+
 1.17   - 1.18.1 : `2.1.1`
+
 1.15.2 - 1.16.5 : `1.1.5-1.16`
 
+
+Latest Fscript-shell version : `2`
