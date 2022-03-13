@@ -7,7 +7,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
-import tf.ssf.sfort.script.extended.mixin.MixinExtendedBiome;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedFishingBobberEntityScript;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedItemScript;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedLivingEntityScript;
@@ -46,7 +45,7 @@ public class Default {
     static {
         ENCHANTMENT_LEVEL_ENTRY.addProvider(ENCHANTMENT, enchant -> set -> enchant.test(set.getKey()), 3000);
         ENTITY.addProvider(WORLD, world -> entity -> world.test(entity.world), 3002);
-        ENTITY.addProvider(BIOME, biom -> entity -> biom.test(entity.world.getBiome(entity.getBlockPos()).value()), 3001);
+        ENTITY.addProvider(BIOME, biom -> entity -> biom.test(entity.world.getBiome(entity.getBlockPos())), 3001);
         ENTITY.addProvider(CHUNK, chunk -> entity -> chunk.test(entity.world.getWorldChunk(entity.getBlockPos())), 3000);
         FISHING_BOBBER_ENTITY.addProvider(ENTITY, entity -> entity::test, 3000);
         ITEM_STACK.addProvider(ITEM, item -> stack -> item.test(stack.getItem()), 3000);
@@ -62,7 +61,6 @@ public class Default {
         LIVING_ENTITY.addProvider(new MixinExtendedLivingEntityScript(), 1000);
         ITEM.addProvider(new MixinExtendedItemScript(), 1000);
         FISHING_BOBBER_ENTITY.addProvider(new MixinExtendedFishingBobberEntityScript(), 1000);
-        BIOME.addProvider(new MixinExtendedBiome(), 1000);
 
         //Mod Compat
         if (FabricLoader.getInstance().isModLoaded("trinkets") && TrinketExtendedLivingEntityScript.success)

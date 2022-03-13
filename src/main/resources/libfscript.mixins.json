@@ -4,7 +4,6 @@
   "package": "tf.ssf.sfort.script.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "BiomeExtended",
     "FishingBobberEntityExtended",
     "ItemExtended",
     "LivingEntityExtended",

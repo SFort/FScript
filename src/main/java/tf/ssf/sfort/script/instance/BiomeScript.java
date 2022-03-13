@@ -19,6 +19,10 @@ public class BiomeScript extends AbstractExtendablePredicateProvider<Biome> {
 				final float arg = Float.parseFloat(val);
 				return biome -> biome.getTemperature()>arg;
 			}
+			case "biome_catagory" : {
+				final Biome.Category arg = Biome.Category.byName(val);
+				return biome -> biome.getCategory() == arg;
+			}
 			case "precipitation" : {
                 final Biome.Precipitation arg = Biome.Precipitation.byName(val);
                 return biome -> biome.getPrecipitation() == arg;

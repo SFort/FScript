@@ -375,7 +375,7 @@ public class ScriptingScreen extends Screen {
     }
     protected void drawButtons(MatrixStack matrix, int mouseX, int mouseY, float delta){
         if (drawButton(matrix, width-50, height-20, 50, 20, "Done", null, mouseX, mouseY)) {
-            close();
+            onClose();
         }
         int x = 130;
         if (400>width){
@@ -637,7 +637,7 @@ public class ScriptingScreen extends Screen {
 
 
     @Override
-    public void close() {
+    public void onClose() {
         client.setScreen(parent);
     }
 
