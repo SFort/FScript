@@ -18,3 +18,11 @@ Latest fscript-shell version : `2`
 
 Explatanion and examples (for developers):  
 [wiki](https://github.com/SFort/FScript/wiki)
+
+#### Inbuilt support for
+[trinkets](https://github.com/emilyploszaj/trinkets)
+
+#### Known mods that implement fscript
+[survival flight](https://github.com/sfort/mc-survivalflight)  
+[less clutter](https://github.com/sfort/mc-lessclutter)  
+[fabrication](https://github.com/unascribed/fabrication)
