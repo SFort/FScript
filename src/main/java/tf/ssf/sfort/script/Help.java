@@ -38,14 +38,15 @@ public interface Help {
         String postfix = "";
         int colon = s.indexOf(':');
         if (colon != -1) {
+            int start = 0;
             if (s.startsWith("~")) {
                 prefix = "~";
-                s = s.substring(1);
-                int i = s.indexOf('~');
+                start = 1;
+                int i = s.indexOf('~', 1);
                 if (i != -1) colon = i;
             }
             postfix = s.substring(colon);
-            s = s.substring(0, colon);
+            s = s.substring(start, colon);
         }
         return new Triple<>(prefix, Arrays.stream(s.split(" ")).collect(Collectors.toList()), postfix);
     }

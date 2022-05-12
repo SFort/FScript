@@ -20,6 +20,7 @@ public class StitchedPredicateProvider implements PredicateProvider<List<Object>
 
     public StitchedPredicateProvider addEmbed(PredicateProvider predicateProvider, String help, String helpDesc) {
         size+=1;
+        if (help.charAt(0) != '~') help="~"+help;
         this.help.put(help, helpDesc);
         for (String key : Help.dismantle(help).b) {
             predicateProviders.put(key, new AbstractMap.SimpleEntry<>(size, predicateProvider));
@@ -35,17 +36,6 @@ public class StitchedPredicateProvider implements PredicateProvider<List<Object>
                 return o -> p.test(o.get(0));
             }
         }
-        Map.Entry<Integer, PredicateProvider> entry = predicateProviders.get(key);
-        if (entry != null) {
-            PredicateProvider provider = entry.getValue();
-            if (dejavu.add(provider.toString())) {
-                final Predicate ret = provider.getPredicate(key, dejavu);
-                if (ret != null) {
-                    final int varIndex = entry.getKey();
-                    return p -> ret.test(p.get(varIndex));
-                }
-            }
-        }
         return null;
     }
 
@@ -55,17 +45,6 @@ public class StitchedPredicateProvider implements PredicateProvider<List<Object>
             Predicate p = predicateProvider.getPredicate(key, arg, dejavu);
             if (p != null) {
                 return o -> p.test(o.get(0));
-            }
-        }
-        Map.Entry<Integer, PredicateProvider> entry = predicateProviders.get(key);
-        if (entry != null) {
-            PredicateProvider provider = entry.getValue();
-            if (dejavu.add(provider.toString())) {
-                final Predicate ret = provider.getPredicate(key, arg, dejavu);
-                if (ret != null) {
-                    final int varIndex = entry.getKey();
-                    return p -> ret.test(p.get(varIndex));
-                }
             }
         }
         return null;
@@ -83,7 +62,7 @@ public class StitchedPredicateProvider implements PredicateProvider<List<Object>
         if (entry != null) {
             PredicateProvider provider = entry.getValue();
             if (dejavu.add(provider.toString())) {
-                final Predicate ret = provider.getEmbed(key, script, dejavu);
+                final Predicate ret = provider.parse(script);
                 if (ret != null) {
                     final int varIndex = entry.getKey();
                     return p -> ret.test(p.get(varIndex));
@@ -99,17 +78,6 @@ public class StitchedPredicateProvider implements PredicateProvider<List<Object>
             Predicate p = predicateProvider.getEmbed(key, arg, script, dejavu);
             if (p != null) {
                 return o -> p.test(o.get(0));
-            }
-        }
-        Map.Entry<Integer, PredicateProvider> entry = predicateProviders.get(key);
-        if (entry != null) {
-            PredicateProvider provider = entry.getValue();
-            if (dejavu.add(provider.toString())) {
-                final Predicate ret = provider.getEmbed(key, arg, script, dejavu);
-                if (ret != null) {
-                    final int varIndex = entry.getKey();
-                    return p -> ret.test(p.get(varIndex));
-                }
             }
         }
         return null;
