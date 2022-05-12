@@ -17,13 +17,14 @@ public interface ExtendablePredicateProvider<T> extends PredicateProvider<T> {
     }
 
     default <S> void addProvider(PredicateProvider<S> predicateProvider, Function<Predicate<S>, Predicate<T>> adapter, int priority) {
-        if (predicateProvider != null && adapter != null)
-        addProvider(
-                predicateProvider instanceof Help ?
-                        new AdaptableHelpPredicateProvider<>((Help & PredicateProvider<S>) predicateProvider, adapter) :
-                        new AdaptablePredicateProvider<>(predicateProvider, adapter),
-                priority
-        );
+        if (predicateProvider != null && adapter != null) {
+            addProvider(
+                    predicateProvider instanceof Help ?
+                            new AdaptableHelpPredicateProvider<>((Help & PredicateProvider<S>) predicateProvider, adapter) :
+                            new AdaptablePredicateProvider<>(predicateProvider, adapter),
+                    priority
+            );
+        }
     }
 
     void addProvider(PredicateProvider<T> predicateProvider, int priority);
