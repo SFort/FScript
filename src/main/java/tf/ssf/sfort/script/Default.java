@@ -100,6 +100,12 @@ public class Default {
         defaults.put("FISHING_BOBBER_ENTITY", FISHING_BOBBER_ENTITY);
         defaults.put("DAMAGE_SOURCE", DAMAGE_SOURCE);
 
-        FabricLoader.getInstance().getEntrypoints("fscript", ModInitializer.class).forEach(ModInitializer::onInitialize);
+        FabricLoader.getInstance().getEntrypoints("fscript", Object.class).forEach( o -> {
+            if (o instanceof Runnable) {
+                ((Runnable)o).run();
+            } else if (o instanceof ModInitializer) {
+                ((ModInitializer)o).onInitialize();
+            }
+        });
     }
 }

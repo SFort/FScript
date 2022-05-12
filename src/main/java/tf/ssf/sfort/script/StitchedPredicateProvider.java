@@ -1,35 +1,39 @@
 package tf.ssf.sfort.script;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-//TODO should allow duplicates of the same predicate provider
 public class StitchedPredicateProvider implements PredicateProvider<List<Object>>, Help {
-    public final List<PredicateProvider> predicateProviders;
+    public final PredicateProvider predicateProvider;
+    public final Map<String, String> help;
+    protected final Map<String, Map.Entry<Integer, PredicateProvider>> predicateProviders = new HashMap<>();
+    protected int size = 0;
 
-    public StitchedPredicateProvider(PredicateProvider... predicateProviders) {
-        this.predicateProviders = Arrays.asList(predicateProviders);
-        for (PredicateProvider predicate : predicateProviders) {
-            if (predicate instanceof Help){
-                extend_help.add((Help)predicate);
-            }
+    public StitchedPredicateProvider(PredicateProvider predicateProvider) {
+        this.predicateProvider = predicateProvider;
+        help = predicateProvider instanceof Help ? ((Help)predicateProvider).getHelp() : new HashMap<>();
+    }
+
+    public StitchedPredicateProvider addEmbed(PredicateProvider predicateProvider, String help, String helpDesc) {
+        size+=1;
+        if (help.charAt(0) != '~') help="~"+help;
+        this.help.put(help, helpDesc);
+        for (String key : Help.dismantle(help).b) {
+            predicateProviders.put(key, new AbstractMap.SimpleEntry<>(size, predicateProvider));
         }
+        return this;
     }
 
     @Override
     public Predicate<List<Object>> getPredicate(String key, Set<String> dejavu) {
-        for (int i = 0; i<predicateProviders.size(); i++){
-            PredicateProvider provider = predicateProviders.get(i);
-            if (dejavu.add(provider.toString())) {
-                final Predicate ret = provider.getPredicate(key, dejavu);
-                if (ret == null) continue;
-                final int varIndex = i;
-                return p->ret.test(p.get(varIndex));
+        if (dejavu.add(predicateProvider.toString())){
+            Predicate p = predicateProvider.getPredicate(key, dejavu);
+            if (p != null) {
+                return o -> p.test(o.get(0));
             }
         }
         return null;
@@ -37,13 +41,10 @@ public class StitchedPredicateProvider implements PredicateProvider<List<Object>
 
     @Override
     public Predicate<List<Object>> getPredicate(String key, String arg, Set<String> dejavu) {
-        for (int i = 0; i<predicateProviders.size(); i++){
-            PredicateProvider provider = predicateProviders.get(i);
-            if (dejavu.add(provider.toString())) {
-                final Predicate ret = provider.getPredicate(key, arg, dejavu);
-                if (ret == null) continue;
-                final int varIndex = i;
-                return p->ret.test(p.get(varIndex));
+        if (dejavu.add(predicateProvider.toString())){
+            Predicate p = predicateProvider.getPredicate(key, arg, dejavu);
+            if (p != null) {
+                return o -> p.test(o.get(0));
             }
         }
         return null;
@@ -51,13 +52,21 @@ public class StitchedPredicateProvider implements PredicateProvider<List<Object>
 
     @Override
     public Predicate<List<Object>> getEmbed(String key, String script, Set<String> dejavu) {
-        for (int i = 0; i<predicateProviders.size(); i++){
-            PredicateProvider provider = predicateProviders.get(i);
+        if (dejavu.add(predicateProvider.toString())){
+            Predicate p = predicateProvider.getEmbed(key, script, dejavu);
+            if (p != null) {
+                return o -> p.test(o.get(0));
+            }
+        }
+        Map.Entry<Integer, PredicateProvider> entry = predicateProviders.get(key);
+        if (entry != null) {
+            PredicateProvider provider = entry.getValue();
             if (dejavu.add(provider.toString())) {
-                final Predicate ret = provider.getEmbed(key, script, dejavu);
-                if (ret == null) continue;
-                final int varIndex = i;
-                return p->ret.test(p.get(varIndex));
+                final Predicate ret = provider.parse(script);
+                if (ret != null) {
+                    final int varIndex = entry.getKey();
+                    return p -> ret.test(p.get(varIndex));
+                }
             }
         }
         return null;
@@ -65,29 +74,17 @@ public class StitchedPredicateProvider implements PredicateProvider<List<Object>
 
     @Override
     public Predicate<List<Object>> getEmbed(String key, String arg, String script, Set<String> dejavu) {
-        for (int i = 0; i<predicateProviders.size(); i++){
-            PredicateProvider provider = predicateProviders.get(i);
-            if (dejavu.add(provider.toString())) {
-                final Predicate ret = provider.getEmbed(key, arg, script, dejavu);
-                if (ret == null) continue;
-                final int varIndex = i;
-                return p->ret.test(p.get(varIndex));
+        if (dejavu.add(predicateProvider.toString())){
+            Predicate p = predicateProvider.getEmbed(key, arg, script, dejavu);
+            if (p != null) {
+                return o -> p.test(o.get(0));
             }
         }
         return null;
     }
 
-    //==================================================================================================================
-
     @Override
     public Map<String, String> getHelp(){
         return help;
     }
-    @Override
-    public List<Help> getImported(){
-        return extend_help;
-    }
-    public final Map<String, String> help = new HashMap<>();
-    public final List<Help> extend_help = new ArrayList<>();
-
 }
