@@ -973,5 +973,6 @@ public class ScriptingScreen extends Screen {
         default_embed.put("ENCHANTMENT_LEVEL_ENTRY", Default.ENCHANTMENT_LEVEL_ENTRY);
         default_embed.put("GAME_MODE", Default.GAME_MODE);
         default_embed.put("FISHING_BOBBER_ENTITY", Default.FISHING_BOBBER_ENTITY);
+        default_embed.put("DAMAGE_SOURCE", Default.DAMAGE_SOURCE);
     }
 }
