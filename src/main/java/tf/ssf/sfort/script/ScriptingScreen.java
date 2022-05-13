@@ -502,12 +502,11 @@ public class ScriptingScreen extends Screen {
                     int tilde = findChr(in, '~', i+1, colon);
                     boolean noTilde = tilde == -1;
                     String name = in.substring(i + 1, noTilde ? colon : tilde);
-                    String searchFor = name + (noTilde? ":": "");
                     AtomicReference<Help> hlp = new AtomicReference<>();
                     Help.recurseAcceptor(getCursorHelp(), new HashSet<>(),
                             s -> {
                                 final Triple<String, List<String>, String> triple = Help.dismantle(s.getKey());
-                                if (hlp.get() != null || !triple.a.startsWith("~") || !triple.b.contains(searchFor)) return;
+                                if (hlp.get() != null || !triple.a.startsWith("~") || !triple.b.contains(name)) return;
                                 String sc = triple.c;
                                 int si = sc.indexOf(':');
                                 hlp.set(script.embedable.get(si == -1 ? sc : sc.substring(si+1)));
