@@ -22,7 +22,7 @@ Explatanion and examples (for developers):
 #### Inbuilt support for
 [trinkets](https://github.com/emilyploszaj/trinkets)
 
-#### Known mods that implement fscript
+#### Known mods that use fscript
 [survival flight](https://github.com/sfort/mc-survivalflight)  
 [less clutter](https://github.com/sfort/mc-lessclutter)  
 [fabrication](https://github.com/unascribed/fabrication)
