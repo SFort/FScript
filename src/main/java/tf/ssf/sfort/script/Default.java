@@ -7,7 +7,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
-import tf.ssf.sfort.script.extended.mixin.MixinExtendedBiome;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedFishingBobberEntityScript;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedItemScript;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedLivingEntityScript;
@@ -78,7 +77,6 @@ public class Default {
         LIVING_ENTITY.addProvider(new MixinExtendedLivingEntityScript(), 1000);
         ITEM.addProvider(new MixinExtendedItemScript(), 1000);
         FISHING_BOBBER_ENTITY.addProvider(new MixinExtendedFishingBobberEntityScript(), 1000);
-        BIOME.addProvider(new MixinExtendedBiome(), 1000);
 
         //Mod Compat
         if (FabricLoader.getInstance().isModLoaded("trinkets") && TrinketExtendedLivingEntityScript.success)

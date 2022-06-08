@@ -42,7 +42,6 @@ public class Parameters {
     public Set<String> ItemGroupID = new HashSet<>();
     public Set<String> RarityID = new HashSet<>();
     public Set<String> BlockID = new HashSet<>();
-    public Set<String> BiomeCatagoryID = new HashSet<>();
     public Set<String> EntityTypeID = new HashSet<>();
     public Set<String> EnchantID = new HashSet<>();
     public Set<String> EnchantRarityID = new HashSet<>();
@@ -82,9 +81,6 @@ public class Parameters {
 
         map.put("BlockID", () -> BlockID);
         BlockID.addAll(Registry.BLOCK.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
-
-        map.put("BiomeCatagoryID", () -> BiomeCatagoryID);
-        BiomeCatagoryID.addAll(Arrays.stream(Biome.Category.values()).map(Biome.Category::getName).collect(Collectors.toSet()));
 
         map.put("EntityTypeID", () -> EntityTypeID);
         EntityTypeID.addAll(Registry.ENTITY_TYPE.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));

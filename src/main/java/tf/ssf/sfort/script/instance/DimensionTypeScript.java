@@ -16,22 +16,20 @@ public class DimensionTypeScript extends AbstractExtendablePredicateProvider<Dim
         help.put("skylight has_skylight", "Require dimension to have a skylight");
         help.put("ceiling has_ceiling", "Require dimension to have a ceiling");
         help.put("raids has_raids", "Require dimension to have raids");
-        help.put("ender_dragon_fight has_ender_dragon_fight", "Require dimension to have an ender dragon");
         help.put("fixed_time has_fixed_time", "Require dimension to have fixed time");
         help.put("coordinate_scale:double", "Minimum dimension coordinate scale");
     }
     @Override
     public Predicate<DimensionType> getLocalPredicate(String in){
         switch (in){
-            case "natural": case "is_natural" : return DimensionType::isNatural;
-            case "ultrawarn": case "is_ultrawarm" : return DimensionType::isUltrawarm;
-            case "piglin_safe": case "is_piglin_safe" : return DimensionType::isPiglinSafe;
-            case "does_bed_work": case "is_bed_working": case "bed_working" : return DimensionType::isBedWorking;
-            case "does_anchor_work": case "respawn_anchor_working": case "is_respawn_anchor_working" : return DimensionType::isRespawnAnchorWorking;
+            case "natural": case "is_natural" : return DimensionType::natural;
+            case "ultrawarn": case "is_ultrawarm" : return DimensionType::ultrawarm;
+            case "piglin_safe": case "is_piglin_safe" : return DimensionType::piglinSafe;
+            case "does_bed_work": case "is_bed_working": case "bed_working" : return DimensionType::bedWorks;
+            case "does_anchor_work": case "respawn_anchor_working": case "is_respawn_anchor_working" : return DimensionType::respawnAnchorWorks;
             case "skylight": case "has_skylight" : return DimensionType::hasSkyLight;
             case "ceiling": case "has_ceiling" : return DimensionType::hasCeiling;
             case "raids": case "has_raids" : return DimensionType::hasRaids;
-            case "ender_dragon_fight": case "has_ender_dragon_fight" : return DimensionType::hasEnderDragonFight;
             case "fixed_time": case "has_fixed_time" : return DimensionType::hasFixedTime;
             default : return null;
         }
@@ -41,7 +39,7 @@ public class DimensionTypeScript extends AbstractExtendablePredicateProvider<Dim
         switch (in){
             case "coordinate_scale" : {
                 final double arg = Double.parseDouble(val);
-                return dim -> dim.getCoordinateScale() >= arg;
+                return dim -> dim.coordinateScale() >= arg;
             }
             default : return null;
         }

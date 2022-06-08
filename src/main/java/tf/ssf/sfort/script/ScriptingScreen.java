@@ -11,7 +11,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -77,7 +76,7 @@ public class ScriptingScreen extends Screen {
     @Override
     public void init(){
         super.init();
-        searchField = new TextFieldWidget(textRenderer, 1, 1, 128, 14, searchField, new LiteralText("Search"));
+        searchField = new TextFieldWidget(textRenderer, 1, 1, 128, 14, searchField, Text.of("Search"));
         searchField.setChangedListener((s) -> s = s.trim());
     }
 
@@ -269,7 +268,7 @@ public class ScriptingScreen extends Screen {
                     pushValMake(os);
                 }
                 if (renderTips && !os.desc.isEmpty()) {
-                    renderTooltip(matrix, new LiteralText(os.desc), mouseX, mouseY);
+                    renderTooltip(matrix, Text.of(os.desc), mouseX, mouseY);
                 }
             }
             thisHeight += 8;
@@ -583,7 +582,7 @@ public class ScriptingScreen extends Screen {
             }
             drawOutlineBox(matrix, x, y, w, h, -1);
             if (desc != null && renderTips)
-                renderTooltip(matrix, new LiteralText(desc), mouseX, mouseY);
+                renderTooltip(matrix, Text.of(desc), mouseX, mouseY);
         }
         if (text != null)
             textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2f), y + ((h - 8) / 2f), -1);
@@ -600,7 +599,7 @@ public class ScriptingScreen extends Screen {
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
             }
             if (desc != null && renderTips)
-                renderTooltip(matrix, new LiteralText(desc), mouseX, mouseY);
+                renderTooltip(matrix, Text.of(desc), mouseX, mouseY);
         }
         if (text != null)
             textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2), y + ((h - 8) / 2), -1);

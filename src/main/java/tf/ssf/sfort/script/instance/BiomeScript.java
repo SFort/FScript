@@ -3,6 +3,7 @@ package tf.ssf.sfort.script.instance;
 import net.minecraft.world.biome.Biome;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 public class BiomeScript extends AbstractExtendablePredicateProvider<Biome> {
@@ -20,7 +21,7 @@ public class BiomeScript extends AbstractExtendablePredicateProvider<Biome> {
 				return biome -> biome.getTemperature()>arg;
 			}
 			case "precipitation" : {
-                final Biome.Precipitation arg = Biome.Precipitation.byName(val);
+                final Biome.Precipitation arg = Arrays.stream(Biome.Precipitation.values()).filter(p -> val.equals(p.getName())).findFirst().orElse(null);
                 return biome -> biome.getPrecipitation() == arg;
             }
 			default: return null;
