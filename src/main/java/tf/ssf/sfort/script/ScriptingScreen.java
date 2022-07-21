@@ -958,22 +958,11 @@ public class ScriptingScreen extends Screen {
         return default_embed;
     }
     static {
-        default_embed.put("ENTITY", Default.ENTITY);
-        default_embed.put("LIVING_ENTITY", Default.LIVING_ENTITY);
-        default_embed.put("PLAYER_ENTITY", Default.PLAYER_ENTITY);
-        default_embed.put("SERVER_PLAYER_ENTITY", Default.SERVER_PLAYER_ENTITY);
-        default_embed.put("DIMENSION_TYPE", Default.DIMENSION_TYPE);
-        default_embed.put("CHUNK", Default.CHUNK);
-        default_embed.put("WORLD", Default.WORLD);
-        default_embed.put("BIOME", Default.BIOME);
-        default_embed.put("ITEM", Default.ITEM);
-        default_embed.put("INVENTORY", Default.INVENTORY);
-        default_embed.put("PLAYER_INVENTORY", Default.PLAYER_INVENTORY);
-        default_embed.put("ITEM_STACK", Default.ITEM_STACK);
-        default_embed.put("ENCHANTMENT", Default.ENCHANTMENT);
-        default_embed.put("ENCHANTMENT_LEVEL_ENTRY", Default.ENCHANTMENT_LEVEL_ENTRY);
-        default_embed.put("GAME_MODE", Default.GAME_MODE);
-        default_embed.put("FISHING_BOBBER_ENTITY", Default.FISHING_BOBBER_ENTITY);
-        default_embed.put("DAMAGE_SOURCE", Default.DAMAGE_SOURCE);
+        for (Map.Entry<String, PredicateProvider<?>> entry : Default.getDefaultMap().entrySet()) {
+            PredicateProvider<?> hlp = entry.getValue();
+            if (hlp instanceof Help) {
+                default_embed.put(entry.getKey(), (Help) hlp);
+            }
+        }
     }
 }
