@@ -2,6 +2,7 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.EnderChestInventory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
@@ -14,6 +15,7 @@ public class PlayerEntityScript<T extends PlayerEntity> extends AbstractExtendab
 		help.put("level:int","Minimum required player level");
 		help.put("food:float","Minimum required food");
 		help.put("~inventory:PLAYER_INVENTORY", "Require matching inventory");
+		help.put("~enderchest:ENDERCHEST_INVENTORY", "Require matching inventory");
 		help.put("~server_player:SERVER_PLAYER_ENTITY", "Require a server player entity");
 	}
 
@@ -38,6 +40,11 @@ public class PlayerEntityScript<T extends PlayerEntity> extends AbstractExtendab
 				final Predicate<PlayerInventory> predicate = DefaultParsers.PLAYER_INVENTORY_PARSER.parse(script);
 				if (predicate == null) return null;
 				return player -> predicate.test(player.getInventory());
+			}
+			case "enderchest" : {
+				final Predicate<EnderChestInventory> predicate = DefaultParsers.ENDERCHEST_INVENTORY_PARSER.parse(script);
+				if (predicate == null) return null;
+				return player -> predicate.test(player.getEnderChestInventory());
 			}
 			case "server_player" : {
 				final Predicate<ServerPlayerEntity> predicate = DefaultParsers.SERVER_PLAYER_ENTITY_PARSER.parse(script);

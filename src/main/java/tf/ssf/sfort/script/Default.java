@@ -18,6 +18,7 @@ import tf.ssf.sfort.script.instance.DamageSourceScript;
 import tf.ssf.sfort.script.instance.DimensionTypeScript;
 import tf.ssf.sfort.script.instance.EnchantmentLevelEntryScript;
 import tf.ssf.sfort.script.instance.EnchantmentScript;
+import tf.ssf.sfort.script.instance.EnderChestInventoryScript;
 import tf.ssf.sfort.script.instance.EntityScript;
 import tf.ssf.sfort.script.instance.FishingBobberEntityScript;
 import tf.ssf.sfort.script.instance.GameModeScript;
@@ -48,6 +49,7 @@ public class Default {
     public static final ItemScript ITEM = new ItemScript();
     public static final InventoryScript<Inventory> INVENTORY = new InventoryScript<>();
     public static final PlayerInventoryScript PLAYER_INVENTORY = new PlayerInventoryScript();
+    public static final EnderChestInventoryScript ENDERCHEST_INVENTORY = new EnderChestInventoryScript();
     public static final ItemStackScript ITEM_STACK = new ItemStackScript();
     public static final EnchantmentScript ENCHANTMENT = new EnchantmentScript();
     public static final EnchantmentLevelEntryScript ENCHANTMENT_LEVEL_ENTRY = new EnchantmentLevelEntryScript();
@@ -95,6 +97,7 @@ public class Default {
         defaults.put("ITEM", ITEM);
         defaults.put("INVENTORY", INVENTORY);
         defaults.put("PLAYER_INVENTORY", PLAYER_INVENTORY);
+        defaults.put("ENDERCHEST_INVENTORY", ENDERCHEST_INVENTORY);
         defaults.put("ITEM_STACK", ITEM_STACK);
         defaults.put("ENCHANTMENT", ENCHANTMENT);
         defaults.put("ENCHANTMENT_LEVEL_ENTRY", ENCHANTMENT_LEVEL_ENTRY);
