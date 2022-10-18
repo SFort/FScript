@@ -52,6 +52,7 @@ public class Parameters {
     public Set<String> GameModeID = new HashSet<>();
     public Set<String> GameModeNameID = new HashSet<>();
     public Set<String> DamageSourceID = new HashSet<>();
+    public Set<String> EffectID = new HashSet<>();
     public Parameters() {
         map.put("AdvancementID", () -> {
             try {
@@ -118,6 +119,9 @@ public class Parameters {
                 }
             }
         }
+
+        map.put("EffectID", () -> EffectID);
+        EffectID.addAll(Registry.STATUS_EFFECT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
     }
 }

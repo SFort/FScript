@@ -42,12 +42,15 @@ public class ScriptingScreen extends Screen {
     protected int cursor = 0;
     protected float sidebarScrollTarget;
     protected float sidebarScroll;
+    protected float sidebarLastScroll;
     protected float sidebarHeight;
     protected float sidebar2ScrollTarget;
     protected float sidebar2Scroll;
+    protected float sidebar2LastScroll;
     protected float sidebar2Height;
     protected float sidebar3ScrollTarget;
     protected float sidebar3Scroll;
+    protected float sidebar3LastScroll;
     protected float sidebar3Height;
     protected boolean tick = false;
     protected int ticks;
@@ -221,7 +224,7 @@ public class ScriptingScreen extends Screen {
     }
     protected void drawTips(MatrixStack matrix, int mouseX, int mouseY, float delta){
         boolean shortened = 400>width;
-        float scroll = sidebarHeight < height ? 0 : sidebarScroll;
+        float scroll = sidebarHeight < height ? 0 : ((sidebarScroll-sidebarLastScroll)*client.getTickDelta()+sidebarLastScroll);
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
         int newHeight = 8;
@@ -289,7 +292,7 @@ public class ScriptingScreen extends Screen {
         }
     }
     protected void drawScript(MatrixStack matrix, int mouseX, int mouseY, float delta){
-        float scroll = sidebar2Height < height ? 0 : sidebar2Scroll;
+        float scroll = sidebar2Height < height ? 0 : ((sidebar2Scroll-sidebar2LastScroll)*client.getTickDelta()+sidebar2LastScroll);
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
         int newHeight = 8;
@@ -436,7 +439,6 @@ public class ScriptingScreen extends Screen {
         matrix.pop();
     }
 
-    //TODO might to be visible in all resolutions
     protected void drawHelp(MatrixStack matrices) {
         String[] hlp = new String[]{
                 "Keybinds:",
@@ -456,7 +458,7 @@ public class ScriptingScreen extends Screen {
                 "",
                 "Note that some suggestions like BiomeID can only be obtained while in a world"
         };
-        float scroll = sidebar3Height < height ? 0 : sidebar3Scroll;
+        float scroll = sidebar3Height < height ? 0 : ((sidebar3Scroll-sidebar3LastScroll)*client.getTickDelta()+sidebar3LastScroll);
         sidebar3Height = 20;
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
@@ -644,18 +646,21 @@ public class ScriptingScreen extends Screen {
         if(tick)ticks++;
         super.tick();
         if (sidebarHeight > height) {
+            sidebarLastScroll = sidebarScroll;
             sidebarScroll += (sidebarScrollTarget-sidebarScroll)/2;
             if (sidebarScrollTarget < 0) sidebarScrollTarget /= 2;
             float h = sidebarHeight-height;
             if (sidebarScrollTarget > h) sidebarScrollTarget = h+((sidebarScrollTarget-h)/2);
         }
         if (sidebar2Height > height) {
+            sidebar2LastScroll = sidebar2Scroll;
             sidebar2Scroll += (sidebar2ScrollTarget-sidebar2Scroll)/2;
             if (sidebar2ScrollTarget < 0) sidebar2ScrollTarget /= 2;
             float h = sidebar2Height-height;
             if (sidebar2ScrollTarget > h) sidebar2ScrollTarget = h+((sidebar2ScrollTarget-h)/2);
         }
         if (sidebar3Height > height) {
+            sidebar3LastScroll = sidebar3Scroll;
             sidebar3Scroll += (sidebar3ScrollTarget-sidebar3Scroll)/2;
             if (sidebar3ScrollTarget < 0) sidebar3ScrollTarget /= 2;
             float h = sidebar3Height-height;
