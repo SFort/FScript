@@ -1,11 +1,11 @@
 package tf.ssf.sfort.script.instance;
 
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 

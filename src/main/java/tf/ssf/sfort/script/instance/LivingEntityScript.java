@@ -5,9 +5,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.SimpleRegistry;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
 
@@ -66,7 +66,7 @@ public class LivingEntityScript<T extends LivingEntity> extends AbstractExtendab
 				return entity -> entity.getArmor()>=arg;
 			}
 			case "effect" : {
-				final StatusEffect arg = SimpleRegistry.STATUS_EFFECT.get(new Identifier(val));
+				final StatusEffect arg = Registries.STATUS_EFFECT.get(new Identifier(val));
 				return entity -> entity.hasStatusEffect(arg);
 			}
 			case "attack" : {

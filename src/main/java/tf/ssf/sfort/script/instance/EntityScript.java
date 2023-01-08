@@ -5,9 +5,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
 
@@ -104,11 +104,11 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 				return entity -> entity.getWidth()>arg;
 			}
 			case "in_block" : {
-				final Block arg = Registry.BLOCK.get(new Identifier(val));
+				final Block arg = Registries.BLOCK.get(new Identifier(val));
 				return entity -> entity.world.getBlockState(entity.getBlockPos()).isOf(arg);
 			}
 			case "type" : {
-				final EntityType<?> arg = Registry.ENTITY_TYPE.get(new Identifier(val));
+				final EntityType<?> arg = Registries.ENTITY_TYPE.get(new Identifier(val));
 				return entity -> entity.getType().equals(arg);
 			}
 			default: return null;

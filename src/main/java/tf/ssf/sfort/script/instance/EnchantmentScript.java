@@ -3,8 +3,8 @@ package tf.ssf.sfort.script.instance;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 
 import java.util.function.Predicate;
@@ -43,7 +43,7 @@ public class EnchantmentScript extends AbstractExtendablePredicateProvider<Encha
 	public Predicate<Enchantment> getLocalPredicate(String in, String val){
 		switch (in){
 			case ".": case "enchant" : {
-				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
+				final Enchantment arg = Registries.ENCHANTMENT.get(new Identifier(val));
 				return enchant -> enchant.equals(arg);
 			}
 			case "min_level" : {
@@ -55,7 +55,7 @@ public class EnchantmentScript extends AbstractExtendablePredicateProvider<Encha
 				return enchant -> enchant.getMaxLevel()>arg;
 			}
 			case "acceptable_item" : {
-				final Item arg = Registry.ITEM.get(new Identifier(val));
+				final Item arg = Registries.ITEM.get(new Identifier(val));
 				return enchant -> enchant.type.isAcceptableItem(arg);
 			}
 			case "rarity" :{

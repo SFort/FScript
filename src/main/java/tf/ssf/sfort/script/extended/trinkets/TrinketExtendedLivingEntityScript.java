@@ -3,8 +3,8 @@ package tf.ssf.sfort.script.extended.trinkets;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.Help;
 import tf.ssf.sfort.script.PredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
@@ -36,7 +36,7 @@ public class TrinketExtendedLivingEntityScript implements PredicateProvider<Livi
     public Predicate<LivingEntity> getPredicate(String in, String val, Set<String> dejavu){
         switch (in){
             case "trinket":
-                final Item arg = Registry.ITEM.get(new Identifier(val));
+                final Item arg = Registries.ITEM.get(new Identifier(val));
                 return entity -> {
                     try {
                         Optional<?> comp = (Optional<?>) getComponent.invoke(null, entity);

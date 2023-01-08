@@ -6,9 +6,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
-import net.minecraft.util.registry.Registry;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
 
@@ -41,11 +41,11 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 	public Predicate<ItemStack> getLocalPredicate(String in, String val){
 		switch (in){
 			case ".": case "item" : {
-				final Item arg = Registry.ITEM.get(new Identifier(val));
+				final Item arg = Registries.ITEM.get(new Identifier(val));
 				return item -> item.isOf(arg);
 			}
 			case "enchant" : {
-				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
+				final Enchantment arg = Registries.ENCHANTMENT.get(new Identifier(val));
 				return item -> EnchantmentHelper.get(item).containsKey(arg);
 			}
 			case "count" : {
@@ -98,7 +98,7 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 			case "enchant" :{
 				final Predicate<Map.Entry<Enchantment, Integer>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
 				if (predicate == null) return null;
-				final Enchantment arg = Registry.ENCHANTMENT.get(new Identifier(val));
+				final Enchantment arg = Registries.ENCHANTMENT.get(new Identifier(val));
 				if (arg == null) return null;
 				return item -> {
 					final Integer lvl = EnchantmentHelper.get(item).get(arg);

@@ -4,10 +4,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -41,7 +40,6 @@ public class Parameters {
     public Map<String, Supplier<Set<String>>> map = new HashMap<>();
     public Set<String> DimensionID = new HashSet<>();
     public Set<String> ItemID = new HashSet<>();
-    public Set<String> ItemGroupID = new HashSet<>();
     public Set<String> RarityID = new HashSet<>();
     public Set<String> BlockID = new HashSet<>();
     public Set<String> EntityTypeID = new HashSet<>();
@@ -63,7 +61,7 @@ public class Parameters {
 
         map.put("BiomeID", () ->{
             try {
-                return MinecraftClient.getInstance().world.getRegistryManager().get(Registry.BIOME_KEY).getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
+                return MinecraftClient.getInstance().world.getRegistryManager().get(Registries.BIOME_SOURCE.getKey()).getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
             }catch (Exception ignore){}
             return new HashSet<>();
         });
@@ -74,28 +72,25 @@ public class Parameters {
         DimensionID.add(World.END.getValue().toString());
 
         map.put("ItemID", () -> ItemID);
-        ItemID.addAll(Registry.ITEM.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
-
-        map.put("ItemGroupID", () -> ItemGroupID);
-        ItemGroupID.addAll(Arrays.stream(ItemGroup.GROUPS).map(ItemGroup::getName).collect(Collectors.toSet()));
+        ItemID.addAll(Registries.ITEM.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
         map.put("RarityID", () -> RarityID);
         RarityID.addAll(Arrays.stream(Rarity.values()).map(Enum::name).collect(Collectors.toSet()));
 
         map.put("BlockID", () -> BlockID);
-        BlockID.addAll(Registry.BLOCK.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
+        BlockID.addAll(Registries.BLOCK.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
         map.put("EntityTypeID", () -> EntityTypeID);
-        EntityTypeID.addAll(Registry.ENTITY_TYPE.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
+        EntityTypeID.addAll(Registries.ENTITY_TYPE.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
         map.put("EnchantID", () -> EnchantID);
-        EnchantID.addAll(Registry.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
+        EnchantID.addAll(Registries.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
         map.put("EnchantRarityID", () -> EnchantRarityID);
         EnchantRarityID.addAll(Arrays.stream(Enchantment.Rarity.values()).map(Enum::name).collect(Collectors.toSet()));
 
         map.put("EnchantTargetID", () -> EnchantTargetID);
-        EnchantTargetID.addAll(Registry.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
+        EnchantTargetID.addAll(Registries.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
         map.put("BiomePrecipitationID", () -> BiomePrecipitationID);
         BiomePrecipitationID.addAll(Arrays.stream(Biome.Precipitation.values()).map(Biome.Precipitation::getName).collect(Collectors.toSet()));
@@ -121,7 +116,7 @@ public class Parameters {
         }
 
         map.put("EffectID", () -> EffectID);
-        EffectID.addAll(Registry.STATUS_EFFECT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
+        EffectID.addAll(Registries.STATUS_EFFECT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
     }
 }
