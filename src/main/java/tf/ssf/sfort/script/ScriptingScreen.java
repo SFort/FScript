@@ -4,6 +4,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.Tessellator;
@@ -161,7 +162,7 @@ public class ScriptingScreen extends Screen {
             if (os.par.size() > 0) {
                 setTip(os.parName, os.par);
                 valMake = new Line(os, getCursorHelp(os));
-                searchField.setTextFieldFocused(true);
+                searchField.setFocused(true);
             } else {
                 Help h2 = getCursorHelp();
                 if (lines.size()>0 && lines.get(cursor).tip.embed != null) cursor++;
@@ -604,7 +605,7 @@ public class ScriptingScreen extends Screen {
                 renderTooltip(matrix, Text.of(desc), mouseX, mouseY);
         }
         if (text != null)
-            textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2), y + ((h - 8) / 2), -1);
+            textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2f), y + ((h - 8) / 2f), -1);
         if (hovering^toggled) drawOutlineBox(matrix, x, y, w, h, -1);
 
         return hovering && didClick;
@@ -738,7 +739,7 @@ public class ScriptingScreen extends Screen {
                 if (searchField.isActive()) pushValMake(searchField.getText());
                 break;
             case GLFW.GLFW_KEY_F:
-                if (hasControlDown()) searchField.setTextFieldFocused(true);
+                if (hasControlDown()) searchField.setFocused(true);
                 break;
             case GLFW.GLFW_KEY_F5:
                 if (script.load != null) loadScript(script.load.get());
@@ -804,7 +805,7 @@ public class ScriptingScreen extends Screen {
 
             for (OrderedText line : lines) {
                 if (line != null) {
-                    textRenderer.draw(line, innerX, innerY, -1, false, matrices.peek().getPositionMatrix(), vcp, false, 0, 0xF000F0);
+                    textRenderer.draw(line, (float) innerX, (float) innerY, -1, false, matrices.peek().getPositionMatrix(), vcp, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
                 }
                 innerY += 10;
             }

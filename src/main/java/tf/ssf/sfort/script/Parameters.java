@@ -5,6 +5,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.world.GameMode;
@@ -66,6 +67,13 @@ public class Parameters {
             return new HashSet<>();
         });
 
+        map.put("DamageSourceType", () -> {
+            try {
+                return MinecraftClient.getInstance().world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
+            }catch (Exception ignore){}
+            return new HashSet<>();
+        });
+
         map.put("DimensionID", () -> DimensionID);
         DimensionID.add(World.OVERWORLD.getValue().toString());
         DimensionID.add(World.NETHER.getValue().toString());
@@ -93,7 +101,7 @@ public class Parameters {
         EnchantTargetID.addAll(Registries.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
         map.put("BiomePrecipitationID", () -> BiomePrecipitationID);
-        BiomePrecipitationID.addAll(Arrays.stream(Biome.Precipitation.values()).map(Biome.Precipitation::getName).collect(Collectors.toSet()));
+        BiomePrecipitationID.addAll(Arrays.stream(Biome.Precipitation.values()).map(Biome.Precipitation::name).collect(Collectors.toSet()));
 
         map.put("GameModeID", () -> GameModeID);
         GameModeID.addAll(Arrays.stream(GameMode.values()).map(Enum::name).collect(Collectors.toSet()));

@@ -56,7 +56,7 @@ public class EnchantmentScript extends AbstractExtendablePredicateProvider<Encha
 			}
 			case "acceptable_item" : {
 				final Item arg = Registries.ITEM.get(new Identifier(val));
-				return enchant -> enchant.type.isAcceptableItem(arg);
+				return enchant -> enchant.isAcceptableItem(arg.getDefaultStack());
 			}
 			case "rarity" :{
 				final Enchantment.Rarity arg = Enchantment.Rarity.valueOf(val);
@@ -64,7 +64,7 @@ public class EnchantmentScript extends AbstractExtendablePredicateProvider<Encha
 			}
 			case "target" : {
 				final EnchantmentTarget arg = EnchantmentTarget.valueOf(val);
-				return enchant -> enchant.type.equals(arg);
+				return enchant -> enchant.target.equals(arg);
 			}
 			default : return null;
 		}

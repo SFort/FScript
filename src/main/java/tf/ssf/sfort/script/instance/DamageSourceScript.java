@@ -2,7 +2,10 @@ package tf.ssf.sfort.script.instance;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.EntityDamageSource;
+import net.minecraft.entity.damage.DamageType;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
 
@@ -11,18 +14,10 @@ import java.util.function.Predicate;
 public class DamageSourceScript extends AbstractExtendablePredicateProvider<DamageSource> {
 
 	public DamageSourceScript() {
-		help.put("projectile is_projectile","Damage source must be a projectile");
-		help.put("is_explosive explosive", "Damage source must be explosive");
-		help.put("bypasses_armor", "Damage source bypasses armor");
-		help.put("is_falling_block falling_block", "Damage source must be a falling block");
-		help.put("is_out_of_world out_of_world", "Damage source must be out of world (void damage)");
-		help.put("is_unblockable unblockable", "Damage source cannot be blocked");
-		help.put("is_fire fire", "Damage source must be fire");
-		help.put("is_neutral neutral", "Damage source must be neutral");
-		help.put("is_from_falling from_falling", "Damage source must be from falling");
+		help.put("is_scaled_with_difficulty scaled_with_difficulty", "Damage source scales with difficulty");
 		help.put("is_source_creative_player source_creative_player", "Damage source must be from a creative player");
-		help.put("is_thorns thorns", "Damage source must be thorns");
 		help.put("name damage_source_name:DamageSourceID", "Damage source must have a matching name");
+		help.put("type damage_source_type:DamageSourceType", "Damage source must be the specified type");
 		help.put("~source:ENTITY", "Damage source's source entity must match");
 		help.put("~attacker:ENTITY", "Damage source's attacker must match");
 	}
@@ -31,6 +26,10 @@ public class DamageSourceScript extends AbstractExtendablePredicateProvider<Dama
 	public Predicate<DamageSource> getLocalPredicate(String in, String val){
 		switch (in){
 			case "name": case "damage_source_name": return ds -> val.equals(ds.getName());
+			case "type": case "damage_source_type": {
+				TagKey<DamageType> tag = TagKey.of(RegistryKeys.DAMAGE_TYPE, new Identifier(val));
+				return ds -> ds.isIn(tag);
+			}
 			default: return null;
 		}
 	}
@@ -55,19 +54,8 @@ public class DamageSourceScript extends AbstractExtendablePredicateProvider<Dama
 	@Override
 	public Predicate<DamageSource> getLocalPredicate(String in){
 		switch (in){
-			case "is_projectile": case  "projectile" : return DamageSource::isProjectile;
-			case "is_explosive": case  "explosive" : return DamageSource::isExplosive;
-			case "bypasses_armor": return DamageSource::bypassesArmor;
-			case "is_falling_block": case  "falling_block" : return DamageSource::isFallingBlock;
-			case "is_out_of_world": case  "out_of_world" : return DamageSource::isOutOfWorld;
-			case "is_unblockable": case  "unblockable" : return DamageSource::isUnblockable;
-			case "is_fire": case  "fire" : return DamageSource::isFire;
-			case "is_neutral": case  "neutral" : return DamageSource::isNeutral;
 			case "is_scaled_with_difficulty": case  "scaled_with_difficulty" : return DamageSource::isScaledWithDifficulty;
-			case "is_magic": case  "magic" : return DamageSource::isMagic;
-			case "is_from_falling": case  "from_falling" : return DamageSource::isFromFalling;
 			case "is_source_creative_player": case  "source_creative_player" : return DamageSource::isSourceCreativePlayer;
-			case "is_thorns": case "thorns": return ds -> ds instanceof EntityDamageSource && ((EntityDamageSource)ds).isThorns();
 			default: return null;
 		}
 	}
