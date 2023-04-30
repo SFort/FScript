@@ -143,29 +143,17 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 			case "living" : {
 				final Predicate<LivingEntity> predicate = DefaultParsers.LIVING_ENTITY_PARSER.parse(script);
 				if (predicate == null) return null;
-				return entity -> {
-					if (entity instanceof LivingEntity)
-						return predicate.test(((LivingEntity) entity));
-					return false;
-				};
+				return entity -> entity instanceof LivingEntity && predicate.test(((LivingEntity) entity));
 			}
 			case "player" : {
 				final Predicate<PlayerEntity> predicate = DefaultParsers.PLAYER_ENTITY_PARSER.parse(script);
 				if (predicate == null) return null;
-				return entity -> {
-					if (entity instanceof PlayerEntity)
-						return predicate.test(((PlayerEntity) entity));
-					return false;
-				};
+				return entity -> entity instanceof PlayerEntity && predicate.test(((PlayerEntity) entity));
 			}
 			case "server_player" : {
 				final Predicate<ServerPlayerEntity> predicate = DefaultParsers.SERVER_PLAYER_ENTITY_PARSER.parse(script);
 				if (predicate == null) return null;
-				return entity -> {
-					if (entity instanceof ServerPlayerEntity)
-						return predicate.test(((ServerPlayerEntity) entity));
-					return false;
-				};
+				return entity -> entity instanceof ServerPlayerEntity && predicate.test(((ServerPlayerEntity) entity));
 			}
 			default : return null;
 		}

@@ -13,34 +13,34 @@ import java.util.function.Predicate;
 
 public class ServerPlayerEntityScript<T extends ServerPlayerEntity> extends AbstractExtendablePredicateProvider<T> {
 
-    public ServerPlayerEntityScript() {
-        help.put("advancement:AdvancementID","Require advancement unlocked");
-        help.put("respawn_distance:double","Require player to be nearby their respawn (usually a bed)");
-    }
+	public ServerPlayerEntityScript() {
+		help.put("advancement:AdvancementID","Require advancement unlocked");
+		help.put("respawn_distance:double","Require player to be nearby their respawn (usually a bed)");
+	}
 
-    @Override
-    public Predicate<T> getLocalPredicate(String in, String val){
-        switch (in){
-            case "respawn_distance" :{
-                final double arg = Double.parseDouble(val);
-                return player -> {
-                    final BlockPos pos = player.getSpawnPointPosition();
-                    final ServerWorld world = (ServerWorld) player.world;
-                    final RegistryKey<World> dim = player.getSpawnPointDimension();
-                    if (pos == null || world == null) return false;
-                    return dim.equals(world.getRegistryKey()) && pos.isWithinDistance(player.getPos(), arg);
-                };
-            }
-            case "advancement" : {
-                final Identifier arg = new Identifier(val);
-                return player -> {
-                    final MinecraftServer server = player.getServer();
-                    if (server == null) return false;
-                    return player.getAdvancementTracker().getProgress(server.getAdvancementLoader().get(arg)).isDone();
-                };
-            }
-            default : return null;
-        }
-    }
+	@Override
+	public Predicate<T> getLocalPredicate(String in, String val){
+		switch (in){
+			case "respawn_distance" :{
+				final double arg = Double.parseDouble(val);
+				return player -> {
+					final BlockPos pos = player.getSpawnPointPosition();
+					final ServerWorld world = (ServerWorld) player.world;
+					final RegistryKey<World> dim = player.getSpawnPointDimension();
+					if (pos == null || world == null) return false;
+					return dim.equals(world.getRegistryKey()) && pos.isWithinDistance(player.getPos(), arg);
+				};
+			}
+			case "advancement" : {
+				final Identifier arg = new Identifier(val);
+				return player -> {
+					final MinecraftServer server = player.getServer();
+					if (server == null) return false;
+					return player.getAdvancementTracker().getProgress(server.getAdvancementLoader().get(arg)).isDone();
+				};
+			}
+			default : return null;
+		}
+	}
 
 }

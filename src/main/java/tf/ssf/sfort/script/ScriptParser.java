@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class ScriptParser<T> {
-    //TODO maybe dedup / cache squish?
     public List<Predicate<T>> squish = new ArrayList<>();
     public PredicateProvider<T> make = null;
     //TODO upper to under
