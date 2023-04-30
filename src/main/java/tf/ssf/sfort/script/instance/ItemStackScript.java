@@ -4,6 +4,8 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
@@ -32,6 +34,7 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 		help.put("has_nbt","Require item to have nbt data stored");
 		help.put("has_enchants","Require item to have enchantments");
 		help.put("in_frame","Require item to be in a item frame");
+		help.put("~nbt~String:NBT_ELEMENT", "Has to have matching nbt");
 	}
 
 	@Override
@@ -100,6 +103,17 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 				return item -> {
 					final Integer lvl = EnchantmentHelper.get(item).get(arg);
 					return lvl != null && predicate.test(new AbstractMap.SimpleEntry<>(arg, lvl));
+				};
+			}
+			case "nbt": {
+				final Predicate<NbtElement> predicate = DefaultParsers.NBT_ELEMENT_PARSER.parse(script);
+				if (predicate == null) return null;
+				return entity -> {
+					NbtCompound nbtc = entity.getNbt();
+					if (nbtc == null || nbtc.isEmpty()) return false;
+					NbtElement nbt = nbtc.get(val);
+					if (nbt == null) return false;
+					return predicate.test(nbt);
 				};
 			}
 			default : return null;

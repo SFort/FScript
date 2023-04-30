@@ -19,6 +19,7 @@ import tf.ssf.sfort.script.instance.DamageSourceScript;
 import tf.ssf.sfort.script.instance.DimensionTypeScript;
 import tf.ssf.sfort.script.instance.EnchantmentLevelEntryScript;
 import tf.ssf.sfort.script.instance.EnchantmentScript;
+import tf.ssf.sfort.script.instance.EnderChestInventoryScript;
 import tf.ssf.sfort.script.instance.EntityScript;
 import tf.ssf.sfort.script.instance.FishingBobberEntityScript;
 import tf.ssf.sfort.script.instance.GameModeScript;
@@ -26,6 +27,7 @@ import tf.ssf.sfort.script.instance.InventoryScript;
 import tf.ssf.sfort.script.instance.ItemScript;
 import tf.ssf.sfort.script.instance.ItemStackScript;
 import tf.ssf.sfort.script.instance.LivingEntityScript;
+import tf.ssf.sfort.script.instance.NbtElementScript;
 import tf.ssf.sfort.script.instance.PlayerEntityScript;
 import tf.ssf.sfort.script.instance.PlayerInventoryScript;
 import tf.ssf.sfort.script.instance.ServerPlayerEntityScript;
@@ -48,12 +50,14 @@ public class Default {
     public static final ItemScript ITEM = new ItemScript();
     public static final InventoryScript<Inventory> INVENTORY = new InventoryScript<>();
     public static final PlayerInventoryScript PLAYER_INVENTORY = new PlayerInventoryScript();
+    public static final EnderChestInventoryScript ENDERCHEST_INVENTORY = new EnderChestInventoryScript();
     public static final ItemStackScript ITEM_STACK = new ItemStackScript();
     public static final EnchantmentScript ENCHANTMENT = new EnchantmentScript();
     public static final EnchantmentLevelEntryScript ENCHANTMENT_LEVEL_ENTRY = new EnchantmentLevelEntryScript();
     public static final GameModeScript GAME_MODE = new GameModeScript();
     public static final FishingBobberEntityScript FISHING_BOBBER_ENTITY = new FishingBobberEntityScript();
     public static final DamageSourceScript DAMAGE_SOURCE = new DamageSourceScript();
+    public static final NbtElementScript NBT_ELEMENT = new NbtElementScript();
 
     protected static final Map<String, PredicateProvider<?>> defaults = new HashMap<>();
     public static Map<String, PredicateProvider<?>> getDefaultMap(){
@@ -95,12 +99,14 @@ public class Default {
         defaults.put("ITEM", ITEM);
         defaults.put("INVENTORY", INVENTORY);
         defaults.put("PLAYER_INVENTORY", PLAYER_INVENTORY);
+        defaults.put("ENDERCHEST_INVENTORY", ENDERCHEST_INVENTORY);
         defaults.put("ITEM_STACK", ITEM_STACK);
         defaults.put("ENCHANTMENT", ENCHANTMENT);
         defaults.put("ENCHANTMENT_LEVEL_ENTRY", ENCHANTMENT_LEVEL_ENTRY);
         defaults.put("GAME_MODE", GAME_MODE);
         defaults.put("FISHING_BOBBER_ENTITY", FISHING_BOBBER_ENTITY);
         defaults.put("DAMAGE_SOURCE", DAMAGE_SOURCE);
+        defaults.put("NBT_ELEMENT", NBT_ELEMENT);
 
         FabricLoader.getInstance().getEntrypoints("fscript", Object.class).forEach( o -> {
             if (o instanceof Runnable) {
