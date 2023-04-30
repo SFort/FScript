@@ -5,6 +5,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedFishingBobberEntityScript;
@@ -29,7 +30,10 @@ import tf.ssf.sfort.script.instance.LivingEntityScript;
 import tf.ssf.sfort.script.instance.NbtElementScript;
 import tf.ssf.sfort.script.instance.PlayerEntityScript;
 import tf.ssf.sfort.script.instance.PlayerInventoryScript;
+import tf.ssf.sfort.script.instance.ProjectileEntityScript;
 import tf.ssf.sfort.script.instance.ServerPlayerEntityScript;
+import tf.ssf.sfort.script.instance.ThrownEntityScript;
+import tf.ssf.sfort.script.instance.ThrownItemEntityScript;
 import tf.ssf.sfort.script.instance.WorldScript;
 
 import java.util.HashMap;
@@ -39,6 +43,9 @@ public class Default {
     public static final Parameters PARAMETERS = new Parameters();
 
     public static final EntityScript<Entity> ENTITY = new EntityScript<>();
+    public static final ProjectileEntityScript<ProjectileEntity> PROJECTILE_ENTITY = new ProjectileEntityScript<>();
+    public static final ThrownEntityScript THROWN_ENTITY = new ThrownEntityScript();
+    public static final ThrownItemEntityScript THROWN_ITEM_ENTITY = new ThrownItemEntityScript();
     public static final LivingEntityScript<LivingEntity> LIVING_ENTITY = new LivingEntityScript<>();
     public static final PlayerEntityScript<PlayerEntity> PLAYER_ENTITY = new PlayerEntityScript<>();
     public static final ServerPlayerEntityScript<ServerPlayerEntity> SERVER_PLAYER_ENTITY = new ServerPlayerEntityScript<>();
@@ -69,12 +76,17 @@ public class Default {
         ENTITY.addProvider(CHUNK, chunk -> entity -> chunk.test(entity.world.getWorldChunk(entity.getBlockPos())), 3000);
         FISHING_BOBBER_ENTITY.addProvider(ENTITY, entity -> entity::test, 3000);
         ITEM_STACK.addProvider(ITEM, item -> stack -> item.test(stack.getItem()), 3000);
+        PROJECTILE_ENTITY.addProvider(ENTITY, entity -> entity::test, 3000);
+        THROWN_ENTITY.addProvider(PROJECTILE_ENTITY, entity -> entity::test, 3000);
+        THROWN_ITEM_ENTITY.addProvider(THROWN_ENTITY, entity -> entity::test, 3000);
         LIVING_ENTITY.addProvider(ENTITY, entity -> entity::test, 3000);
         PLAYER_ENTITY.addProvider(LIVING_ENTITY, entity -> entity::test, 3001);
         PLAYER_ENTITY.addProvider(FISHING_BOBBER_ENTITY, fis -> player -> fis.test(player.fishHook), 3000);
         SERVER_PLAYER_ENTITY.addProvider(PLAYER_ENTITY, entity -> entity::test, 3001);
         SERVER_PLAYER_ENTITY.addProvider(GAME_MODE, mode -> player -> mode.test(player.interactionManager.getGameMode()), 3000);
         WORLD.addProvider(DIMENSION_TYPE, dim -> world -> dim.test(world.getDimension()), 3000);
+        PLAYER_INVENTORY.addProvider(INVENTORY, inv -> inv::test, 3000);
+        ENDERCHEST_INVENTORY.addProvider(INVENTORY, inv -> inv::test, 3000);
 
         //Mixin
         SERVER_PLAYER_ENTITY.addProvider(new MixinExtendedServerPlayerEntityScript(), 1000);
@@ -87,6 +99,9 @@ public class Default {
             LIVING_ENTITY.addProvider(new TrinketExtendedLivingEntityScript());
 
         defaults.put("ENTITY", ENTITY);
+        defaults.put("PROJECTILE_ENTITY", PROJECTILE_ENTITY);
+        defaults.put("THROWN_ENTITY", THROWN_ENTITY) ;
+        defaults.put("THROWN_ITEM_ENTITY", THROWN_ITEM_ENTITY) ;
         defaults.put("LIVING_ENTITY", LIVING_ENTITY);
         defaults.put("PLAYER_ENTITY", PLAYER_ENTITY);
         defaults.put("SERVER_PLAYER_ENTITY", SERVER_PLAYER_ENTITY);
