@@ -109,7 +109,7 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 				final Predicate<NbtElement> predicate = DefaultParsers.NBT_ELEMENT_PARSER.parse(script);
 				if (predicate == null) return null;
 				return entity -> {
-					NbtCompound nbtc = entity.getNbt();
+					NbtCompound nbtc = entity.getTag();
 					if (nbtc == null || nbtc.isEmpty()) return false;
 					NbtElement nbt = nbtc.get(val);
 					if (nbt == null) return false;
