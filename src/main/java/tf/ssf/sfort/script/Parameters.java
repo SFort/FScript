@@ -11,7 +11,9 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import org.objectweb.asm.Opcodes;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +53,7 @@ public class Parameters {
     public Set<String> GameModeID = new HashSet<>();
     public Set<String> GameModeNameID = new HashSet<>();
     public Set<String> DamageSourceID = new HashSet<>();
+    public Set<String> EffectID = new HashSet<>();
     public Parameters() {
         map.put("AdvancementID", () -> {
             try {
@@ -108,27 +111,21 @@ public class Parameters {
         GameModeNameID.addAll(Arrays.stream(EnchantmentTarget.values()).map(Enum::name).collect(Collectors.toSet()));
 
         map.put("DamageSourceID", () -> DamageSourceID);
-        DamageSourceID.add(DamageSource.LIGHTNING_BOLT.getName());
-        DamageSourceID.add(DamageSource.ON_FIRE.getName());
-        DamageSourceID.add(DamageSource.LAVA.getName());
-        DamageSourceID.add(DamageSource.HOT_FLOOR.getName());
-        DamageSourceID.add(DamageSource.CRAMMING.getName());
-        DamageSourceID.add(DamageSource.DROWN.getName());
-        DamageSourceID.add(DamageSource.STARVE.getName());
-        DamageSourceID.add(DamageSource.CACTUS.getName());
-        DamageSourceID.add(DamageSource.FALL.getName());
-        DamageSourceID.add(DamageSource.FLY_INTO_WALL.getName());
-        DamageSourceID.add(DamageSource.OUT_OF_WORLD.getName());
-        DamageSourceID.add(DamageSource.GENERIC.getName());
-        DamageSourceID.add(DamageSource.MAGIC.getName());
-        DamageSourceID.add(DamageSource.WITHER.getName());
-        DamageSourceID.add(DamageSource.ANVIL.getName());
-        DamageSourceID.add(DamageSource.FALLING_BLOCK.getName());
-        DamageSourceID.add(DamageSource.DRAGON_BREATH.getName());
-        DamageSourceID.add(DamageSource.DRYOUT.getName());
-        DamageSourceID.add(DamageSource.SWEET_BERRY_BUSH.getName());
-        DamageSourceID.add(DamageSource.FREEZE.getName());
-        DamageSourceID.add(DamageSource.FALLING_STALACTITE.getName());
-        DamageSourceID.add(DamageSource.STALAGMITE.getName());
+
+        for (Field field : DamageSource.class.getDeclaredFields()) {
+            if ((field.getModifiers()&Opcodes.ACC_STATIC) != 0 && field.getType().isAssignableFrom(DamageSource.class)) {
+                try {
+                    Object ds = field.get(null);
+                    if (ds instanceof DamageSource) {
+                        DamageSourceID.add(((DamageSource) ds).getName());
+                    }
+                } catch (IllegalAccessException ignore) {
+                }
+            }
+        }
+
+        map.put("EffectID", () -> EffectID);
+        EffectID.addAll(Registry.STATUS_EFFECT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
+
     }
 }
