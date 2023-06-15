@@ -8,12 +8,12 @@ despite that it easy to extend and apply to any other mod.
 
 MC Version / Latest Available FScript:
 
-1.19.4          : [`3.1.8`](https://github.com/SFort/FScript/releases/tag/r3.1.8)  
-1.19.3          : [`3.1.7`](https://github.com/SFort/FScript/releases/tag/r3.1.7)  
-1.19   - 1.19.2 : [`3.1.6`](https://github.com/SFort/FScript/releases/tag/r3.1.6)  
-1.18.2          : [`3.1.2`](https://github.com/SFort/FScript/releases/tag/r3.1.2)  
-1.17   - 1.18.1 : [`3.1.2-1.18.1`](https://github.com/SFort/FScript/releases/tag/r3.1.2)  
-1.16   - 1.16.5 : [`3.1.2-1.16.5`](https://github.com/SFort/FScript/releases/tag/r3.1.2)  
+1.19.4          : [`3.2.0`](https://github.com/SFort/FScript/releases/tag/r3.2.0)  
+1.19.3          : [`3.2.0+1.19.3`](https://github.com/SFort/FScript/releases/tag/r3.2.0)  
+1.19   - 1.19.2 : [`3.2.0+1.19.2`](https://github.com/SFort/FScript/releases/tag/r3.2.0)  
+1.18.2          : [`3.2.0+1.18.2`](https://github.com/SFort/FScript/releases/tag/r3.2.0)  
+1.17   - 1.18.1 : [`3.2.0-1.18.1`](https://github.com/SFort/FScript/releases/tag/r3.2.0)  
+1.16   - 1.16.5 : [`3.2.0-1.16.5`](https://github.com/SFort/FScript/releases/tag/r3.2.0)  
 1.14.4 - 1.15.2 : [`1.1.5-1.16`](https://github.com/SFort/FScript/releases/tag/r1.1.5)  
 
 
