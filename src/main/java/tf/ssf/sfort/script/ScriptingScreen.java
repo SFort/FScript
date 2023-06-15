@@ -4,15 +4,11 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import tf.ssf.sfort.script.util.Triple;
@@ -85,20 +81,18 @@ public class ScriptingScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrix, int mouseX, int mouseY, float delta) {
-        matrix.push();
-        if (client.world == null) this.renderBackground(matrix);
-        else renderWorldBackground(matrix);
-        if (renderHelp) drawHelp(matrix);
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+        if (client.world == null) this.renderBackground(drawContext);
+        else renderWorldBackground(drawContext);
+        if (renderHelp) drawHelp(drawContext);
         else {
-            drawBackgroundShade(matrix, mouseX, mouseY, delta);
-            drawForeground(matrix, mouseX, mouseY, delta);
+            drawBackgroundShade(drawContext, mouseX, mouseY, delta);
+            drawForeground(drawContext, mouseX, mouseY, delta);
         }
-        matrix.pop();
     }
     
-    protected void renderWorldBackground(MatrixStack matrix){
-        fill(matrix, 0, 0, width, height, 0x44000000);
+    protected void renderWorldBackground(DrawContext drawContext){
+        drawContext.fill(0, 0, width, height, 0x44000000);
     }
 
     protected void clearTip(){
@@ -207,23 +201,23 @@ public class ScriptingScreen extends Screen {
         }
         return script.help;
     }
-    protected void drawBackgroundShade(MatrixStack matrix, int mouseX, int mouseY, float delta) {
-        fill(matrix, width-12, 10, width-10, (ticks>>3)%8+2, -1);
-        fill(matrix, 0, 16, 130, height, 0x44000000);
+    protected void drawBackgroundShade(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+        drawContext.fill(width-12, 10, width-10, (ticks>>3)%8+2, -1);
+        drawContext.fill(0, 16, 130, height, 0x44000000);
     }
-    protected void drawOptionButtons(MatrixStack matrix, int mouseX, int mouseY, float delta) {
-        if (drawToggleButton(matrix, width-16, 1, 10, 10, null, "Switch through alternative names", mouseX, mouseY, tick)){
+    protected void drawOptionButtons(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+        if (drawToggleButton(drawContext, width-16, 1, 10, 10, null, "Switch through alternative names", mouseX, mouseY, tick)){
             ticks = 0;
             tick = !tick;
         }
-        if (drawToggleButton(matrix, width-28, 1, 10, 10, "?", "Show descriptions as tooltips", mouseX, mouseY, renderTips)){
+        if (drawToggleButton(drawContext, width-28, 1, 10, 10, "?", "Show descriptions as tooltips", mouseX, mouseY, renderTips)){
             renderTips = !renderTips;
         }
-        if (drawButton(matrix, width-46, 1, 16, 10, "F1", "Show Help", mouseX, mouseY)){
+        if (drawButton(drawContext, width-46, 1, 16, 10, "F1", "Show Help", mouseX, mouseY)){
             renderHelp = !renderHelp;
         }
     }
-    protected void drawTips(MatrixStack matrix, int mouseX, int mouseY, float delta){
+    protected void drawTips(DrawContext drawContext, int mouseX, int mouseY, float delta){
         boolean shortened = 400>width;
         float scroll = sidebarHeight < height ? 0 : ((sidebarScroll-sidebarLastScroll)*client.getTickDelta()+sidebarLastScroll);
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
@@ -257,7 +251,7 @@ public class ScriptingScreen extends Screen {
                         line = 1;
                     }
                     if(y<22 || (shortened && y>height-30)) continue;
-                    x = textRenderer.drawWithShadow(matrix, word+" ", x, y, -1);
+                    x = drawContext.drawTextWithShadow(textRenderer, word+" ", x, (int) y, -1);
                 }
                 if(line == 0 && Arrays.stream(os.name).anyMatch(st -> textRenderer.getWidth(st)>115)){
                     y += 12;
@@ -272,7 +266,7 @@ public class ScriptingScreen extends Screen {
                     pushValMake(os);
                 }
                 if (renderTips && !os.desc.isEmpty()) {
-                    renderTooltip(matrix, Text.of(os.desc), mouseX, mouseY);
+                    drawContext.drawTooltip(textRenderer, Text.of(os.desc), mouseX, mouseY);
                 }
             }
             thisHeight += 8;
@@ -281,25 +275,25 @@ public class ScriptingScreen extends Screen {
             newHeight += thisHeight;
             if(y>height){
                 int xOffset = shortened && y>width-20 ? 27 : 7;
-                textRenderer.draw(matrix, "v", 0, height-xOffset, -1);
-                textRenderer.draw(matrix, "v", 124, height-xOffset, -1);
+                drawContext.drawText(textRenderer, "v", 0, height-xOffset, -1, false);
+                drawContext.drawText(textRenderer, "v", 124, height-xOffset, -1, false);
                 break;
             }
         }
         sidebarHeight = newHeight;
         if(sidebarScroll>0){
-            textRenderer.draw(matrix, "^", 0, 17, -1);
-            textRenderer.draw(matrix, "^", 124, 17, -1);
+            drawContext.drawText(textRenderer, "^", 0, 17, -1, false);
+            drawContext.drawText(textRenderer, "^", 124, 17, -1, false);
         }
     }
-    protected void drawScript(MatrixStack matrix, int mouseX, int mouseY, float delta){
+    protected void drawScript(DrawContext drawContext, int mouseX, int mouseY, float delta){
         float scroll = sidebar2Height < height ? 0 : ((sidebar2Scroll-sidebar2LastScroll)*client.getTickDelta()+sidebar2LastScroll);
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
         int newHeight = 8;
         int x = 140;
         if(valMake != null && lines.isEmpty()){
-            textRenderer.drawWithShadow(matrix, valMake + " §7"+last_par, x, y, -2000);
+            drawContext.drawTextWithShadow(textRenderer, valMake + " §7"+last_par, x, (int) y, -2000);
             if(didClick && mouseX < width && mouseX > 132 && mouseY < y+12 && mouseY > 20){
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, 1.2f, 1f));
                 valMake = null;
@@ -314,10 +308,10 @@ public class ScriptingScreen extends Screen {
             if (isCloseBracket(s)) x -= 8;
             int lx = 0;
             if(cursor == i){
-                if(valMake != null) lx = textRenderer.drawWithShadow(matrix, valMake + " §7"+last_par, x-8, y, -2000) - x +16;
-                textRenderer.drawWithShadow(matrix, ">", x+lx-8, y, -1);
+                if(valMake != null) lx = drawContext.drawTextWithShadow(textRenderer, valMake + " §7"+last_par, x-8, (int) y, -2000) - x +16;
+                drawContext.drawTextWithShadow(textRenderer, ">", x+lx-8, (int) y, -1);
             }
-            if(y>20 && y<height-30) textRenderer.drawWithShadow(matrix, s.toString(), x+lx, y, -1);
+            if(y>20 && y<height-30) drawContext.drawTextWithShadow(textRenderer, s.toString(), x+lx, (int) y, -1);
             if (isOpenBracket(s)) x += 8;
             y += 12;
             thisHeight += 12;
@@ -364,70 +358,70 @@ public class ScriptingScreen extends Screen {
             y += 8;
             newHeight += thisHeight;
             if(y>height-31){
-                textRenderer.draw(matrix, "v", 130, height-27, -1);
-                textRenderer.draw(matrix, "v", width-8, height-27, -1);
+                drawContext.drawText(textRenderer, "v", 130, height-27, -1, false);
+                drawContext.drawText(textRenderer, "v", width-8, height-27, -1, false);
                 break;
             }
         }
         sidebar2Height = newHeight;
         if(sidebar2Scroll>0){
-            textRenderer.draw(matrix, "^", 130, 17, -1);
-            textRenderer.draw(matrix, "^", width-8, 17, -1);
+            drawContext.drawText(textRenderer, "^", 130, 17, -1, false);
+            drawContext.drawText(textRenderer, "^", width-8, 17, -1, false);
         }
 
     }
-    protected void drawButtons(MatrixStack matrix, int mouseX, int mouseY, float delta){
-        if (drawButton(matrix, width-50, height-20, 50, 20, "Done", null, mouseX, mouseY)) {
+    protected void drawButtons(DrawContext drawContext, int mouseX, int mouseY, float delta){
+        if (drawButton(drawContext, width-50, height-20, 50, 20, "Done", null, mouseX, mouseY)) {
             close();
         }
         int x = 130;
         if (400>width){
             x=0;
         }
-        if (drawButton(matrix, x, height - 20, 20, 20, "!", "Negate selected", mouseX, mouseY))
+        if (drawButton(drawContext, x, height - 20, 20, 20, "!", "Negate selected", mouseX, mouseY))
             negateVal();
         x += 20;
-        if (drawButton(matrix, x, height - 20, 20, 20, "[]", "AND", mouseX, mouseY))
+        if (drawButton(drawContext, x, height - 20, 20, 20, "[]", "AND", mouseX, mouseY))
             bracketLine('[', ']');
         x += 20;
-        if (drawButton(matrix, x, height - 20, 20, 20, "()", "OR", mouseX, mouseY))
+        if (drawButton(drawContext, x, height - 20, 20, 20, "()", "OR", mouseX, mouseY))
             bracketLine('(', ')');
         x += 20;
-        if (drawButton(matrix, x, height - 20, 20, 20, "{}", "XOR", mouseX, mouseY))
+        if (drawButton(drawContext, x, height - 20, 20, 20, "{}", "XOR", mouseX, mouseY))
             bracketLine('{', '}');
     }
-    protected void drawScriptButtons(MatrixStack matrix, int mouseX, int mouseY, float delta){
+    protected void drawScriptButtons(DrawContext drawContext, int mouseX, int mouseY, float delta){
         int x = width-100;
         if (script.save != null) {
-            if (drawButton(matrix, x, height - 20, 50, 20, "Save", null, mouseX, mouseY))
+            if (drawButton(drawContext, x, height - 20, 50, 20, "Save", null, mouseX, mouseY))
                 script.save.accept(unloadScript());
             x -= 50;
         }
         if (script.apply != null) {
-            if (drawButton(matrix, x, height - 20, 50, 20, "Apply", null, mouseX, mouseY))
+            if (drawButton(drawContext, x, height - 20, 50, 20, "Apply", null, mouseX, mouseY))
                 script.apply.accept(unloadScript());
             x -= 50;
         }
         if (script.load != null) {
-            if (drawButton(matrix, x, height - 20, 50, 20, "Load", null, mouseX, mouseY))
+            if (drawButton(drawContext, x, height - 20, 50, 20, "Load", null, mouseX, mouseY))
                 loadScript(script.load.get());
         }
     }
-    protected void drawForeground(MatrixStack matrix, int mouseX, int mouseY, float delta) {
-        drawOptionButtons(matrix, mouseX, mouseY, delta);
-        textRenderer.drawWithShadow(matrix, script.name, 136, 4, -1);
-        drawTips(matrix, mouseX, mouseY, delta);
-        drawScript(matrix, mouseX, mouseY, delta);
+    protected void drawForeground(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+        drawOptionButtons(drawContext, mouseX, mouseY, delta);
+        drawContext.drawTextWithShadow(textRenderer, script.name, 136, 4, -1);
+        drawTips(drawContext, mouseX, mouseY, delta);
+        drawScript(drawContext, mouseX, mouseY, delta);
 
         bufferTooltips = true;
 
         RenderSystem.setShaderColor(1, 1, 1, 0.2f);
-        searchField.render(matrix, mouseX, mouseY, delta);
+        searchField.render(drawContext, mouseX, mouseY, delta);
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
-        drawButtons(matrix, mouseX, mouseY, delta);
-        drawScriptButtons(matrix, mouseX, mouseY, delta);
-        super.render(matrix, mouseX, mouseY, delta);
+        drawButtons(drawContext, mouseX, mouseY, delta);
+        drawScriptButtons(drawContext, mouseX, mouseY, delta);
+        super.render(drawContext, mouseX, mouseY, delta);
 
         didClick = false;
         didRightClick = false;
@@ -437,10 +431,9 @@ public class ScriptingScreen extends Screen {
         }
         bufferedTooltips.clear();
 
-        matrix.pop();
     }
 
-    protected void drawHelp(MatrixStack matrices) {
+    protected void drawHelp(DrawContext drawContext) {
         String[] hlp = new String[]{
                 "Keybinds:",
                 "\tF1 - Toggles Help",
@@ -472,12 +465,12 @@ public class ScriptingScreen extends Screen {
                     sidebar3Height += 12;
                 }
                 if (y < 4) continue;
-                x = textRenderer.drawWithShadow(matrices, word + " ", x, y, -1);
+                x = drawContext.drawTextWithShadow(textRenderer, word + " ", x, (int) y, -1);
             }
             sidebar3Height+=20;
             y+=20;
         }
-        textRenderer.drawWithShadow(matrices, "|", 6, (scroll/(sidebar3Height-height))*(height-20)+5, -1);
+        drawContext.drawTextWithShadow(textRenderer, "|", 6, (int) ((scroll/(sidebar3Height-height))*(height-20)+5), -1);
     }
     protected String unloadScript(){
         StringBuilder out = new StringBuilder();
@@ -573,7 +566,7 @@ public class ScriptingScreen extends Screen {
         }
         return to;
     }
-    protected boolean drawButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY) {
+    protected boolean drawButton(DrawContext drawContext, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY) {
         boolean hovering = mouseIn(x, y, w, h, mouseX, mouseY);
         if (hovering) {
             if (didClick) {
@@ -583,15 +576,15 @@ public class ScriptingScreen extends Screen {
                 h-=4;
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
             }
-            drawOutlineBox(matrix, x, y, w, h, -1);
+            drawOutlineBox(drawContext, x, y, w, h, -1);
             if (desc != null && renderTips)
-                renderTooltip(matrix, Text.of(desc), mouseX, mouseY);
+                drawContext.drawTooltip(textRenderer, Text.of(desc), mouseX, mouseY);
         }
         if (text != null)
-            textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2f), y + ((h - 8) / 2f), -1);
+            drawContext.drawTextWithShadow(textRenderer, text, (int) (x + ((w - textRenderer.getWidth(text)) / 2f)), (int) (y + ((h - 8) / 2f)), -1);
         return hovering && didClick;
     }
-    protected boolean drawToggleButton(MatrixStack matrix, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY, boolean toggled) {
+    protected boolean drawToggleButton(DrawContext drawContext, int x, int y, int w, int h, String text, String desc, int mouseX, int mouseY, boolean toggled) {
         boolean hovering = mouseIn(x, y, w, h, mouseX, mouseY);
         if (hovering) {
             if (didClick) {
@@ -602,22 +595,22 @@ public class ScriptingScreen extends Screen {
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1f));
             }
             if (desc != null && renderTips)
-                renderTooltip(matrix, Text.of(desc), mouseX, mouseY);
+                drawContext.drawTooltip(textRenderer, Text.of(desc), mouseX, mouseY);
         }
         if (text != null)
-            textRenderer.drawWithShadow(matrix, text, x + ((w - textRenderer.getWidth(text)) / 2f), y + ((h - 8) / 2f), -1);
-        if (hovering^toggled) drawOutlineBox(matrix, x, y, w, h, -1);
+            drawContext.drawTextWithShadow(textRenderer, text, (int) (x + ((w - textRenderer.getWidth(text)) / 2f)), (int) (y + ((h - 8) / 2f)), -1);
+        if (hovering^toggled) drawOutlineBox(drawContext, x, y, w, h, -1);
 
         return hovering && didClick;
     }
     protected boolean mouseIn(int x, int y, int w, int h, float mouseX, float mouseY){
         return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
     }
-    protected void drawOutlineBox(MatrixStack matrix, int x, int y, int w, int h, int color){
-        fill(matrix, x, y, x+w, y+1, color);
-        fill(matrix, x, y, x+1, y+h, color);
-        fill(matrix, x, y+h-1, x+w, y+h, color);
-        fill(matrix, x+w-1, y, x+w, y+h, color);
+    protected void drawOutlineBox(DrawContext drawContext, int x, int y, int w, int h, int color){
+        drawContext.fill(x, y, x+w, y+1, color);
+        drawContext.fill(x, y, x+1, y+h, color);
+        drawContext.fill(x, y+h-1, x+w, y+h, color);
+        drawContext.fill(x+w-1, y, x+w, y+h, color);
     }
     public static String formatTitleCase(String in) {
         String[] pieces = in.toLowerCase().split("[_ ;:/]");
@@ -763,12 +756,13 @@ public class ScriptingScreen extends Screen {
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
+    /*
     @Override
-    public void renderOrderedTooltip(MatrixStack matrices, List<? extends OrderedText> lines, int x, int y) {
+    public void renderOrderedTooltip(DrawContext drawContext, List<? extends OrderedText> lines, int x, int y) {
         if (!lines.isEmpty()) {
             if (bufferTooltips) {
                 final int yf = y;
-                bufferedTooltips.add(() -> renderOrderedTooltip(matrices, lines, x, yf));
+                bufferedTooltips.add(() -> renderOrderedTooltip(drawContext, lines, x, yf));
                 return;
             }
             if (y < 20) {
@@ -798,22 +792,23 @@ public class ScriptingScreen extends Screen {
                 innerY = height - totalHeight - 6;
             }
 
-            matrices.push();
-            fill(matrices, innerX-3, innerY-3, innerX+maxWidth+3, innerY+totalHeight+3, 0xAA000000);
+            drawContext.push();
+            fill(drawContext, innerX-3, innerY-3, innerX+maxWidth+3, innerY+totalHeight+3, 0xAA000000);
             VertexConsumerProvider.Immediate vcp = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-            matrices.translate(0, 0, 400);
+            drawContext.translate(0, 0, 400);
 
             for (OrderedText line : lines) {
                 if (line != null) {
-                    textRenderer.draw(line, (float) innerX, (float) innerY, -1, false, matrices.peek().getPositionMatrix(), vcp, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
+                    textRenderer.draw(line, (float) innerX, (float) innerY, -1, false, drawContext.peek().getPositionMatrix(), vcp, TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
                 }
                 innerY += 10;
             }
 
             vcp.draw();
-            matrices.pop();
+            drawContext.pop();
         }
     }
+    */
     protected void bracketLine(char c1, char c2, Help h2){
         Help help = getCursorHelp();
         if(!lines.isEmpty()) cursor++;

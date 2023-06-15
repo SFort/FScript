@@ -71,9 +71,9 @@ public class Default {
     }
     static {
         ENCHANTMENT_LEVEL_ENTRY.addProvider(ENCHANTMENT, enchant -> set -> enchant.test(set.getKey()), 3000);
-        ENTITY.addProvider(WORLD, world -> entity -> world.test(entity.world), 3002);
-        ENTITY.addProvider(BIOME, biom -> entity -> biom.test(entity.world.getBiome(entity.getBlockPos()).value()), 3001);
-        ENTITY.addProvider(CHUNK, chunk -> entity -> chunk.test(entity.world.getWorldChunk(entity.getBlockPos())), 3000);
+        ENTITY.addProvider(WORLD, world -> entity -> world.test(entity.getWorld()), 3002);
+        ENTITY.addProvider(BIOME, biom -> entity -> biom.test(entity.getWorld().getBiome(entity.getBlockPos()).value()), 3001);
+        ENTITY.addProvider(CHUNK, chunk -> entity -> chunk.test(entity.getWorld().getWorldChunk(entity.getBlockPos())), 3000);
         FISHING_BOBBER_ENTITY.addProvider(ENTITY, entity -> entity::test, 3000);
         ITEM_STACK.addProvider(ITEM, item -> stack -> item.test(stack.getItem()), 3000);
         PROJECTILE_ENTITY.addProvider(ENTITY, entity -> entity::test, 3000);
