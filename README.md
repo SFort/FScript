@@ -10,7 +10,7 @@ MC Version / Latest Available FScript:
 
 
 1.20            : [`3.2.2`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
-1.19.4          : [`3.2.2`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
+1.19.4          : [`3.2.2+1.19.4`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
 1.19.3          : [`3.2.2+1.19.3`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
 1.19   - 1.19.2 : [`3.2.2+1.19.2`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
 1.18.2          : [`3.2.2+1.18.2`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
