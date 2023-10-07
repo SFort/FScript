@@ -22,6 +22,7 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 		help.put("height:int", "Minimum required height");
 		help.put("width:int", "Minimum required width");
 		help.put("age:int","Minimum ticks the entity must have existed");
+		help.put("permission_level:int", "Entity has at least this permission level");
 		help.put("x:double","Minimum required entity x");
 		help.put("y:double","Minimum required entity y height");
 		help.put("z:double","Minimum required entity z");
@@ -74,6 +75,10 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 			case "age" : {
 				final int arg = Integer.parseInt(val);
 				return entity -> entity.age>arg;
+			}
+			case "permission_level" : {
+				final int arg = Integer.parseInt(val);
+				return entity -> entity.hasPermissionLevel(arg);
 			}
 			case "local_difficulty" : {
 				final float arg = Float.parseFloat(val);
