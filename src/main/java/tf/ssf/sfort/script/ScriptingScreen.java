@@ -82,7 +82,7 @@ public class ScriptingScreen extends Screen {
 
     @Override
     public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
-        if (client.world == null) this.renderBackground(drawContext);
+        if (client.world == null) this.renderBackground(drawContext, mouseX, mouseY, delta);
         else renderWorldBackground(drawContext);
         if (renderHelp) drawHelp(drawContext);
         else {
@@ -664,21 +664,20 @@ public class ScriptingScreen extends Screen {
         if (tooltipBlinkTicks > 0) {
             tooltipBlinkTicks--;
         }
-        searchField.tick();
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizon, double amount) {
         if(renderHelp){
             sidebar3ScrollTarget -= amount*20;
-            return super.mouseScrolled(mouseX, mouseY, amount);
+            return super.mouseScrolled(mouseX, mouseY, horizon, amount);
         }
         if (mouseX <= 120) {
             sidebarScrollTarget -= amount*20;
         }else if (mouseY > 22){
             sidebar2ScrollTarget -= amount*20;
         }
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, horizon, amount);
     }
 
     @Override

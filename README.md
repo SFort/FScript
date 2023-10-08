@@ -8,8 +8,8 @@ despite that it easy to extend and apply to any other mod.
 
 MC Version / Latest Available FScript:
 
-
-1.20            : [`3.2.2`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
+1.20.2          : [`3.2.3`](https://github.com/SFort/FScript/releases/tag/r3.2.3)  
+1.20   - 1.20.1 : [`3.2.2`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
 1.19.4          : [`3.2.2+1.19.4`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
 1.19.3          : [`3.2.2+1.19.3`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  
 1.19   - 1.19.2 : [`3.2.2+1.19.2`](https://github.com/SFort/FScript/releases/tag/r3.2.2)  

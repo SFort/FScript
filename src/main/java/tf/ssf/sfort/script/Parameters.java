@@ -55,7 +55,7 @@ public class Parameters {
     public Parameters() {
         map.put("AdvancementID", () -> {
             try {
-                return MinecraftClient.getInstance().getServer().getAdvancementLoader().getAdvancements().stream().map(a -> a.getId().toString()).collect(Collectors.toSet());
+                return MinecraftClient.getInstance().getServer().getAdvancementLoader().getAdvancements().stream().map(a -> a.id().toString()).collect(Collectors.toSet());
             }catch (Exception ignore){}
             return new HashSet<>();
         });
