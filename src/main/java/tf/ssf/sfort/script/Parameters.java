@@ -1,8 +1,6 @@
 package tf.ssf.sfort.script;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
@@ -44,9 +42,6 @@ public class Parameters {
     public Set<String> RarityID = new HashSet<>();
     public Set<String> BlockID = new HashSet<>();
     public Set<String> EntityTypeID = new HashSet<>();
-    public Set<String> EnchantID = new HashSet<>();
-    public Set<String> EnchantRarityID = new HashSet<>();
-    public Set<String> EnchantTargetID = new HashSet<>();
     public Set<String> BiomePrecipitationID = new HashSet<>();
     public Set<String> GameModeID = new HashSet<>();
     public Set<String> GameModeNameID = new HashSet<>();
@@ -73,6 +68,12 @@ public class Parameters {
             }catch (Exception ignore){}
             return new HashSet<>();
         });
+        map.put("EnchantID", () -> {
+            try {
+                return MinecraftClient.getInstance().world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getIds().stream().map(Identifier::toString).collect(Collectors.toSet());
+            } catch (Exception ignore){}
+            return new HashSet<>();
+        });
 
         map.put("DimensionID", () -> DimensionID);
         DimensionID.add(World.OVERWORLD.getValue().toString());
@@ -90,15 +91,6 @@ public class Parameters {
 
         map.put("EntityTypeID", () -> EntityTypeID);
         EntityTypeID.addAll(Registries.ENTITY_TYPE.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
-
-        map.put("EnchantID", () -> EnchantID);
-        EnchantID.addAll(Registries.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
-
-        map.put("EnchantRarityID", () -> EnchantRarityID);
-        EnchantRarityID.addAll(Arrays.stream(Enchantment.Rarity.values()).map(Enum::name).collect(Collectors.toSet()));
-
-        map.put("EnchantTargetID", () -> EnchantTargetID);
-        EnchantTargetID.addAll(Registries.ENCHANTMENT.getIds().stream().map(Identifier::toString).collect(Collectors.toSet()));
 
         map.put("BiomePrecipitationID", () -> BiomePrecipitationID);
         BiomePrecipitationID.addAll(Arrays.stream(Biome.Precipitation.values()).map(Biome.Precipitation::name).collect(Collectors.toSet()));

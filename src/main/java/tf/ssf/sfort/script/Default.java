@@ -9,7 +9,6 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedFishingBobberEntityScript;
-import tf.ssf.sfort.script.extended.mixin.MixinExtendedItemScript;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedLivingEntityScript;
 import tf.ssf.sfort.script.extended.mixin.MixinExtendedServerPlayerEntityScript;
 import tf.ssf.sfort.script.extended.trinkets.TrinketExtendedLivingEntityScript;
@@ -91,7 +90,6 @@ public class Default {
         //Mixin
         SERVER_PLAYER_ENTITY.addProvider(new MixinExtendedServerPlayerEntityScript(), 1000);
         LIVING_ENTITY.addProvider(new MixinExtendedLivingEntityScript(), 1000);
-        ITEM.addProvider(new MixinExtendedItemScript(), 1000);
         FISHING_BOBBER_ENTITY.addProvider(new MixinExtendedFishingBobberEntityScript(), 1000);
 
         //Mod Compat

@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.explosion.Explosion;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
 
@@ -130,7 +131,7 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 			case "fire_immune": case "is_fire_immune" : return Entity::isFireImmune;
 			case "freezing": case "is_freezing" : return Entity::isFrozen;
 			case "glowing": case "is_glowing" : return Entity::isGlowing;
-			case "explosion_immune": case "is_explosion_immune" : return Entity::isImmuneToExplosion;
+			case "explosion_immune": case "is_explosion_immune" : return entity -> entity.isImmuneToExplosion(new Explosion(entity.getWorld(), null, entity.getX(), entity.getY(), entity.getZ(), 99f, false, Explosion.DestructionType.KEEP));
 			case "invisible": case "is_invisible" : return Entity::isInvisible;
 			case "on_ground": case "is_on_ground" : return Entity::isOnGround;
 			case "silent": case "is_silent" : return Entity::isSilent;

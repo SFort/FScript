@@ -15,7 +15,6 @@ import net.minecraft.util.Rarity;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
 
-import java.util.Map;
 import java.util.function.Predicate;
 
 public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemStack> {
@@ -36,6 +35,9 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 		help.put("has_enchants","Require item to have enchantments");
 		help.put("in_frame","Require item to be in a item frame");
 		help.put("~nbt~String:NBT_ELEMENT", "Has to have matching nbt");
+		help.put("rarity:EnchantRarityID","Require enchantment to be this rarity");
+		help.put("food is_food","Item is food");
+		help.put("fireproof is_fireproof","Item is fireproof");
 	}
 
 	@Override
@@ -75,6 +77,9 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 			case "enchantable" : return ItemStack::isEnchantable;
 			case "has_glint" : return ItemStack::hasGlint;
 			case "has_nbt" : return i -> i.contains(DataComponentTypes.BLOCK_ENTITY_DATA);
+			case "food": case "is_food" : return i -> i.contains(DataComponentTypes.FOOD);
+			//Whoever choose to name this "fire resistant" annoys me off this isn't real life, it's a game things can be invulnerable
+			case "fireproof": case "is_fireproof" : return i -> i.contains(DataComponentTypes.FIRE_RESISTANT);
 			case "has_enchants" : return ItemStack::hasEnchantments;
 			case "in_frame" : return ItemStack::isInFrame;
 			default : return null;
@@ -85,7 +90,7 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 	public Predicate<ItemStack> getLocalEmbed(String in, String script){
 		switch (in) {
 			case "enchant" : {
-				final Predicate<Map.Entry<Enchantment, Integer>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
+				final Predicate<Object2IntMap.Entry<RegistryEntry<Enchantment>>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
 				if (predicate == null) return null;
 				return item -> {
 					ItemEnchantmentsComponent component = item.getEnchantments();
@@ -102,7 +107,7 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 	public Predicate<ItemStack> getLocalEmbed(String in, String val, String script){
 		switch (in) {
 			case "enchant" :{
-				final Predicate<Map.Entry<Enchantment, Integer>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
+				final Predicate<Object2IntMap.Entry<RegistryEntry<Enchantment>>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
 				if (predicate == null) return null;
 				final Identifier id = Identifier.of(val);
 				return item -> {
