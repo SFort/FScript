@@ -85,7 +85,7 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 				return entity -> entity.getWorld().getLocalDifficulty(entity.getBlockPos()).isHarderThan(arg);
 			}
 			case "biome" : {
-				final Identifier arg = new Identifier(val);
+				final Identifier arg = Identifier.of(val);
 				return entity -> entity.getWorld().getBiome(entity.getBlockPos()).getKey().map(x->x.getValue().equals(arg)).orElse(false);
 			}
 			case "air" : {
@@ -109,11 +109,11 @@ public class EntityScript<T extends Entity> extends AbstractExtendablePredicateP
 				return entity -> entity.getWidth()>arg;
 			}
 			case "in_block" : {
-				final Block arg = Registries.BLOCK.get(new Identifier(val));
+				final Block arg = Registries.BLOCK.get(Identifier.of(val));
 				return entity -> entity.getWorld().getBlockState(entity.getBlockPos()).isOf(arg);
 			}
 			case "type" : {
-				final EntityType<?> arg = Registries.ENTITY_TYPE.get(new Identifier(val));
+				final EntityType<?> arg = Registries.ENTITY_TYPE.get(Identifier.of(val));
 				return entity -> entity.getType().equals(arg);
 			}
 			default: return null;

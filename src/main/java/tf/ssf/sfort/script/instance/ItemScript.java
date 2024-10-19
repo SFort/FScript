@@ -21,7 +21,7 @@ public class ItemScript extends AbstractExtendablePredicateProvider<Item> {
 	public Predicate<Item> getLocalPredicate(String in, String val){
 		switch (in){
 			case ".": case "item" : {
-				final Item arg = Registries.ITEM.get(new Identifier(val));
+				final Item arg = Registries.ITEM.get(Identifier.of(val));
 				return item -> item == arg;
 			}
 			default : return null;

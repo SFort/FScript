@@ -89,6 +89,7 @@ public class ScriptingScreen extends Screen {
             drawBackgroundShade(drawContext, mouseX, mouseY, delta);
             drawForeground(drawContext, mouseX, mouseY, delta);
         }
+        searchField.render(drawContext, mouseX, mouseY, delta);
     }
     
     protected void renderWorldBackground(DrawContext drawContext){
@@ -219,7 +220,7 @@ public class ScriptingScreen extends Screen {
     }
     protected void drawTips(DrawContext drawContext, int mouseX, int mouseY, float delta){
         boolean shortened = 400>width;
-        float scroll = sidebarHeight < height ? 0 : ((sidebarScroll-sidebarLastScroll)*client.getTickDelta()+sidebarLastScroll);
+        float scroll = sidebarHeight < height ? 0 : ((sidebarScroll-sidebarLastScroll)*client.getRenderTickCounter().getTickDelta(true)+sidebarLastScroll);
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
         int newHeight = 8;
@@ -287,7 +288,7 @@ public class ScriptingScreen extends Screen {
         }
     }
     protected void drawScript(DrawContext drawContext, int mouseX, int mouseY, float delta){
-        float scroll = sidebar2Height < height ? 0 : ((sidebar2Scroll-sidebar2LastScroll)*client.getTickDelta()+sidebar2LastScroll);
+        float scroll = sidebar2Height < height ? 0 : ((sidebar2Scroll-sidebar2LastScroll)*client.getRenderTickCounter().getTickDelta(true)+sidebar2LastScroll);
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;
         int newHeight = 8;
@@ -452,7 +453,7 @@ public class ScriptingScreen extends Screen {
                 "",
                 "Note that some suggestions like BiomeID can only be obtained while in a world"
         };
-        float scroll = sidebar3Height < height ? 0 : ((sidebar3Scroll-sidebar3LastScroll)*client.getTickDelta()+sidebar3LastScroll);
+        float scroll = sidebar3Height < height ? 0 : ((sidebar3Scroll-sidebar3LastScroll)*client.getRenderTickCounter().getTickDelta(true)+sidebar3LastScroll);
         sidebar3Height = 20;
         scroll = (float) (Math.floor((scroll*client.getWindow().getScaleFactor()))/client.getWindow().getScaleFactor());
         float y = 22-scroll;

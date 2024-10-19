@@ -32,7 +32,7 @@ public class ServerPlayerEntityScript<T extends ServerPlayerEntity> extends Abst
 				};
 			}
 			case "advancement" : {
-				final Identifier arg = new Identifier(val);
+				final Identifier arg = Identifier.of(val);
 				return player -> {
 					final MinecraftServer server = player.getServer();
 					if (server == null) return false;

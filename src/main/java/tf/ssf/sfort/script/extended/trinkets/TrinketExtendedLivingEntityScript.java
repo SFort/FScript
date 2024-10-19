@@ -36,7 +36,7 @@ public class TrinketExtendedLivingEntityScript implements PredicateProvider<Livi
     public Predicate<LivingEntity> getPredicate(String in, String val, Set<String> dejavu){
         switch (in){
             case "trinket":
-                final Item arg = Registries.ITEM.get(new Identifier(val));
+                final Item arg = Registries.ITEM.get(Identifier.of(val));
                 return entity -> {
                     try {
                         Optional<?> comp = (Optional<?>) getComponent.invoke(null, entity);

@@ -27,7 +27,7 @@ public class DamageSourceScript extends AbstractExtendablePredicateProvider<Dama
 		switch (in){
 			case "name": case "damage_source_name": return ds -> val.equals(ds.getName());
 			case "type": case "damage_source_type": {
-				TagKey<DamageType> tag = TagKey.of(RegistryKeys.DAMAGE_TYPE, new Identifier(val));
+				TagKey<DamageType> tag = TagKey.of(RegistryKeys.DAMAGE_TYPE, Identifier.of(val));
 				return ds -> ds.isIn(tag);
 			}
 			default: return null;

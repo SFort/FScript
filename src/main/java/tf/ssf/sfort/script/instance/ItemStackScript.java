@@ -1,19 +1,20 @@
 package tf.ssf.sfort.script.instance;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import tf.ssf.sfort.script.util.AbstractExtendablePredicateProvider;
 import tf.ssf.sfort.script.util.DefaultParsers;
 
-import java.util.AbstractMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -41,12 +42,17 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 	public Predicate<ItemStack> getLocalPredicate(String in, String val){
 		switch (in){
 			case ".": case "item" : {
-				final Item arg = Registries.ITEM.get(new Identifier(val));
+				final Item arg = Registries.ITEM.get(Identifier.of(val));
 				return item -> item.isOf(arg);
 			}
 			case "enchant" : {
-				final Enchantment arg = Registries.ENCHANTMENT.get(new Identifier(val));
-				return item -> EnchantmentHelper.get(item).containsKey(arg);
+				final Identifier id = Identifier.of(val);
+				return item -> {
+					for (RegistryEntry<Enchantment> entry : item.getEnchantments().getEnchantments()) {
+						if (entry.matchesId(id)) return true;
+					}
+					return false;
+				};
 			}
 			case "count" : {
 				final int arg = Integer.parseInt(val);
@@ -68,7 +74,7 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 			case "stackable" : return ItemStack::isStackable;
 			case "enchantable" : return ItemStack::isEnchantable;
 			case "has_glint" : return ItemStack::hasGlint;
-			case "has_nbt" : return ItemStack::hasNbt;
+			case "has_nbt" : return i -> i.contains(DataComponentTypes.BLOCK_ENTITY_DATA);
 			case "has_enchants" : return ItemStack::hasEnchantments;
 			case "in_frame" : return ItemStack::isInFrame;
 			default : return null;
@@ -82,11 +88,11 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 				final Predicate<Map.Entry<Enchantment, Integer>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
 				if (predicate == null) return null;
 				return item -> {
-					boolean rez = false;
-					final Iterator<Map.Entry<Enchantment, Integer>> i = EnchantmentHelper.get(item).entrySet().iterator();
-					while(i.hasNext() && !rez)
-						rez=predicate.test(i.next());
-					return rez;
+					ItemEnchantmentsComponent component = item.getEnchantments();
+					for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : component.getEnchantmentEntries()) {
+						if (predicate.test(entry)) return true;
+					}
+					return false;
 				};
 			}
 			default : return null;
@@ -98,18 +104,22 @@ public class ItemStackScript extends AbstractExtendablePredicateProvider<ItemSta
 			case "enchant" :{
 				final Predicate<Map.Entry<Enchantment, Integer>> predicate = DefaultParsers.ENCHANTMENT_PARSER.parse(script);
 				if (predicate == null) return null;
-				final Enchantment arg = Registries.ENCHANTMENT.get(new Identifier(val));
-				if (arg == null) return null;
+				final Identifier id = Identifier.of(val);
 				return item -> {
-					final Integer lvl = EnchantmentHelper.get(item).get(arg);
-					return lvl != null && predicate.test(new AbstractMap.SimpleEntry<>(arg, lvl));
+					ItemEnchantmentsComponent component = item.getEnchantments();
+					for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : component.getEnchantmentEntries()) {
+						if (entry.getKey().matchesId(id)) {
+							return predicate.test(entry);
+						}
+					}
+					return false;
 				};
 			}
 			case "nbt": {
 				final Predicate<NbtElement> predicate = DefaultParsers.NBT_ELEMENT_PARSER.parse(script);
 				if (predicate == null) return null;
 				return entity -> {
-					NbtCompound nbtc = entity.getNbt();
+					NbtCompound nbtc = entity.get(DataComponentTypes.BLOCK_ENTITY_DATA).getNbt();
 					if (nbtc == null || nbtc.isEmpty()) return false;
 					NbtElement nbt = nbtc.get(val);
 					if (nbt == null) return false;

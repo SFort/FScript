@@ -43,7 +43,7 @@ public class EnchantmentScript extends AbstractExtendablePredicateProvider<Encha
 	public Predicate<Enchantment> getLocalPredicate(String in, String val){
 		switch (in){
 			case ".": case "enchant" : {
-				final Enchantment arg = Registries.ENCHANTMENT.get(new Identifier(val));
+				final Enchantment arg = Registries.ENCHANTMENT.get(Identifier.of(val));
 				return enchant -> enchant.equals(arg);
 			}
 			case "min_level" : {

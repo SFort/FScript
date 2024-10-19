@@ -29,7 +29,7 @@ public class WorldScript extends AbstractExtendablePredicateProvider<World> {
 	public Predicate<World> getLocalPredicate(String in, String val){
 		switch (in){
 			case "dimension" : {
-				final Identifier arg = new Identifier(val);
+				final Identifier arg = Identifier.of(val);
 				return world -> world.getRegistryKey().getValue().equals(arg);
 			}
 			default : return null;
