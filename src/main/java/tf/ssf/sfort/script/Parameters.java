@@ -104,10 +104,10 @@ public class Parameters {
         BiomePrecipitationID.addAll(Arrays.stream(Biome.Precipitation.values()).map(Biome.Precipitation::name).collect(Collectors.toSet()));
 
         map.put("GameModeID", () -> GameModeID);
-        GameModeID.addAll(Arrays.stream(GameMode.values()).map(Enum::name).collect(Collectors.toSet()));
+        GameModeID.addAll(Arrays.stream(GameMode.values()).map(gameMode -> Integer.toString(gameMode.getId())).collect(Collectors.toSet()));
 
         map.put("GameModeNameID", () -> GameModeNameID);
-        GameModeNameID.addAll(Arrays.stream(EnchantmentTarget.values()).map(Enum::name).collect(Collectors.toSet()));
+        GameModeNameID.addAll(Arrays.stream(GameMode.values()).map(GameMode::getName).collect(Collectors.toSet()));
 
         map.put("DamageSourceID", () -> DamageSourceID);
 
